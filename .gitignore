@@ -1,0 +1,19 @@
+# 環境設定
+.env
+
+# Go
+/backend/heron-api
+/backend/heron-api.exe
+/backend/*.db
+/backend/*.db-journal
+
+# Node / Angular
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.angular/
+
+# エディタ・OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json

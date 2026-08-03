@@ -1,0 +1,75 @@
+# HERON 社内機材管理システム — ローカル/検証用 Docker Compose 構成。
+#
+# 起動:   docker compose up -d --build
+# 停止:   docker compose down
+# 初期化: docker compose down -v   （DBのデータも消える）
+#
+# 起動後のアクセス先:
+#   フロントエンド  http://localhost:8081
+#   API             http://localhost:8080/api
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: heron-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-heron}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-heron_password}
+      POSTGRES_DB: ${DB_NAME:-heron}
+      TZ: Asia/Tokyo
+      # 日本語の機材名を正しく扱うため UTF-8 で初期化する。
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - heron-db-data:/var/lib/postgresql/data
+    ports:
+      # ホストの DB クライアントから覗くための公開。
+      # ホスト側で別の PostgreSQL が 5432 を使っていても衝突しないよう
+      # 既定では 55432 に割り当てる（backend はコンテナ間ネットワークで
+      # db:5432 に直接つなぐため、この公開は無くても動作する）。
+      - "${DB_HOST_PORT:-55432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-heron} -d ${DB_NAME:-heron}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: heron-api
+    environment:
+      PORT: "8080"
+      DB_DRIVER: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-heron}
+      DB_PASSWORD: ${DB_PASSWORD:-heron_password}
+      DB_NAME: ${DB_NAME:-heron}
+      # 本番運用では必ず変更すること。
+      JWT_SECRET: ${JWT_SECRET:-heron-dev-secret-change-me}
+      JWT_TTL_HOURS: "12"
+      # デモ用の初期データ投入。実運用では false にする。
+      SEED_DEMO: ${SEED_DEMO:-true}
+      # frontend は nginx が同一オリジンで中継するため CORS は開発用途のみ。
+      CORS_ORIGINS: "http://localhost:4200,http://localhost:8081"
+      TZ: Asia/Tokyo
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: heron-web
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+volumes:
+  heron-db-data:

@@ -1,0 +1,6 @@
+*.db
+*.db-journal
+heron-api
+heron-api.exe
+Dockerfile
+.dockerignore

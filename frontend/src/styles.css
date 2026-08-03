@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-heron-silver text-heron-navy antialiased;
+  }
+
+  /* モバイルでの連続スキャン時、意図しないタップハイライトを抑える。 */
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .heron-card {
+    @apply rounded-xl border border-heron-5/60 bg-white shadow-sm;
+  }
+
+  .heron-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+           text-sm font-semibold transition
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .heron-btn-primary {
+    @apply heron-btn bg-heron-navy text-white hover:bg-heron-1 active:bg-heron-navy;
+  }
+
+  .heron-btn-secondary {
+    @apply heron-btn border border-heron-4 bg-white text-heron-navy hover:bg-heron-silver;
+  }
+
+  .heron-btn-ghost {
+    @apply heron-btn text-heron-2 hover:bg-heron-silver hover:text-heron-navy;
+  }
+
+  .heron-input {
+    @apply w-full rounded-lg border border-heron-4 bg-white px-3 py-2.5 text-sm
+           text-heron-navy placeholder:text-heron-3
+           focus:border-heron-1 focus:outline-none focus:ring-2 focus:ring-heron-3/40;
+  }
+
+  .heron-label {
+    @apply mb-1.5 block text-xs font-semibold tracking-wide text-heron-2;
+  }
+
+  .heron-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1
+           text-xs font-semibold text-white;
+  }
+
+  /* 機材IDは等幅で表示し、ラベルとの目視照合をしやすくする。 */
+  .heron-mono {
+    font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+    @apply tracking-tight;
+  }
+}
+
+/*
+ * ラベル印刷（設計書 第3部 4章）。
+ *
+ * NIIMBOT M2 で使用するシールの実寸 30mm × 15mm に合わせ、
+ * 余白ゼロで描画領域を厳密に定義する。
+ */
+@page {
+  size: 30mm 15mm;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: 30mm;
+    height: 15mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* 印刷対象のラベル以外は一切出力しない。 */
+  .no-print {
+    display: none !important;
+  }
+}
