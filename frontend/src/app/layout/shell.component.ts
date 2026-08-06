@@ -13,7 +13,7 @@ interface NavItem {
 }
 
 /**
- * 共通シェル (ロゴ画像拡大 ＆ タイトル・アイコン垂直パーフェクト整列)。
+ * 共通シェル (「++」上付き完全調整).
  */
 @Component({
   selector: 'app-shell',
@@ -25,14 +25,14 @@ interface NavItem {
       <aside
         class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-heron-navy md:flex"
       >
-        <!-- ロゴ ＆ タイトルヘッダー (枠内拡大 ＆ 垂直パーフェクト整列) -->
+        <!-- ロゴ ＆ タイトルヘッダー -->
         <div class="px-4 py-4 border-b border-slate-800 flex items-center gap-3">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden">
             <img src="icon.png" alt="HERON Logo" class="h-full w-full object-contain scale-110" />
           </div>
           <div class="flex flex-col justify-center min-w-0">
-            <div class="heron-brand-font text-lg text-white leading-none tracking-tight flex items-baseline">
-              <sup class="text-xs font-extrabold text-[#90CFD6] mr-0.5 -top-0.5">++</sup>
+            <div class="heron-brand-font text-lg text-white leading-none tracking-tight flex items-center">
+              <span class="inline-block text-[11px] font-extrabold text-[#90CFD6] mr-0.5 relative -top-1.5 leading-none">++</span>
               <span>HERON..</span>
             </div>
             <div class="mt-1 text-[10px] text-slate-400 leading-none">社内機材管理システム</div>
@@ -75,8 +75,8 @@ interface NavItem {
           <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden">
             <img src="icon.png" alt="HERON Logo" class="h-full w-full object-contain scale-110" />
           </div>
-          <div class="heron-brand-font text-base text-white tracking-tight flex items-baseline">
-            <sup class="text-xs font-extrabold text-[#90CFD6] mr-0.5 -top-0.5">++</sup>
+          <div class="heron-brand-font text-base text-white tracking-tight flex items-center">
+            <span class="inline-block text-[10px] font-extrabold text-[#90CFD6] mr-0.5 relative -top-1.5 leading-none">++</span>
             <span>HERON..</span>
           </div>
         </div>

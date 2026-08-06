@@ -17,8 +17,8 @@ import { User } from '../../core/models';
           <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-1 shadow-md border border-slate-200 mb-3 overflow-hidden">
             <img src="icon.png" alt="HERON Logo" class="h-full w-full object-contain scale-110" />
           </div>
-          <h1 class="heron-brand-font text-3xl text-white tracking-tight flex items-baseline justify-center">
-            <sup class="text-lg font-extrabold text-[#90CFD6] mr-0.5 -top-1">++</sup>
+          <h1 class="heron-brand-font text-3xl text-white tracking-tight flex items-center justify-center">
+            <span class="inline-block text-base font-extrabold text-[#90CFD6] mr-0.5 relative -top-2 leading-none">++</span>
             <span>HERON..</span>
           </h1>
           <p class="mt-1.5 text-xs tracking-wide text-slate-400">社内機材管理システム</p>
