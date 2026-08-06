@@ -46,6 +46,13 @@ export class AuthService {
       );
   }
 
+  loginWithFirebaseUser(user: User, token: string): void {
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    this._token.set(token);
+    this._user.set(user);
+  }
+
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);

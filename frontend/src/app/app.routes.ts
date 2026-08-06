@@ -27,6 +27,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'print/shelf-label/:code',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () =>
+      import('./pages/shelf-label-print/shelf-label-print.component').then(
+        (m) => m.ShelfLabelPrintComponent,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -63,9 +71,8 @@ export const routes: Routes = [
       },
       {
         path: 'scan',
-        canActivate: [adminGuard],
-        loadComponent: () =>
-          import('./pages/scan/scan.component').then((m) => m.ScanComponent),
+        redirectTo: 'equipments',
+        pathMatch: 'full',
       },
       {
         path: 'inventory',
@@ -88,6 +95,14 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/logs/logs.component').then((m) => m.LogsComponent),
+      },
+      {
+        path: 'settings',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/settings/settings.component').then(
+            (m) => m.SettingsComponent,
+          ),
       },
     ],
   },

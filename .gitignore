@@ -12,6 +12,9 @@
 /frontend/dist/
 /frontend/.angular/
 
+# Firebase
+.firebase/
+
 # エディタ・OS
 .DS_Store
 Thumbs.db

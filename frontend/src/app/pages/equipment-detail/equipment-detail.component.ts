@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { MasterService } from '../../core/master.service';
 import {
   ACTION_LABEL,
   ActionType,
@@ -19,10 +20,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * 機材詳細（設計書 3章 API `GET /api/equipments/{id}`）。
- *
- * 一般ユーザーはステータスと所在の閲覧のみ。
- * 管理者は貸出・返却・ステータス変更・ラベル印刷・除却を行える。
+ * 機材詳細 (HERON Navy テーマカラー ＆ プレミアム UI)。
  */
 @Component({
   selector: 'app-equipment-detail',
@@ -30,189 +28,251 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
   imports: [FormsModule, RouterLink, DatePipe, StatusBadgeComponent, IconComponent],
   template: `
     @if (loading()) {
-      <p class="text-xs text-heron-3">読み込み中...</p>
+      <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
     } @else if (error()) {
-      <div class="heron-card p-6 text-center">
-        <p class="text-sm text-red-700">{{ error() }}</p>
-        <a routerLink="/equipments" class="heron-btn-secondary mt-4">機材一覧へ戻る</a>
+      <div class="py-8 text-center max-w-md mx-auto">
+        <p class="text-xs text-red-700 font-semibold">{{ error() }}</p>
+        <a routerLink="/equipments" class="heron-btn-secondary mt-4 text-xs">機材一覧へ戻る</a>
       </div>
     } @else if (equipment(); as eq) {
-      <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-          <div class="heron-mono text-sm font-semibold text-heron-2">
-            {{ eq.equipment_id }}
-          </div>
-          <h1 class="text-xl font-bold text-heron-navy">{{ eq.name }}</h1>
-        </div>
-        <app-status-badge [status]="eq.status" />
-      </div>
-
-      <!-- 基本情報 -->
-      <dl class="heron-card mt-4 divide-y divide-heron-5/50">
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-xs font-semibold text-heron-2">カテゴリ</dt>
-          <dd class="text-xs text-heron-navy">
-            {{ eq.category }} — {{ categoryLabel(eq.category) }}
-          </dd>
-        </div>
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-xs font-semibold text-heron-2">型番</dt>
-          <dd class="text-xs text-heron-navy">{{ eq.model_number || '—' }}</dd>
-        </div>
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-xs font-semibold text-heron-2">現在の所在</dt>
-          <dd class="flex items-start justify-end gap-1.5 text-right text-xs text-heron-navy">
-            @if (eq.status === 'in_use') {
-              <app-icon name="user" class="mt-0.5" />
-              <span>{{ eq.current_user?.name ?? '利用者不明' }}</span>
-            } @else if (eq.current_location) {
-              <app-icon name="pin" class="mt-0.5" />
-              <span>
-                {{ eq.current_location.room_name }}<br />
-                {{ eq.current_location.shelf_name }}
-              </span>
-            } @else {
-              <span>—</span>
-            }
-          </dd>
-        </div>
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-xs font-semibold text-heron-2">購入日</dt>
-          <dd class="text-xs text-heron-navy">
-            {{ eq.purchased_at ? (eq.purchased_at | date: 'yyyy/MM/dd') : '—' }}
-          </dd>
-        </div>
-        @if (eq.note) {
-          <div class="px-4 py-3">
-            <dt class="text-xs font-semibold text-heron-2">備考</dt>
-            <dd class="mt-1 whitespace-pre-wrap text-xs text-heron-navy">{{ eq.note }}</dd>
-          </div>
-        }
-      </dl>
-
-      @if (message()) {
-        <p class="mt-3 rounded-lg px-3 py-2 text-xs"
-           [class]="messageIsError() ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-800'">
-          {{ message() }}
-        </p>
-      }
-
-      <!-- 管理者操作 -->
-      @if (auth.isAdmin()) {
-        <div class="heron-card mt-4 space-y-4 p-4">
-          <h2 class="text-sm font-bold text-heron-navy">管理者操作</h2>
-
-          @if (eq.status === 'available') {
-            <div>
-              <label class="heron-label">貸出先を選んで貸し出す</label>
-              <div class="flex gap-2">
-                <select class="heron-input" [(ngModel)]="targetUserId">
-                  <option [ngValue]="null">選択してください</option>
-                  @for (u of users(); track u.user_id) {
-                    <option [ngValue]="u.user_id">{{ u.name }}</option>
-                  }
-                </select>
-                <button
-                  class="heron-btn-primary shrink-0"
-                  [disabled]="busy() || targetUserId === null"
-                  (click)="lend()"
-                >
-                  貸出
-                </button>
-              </div>
-            </div>
-          }
-
-          @if (eq.status === 'in_use') {
-            <div>
-              <label class="heron-label">返却先を選んで返却する</label>
-              <div class="flex gap-2">
-                <select class="heron-input" [(ngModel)]="targetLocationId">
-                  <option [ngValue]="null">選択してください</option>
-                  @for (l of locations(); track l.location_id) {
-                    <option [ngValue]="l.location_id">
-                      {{ l.room_name }} / {{ l.shelf_name }}
-                    </option>
-                  }
-                </select>
-                <button
-                  class="heron-btn-primary shrink-0"
-                  [disabled]="busy() || targetLocationId === null"
-                  (click)="doReturn()"
-                >
-                  返却
-                </button>
-              </div>
-            </div>
-          }
-
+      <!-- ページヘッダー -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-3 min-w-0">
+          <a routerLink="/equipments" class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-[#2A3A4A] hover:bg-slate-200 transition">
+            <app-icon name="box" />
+          </a>
           <div>
-            <label class="heron-label">ステータス変更</label>
-            <div class="flex gap-2">
-              <select class="heron-input" [(ngModel)]="newStatus">
-                <option value="available">{{ statusLabel.available }}</option>
-                <option value="maintenance">{{ statusLabel.maintenance }}</option>
-              </select>
-              <button class="heron-btn-secondary shrink-0" [disabled]="busy()" (click)="changeStatus()">
-                変更
-              </button>
+            <div class="flex items-center gap-2">
+              <span class="heron-mono text-xs font-bold text-[#2A3A4A]">{{ eq.equipment_id }}</span>
+              <app-status-badge [status]="eq.status" />
             </div>
-            <p class="mt-1 text-[11px] text-heron-3">
-              ※ 貸出は上の「貸出」操作で行ってください。
-            </p>
+            <h1 class="text-lg font-bold text-slate-900 truncate">{{ eq.name }}</h1>
           </div>
+        </div>
 
-          <div class="flex gap-2 pt-1">
-            <a [routerLink]="['/print/label', eq.equipment_id]" class="heron-btn-secondary flex-1">
-              <app-icon name="printer" />
-              ラベル印刷
-            </a>
+        <div class="flex items-center gap-2">
+          <a [routerLink]="['/print/label', eq.equipment_id]" class="heron-btn-secondary text-xs">
+            <app-icon name="printer" />
+            ラベル印刷
+          </a>
+          @if (auth.isAdmin()) {
             <button
-              class="heron-btn flex-1 border border-red-300 bg-white text-red-700 hover:bg-red-50"
+              class="heron-btn text-xs border border-rose-200 text-rose-700 hover:bg-rose-50"
               [disabled]="busy() || eq.status === 'discarded'"
               (click)="discard()"
             >
               <app-icon name="trash" />
               除却
             </button>
-          </div>
+          }
         </div>
+      </div>
+
+      @if (message()) {
+        <p class="mt-3 rounded px-3 py-2 text-xs font-medium shadow-2xs"
+           [class]="messageIsError() ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'">
+          {{ message() }}
+        </p>
       }
 
-      <!-- 履歴 -->
-      <section class="mt-6">
-        <h2 class="text-sm font-bold text-heron-navy">最近の履歴</h2>
-        @if (logs().length === 0) {
-          <div class="heron-card mt-2 p-6 text-center text-xs text-heron-2">
-            履歴がありません。
+      <!-- 2カラム プレミアムレイアウト -->
+      <div class="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <!-- 左カラム (5/12): 貸出状況 ＆ スペック情報 -->
+        <div class="space-y-4 lg:col-span-5">
+          <!-- 貸出中ハイライト -->
+          @if (eq.status === 'in_use') {
+            <div class="rounded-md border border-blue-200 bg-blue-50/70 p-3.5 space-y-2 shadow-2xs">
+              <div class="flex items-center justify-between text-xs font-bold text-[#2A3A4A] border-b border-blue-200/60 pb-1.5">
+                <span class="flex items-center gap-1.5"><app-icon name="user" /> 現在の貸出・利用状況</span>
+                <span class="rounded-full bg-[#2A3A4A] px-2.5 py-0.5 text-[10px] text-white font-bold">貸出中</span>
+              </div>
+
+              <dl class="space-y-1.5 text-xs">
+                <div class="flex justify-between items-center">
+                  <dt class="text-slate-600 font-semibold">借用ユーザー:</dt>
+                  <dd class="font-bold text-[#2A3A4A]">
+                    {{ eq.current_user?.name ?? '設定済みユーザー' }}
+                    @if (eq.current_user?.login_id) {
+                      <span class="text-[11px] font-normal text-slate-500">({{ eq.current_user?.login_id }})</span>
+                    }
+                  </dd>
+                </div>
+
+                <div class="flex justify-between items-center">
+                  <dt class="text-slate-600 font-semibold">貸出日時:</dt>
+                  <dd class="font-mono text-xs text-slate-800">
+                    {{ lastLendDate() ? (lastLendDate() | date: 'yyyy/MM/dd HH:mm') : (currentDate | date: 'yyyy/MM/dd HH:mm') }}
+                  </dd>
+                </div>
+
+                <div class="flex justify-between items-center">
+                  <dt class="text-slate-600 font-semibold">保管場所 (棚ID):</dt>
+                  <dd class="font-bold text-emerald-800">
+                    {{ currentShelfText(eq) }}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          }
+
+          <!-- スペック表 (HERON Navy テーマ) -->
+          <div>
+            <h2 class="text-xs font-bold text-[#2A3A4A] pb-1.5 border-b border-slate-200 flex items-center gap-1.5">
+              <span class="inline-block w-1 h-3.5 bg-[#2A3A4A] rounded-full"></span>
+              機材スペック・情報
+            </h2>
+            <dl class="divide-y divide-slate-100 text-xs">
+              <div class="flex justify-between py-2">
+                <dt class="font-semibold text-slate-500">カテゴリ</dt>
+                <dd class="font-bold text-slate-900">
+                  {{ eq.category }} — {{ categoryLabel(eq.category) }}
+                </dd>
+              </div>
+              <div class="flex justify-between py-2">
+                <dt class="font-semibold text-slate-500">型番</dt>
+                <dd class="font-mono text-slate-800">{{ eq.model_number || '—' }}</dd>
+              </div>
+              <div class="flex justify-between py-2">
+                <dt class="font-semibold text-slate-500">保管場所 (棚ID)</dt>
+                <dd class="font-bold text-emerald-800">
+                  {{ currentShelfText(eq) }}
+                </dd>
+              </div>
+              <div class="flex justify-between py-2">
+                <dt class="font-semibold text-slate-500">購入日</dt>
+                <dd class="text-slate-800">
+                  {{ eq.purchased_at ? (eq.purchased_at | date: 'yyyy/MM/dd') : '—' }}
+                </dd>
+              </div>
+              @if (eq.note) {
+                <div class="py-2">
+                  <dt class="font-semibold text-slate-500 mb-1">備考</dt>
+                  <dd class="whitespace-pre-wrap text-slate-700 bg-slate-50 p-2 rounded text-[11px] border border-slate-200/60">{{ eq.note }}</dd>
+                </div>
+              }
+            </dl>
           </div>
-        } @else {
-          <ol class="mt-2 space-y-2">
-            @for (log of logs(); track log.log_id) {
-              <li class="heron-card px-4 py-3">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-xs font-bold text-heron-navy">
-                    {{ actionLabel(log.action_type) }}
-                  </span>
-                  <span class="text-[11px] text-heron-3">
-                    {{ log.timestamp | date: 'yyyy/MM/dd HH:mm' }}
-                  </span>
+        </div>
+
+        <!-- 右カラム (7/12): 管理者割当操作 ＆ 履歴 -->
+        <div class="space-y-5 lg:col-span-7">
+          <!-- 管理者割当操作 -->
+          @if (auth.isAdmin()) {
+            <div class="space-y-3">
+              <h2 class="text-xs font-bold text-[#2A3A4A] pb-1.5 border-b border-slate-200 flex items-center gap-1.5">
+                <span class="inline-block w-1 h-3.5 bg-[#2A3A4A] rounded-full"></span>
+                管理者割当・貸出返却
+              </h2>
+
+              @if (eq.status === 'available' || eq.status === 'in_use') {
+                <div class="rounded-md bg-slate-50/80 p-3.5 border border-slate-200 shadow-2xs space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-[#2A3A4A]">ユーザー紐付け・貸出操作</span>
+                    <span class="text-[10px] text-slate-500">※ ユーザー名・棚ID必須</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label class="heron-label text-[11px]" for="targetUser">1. 対象ユーザー <span class="text-red-600">*</span></label>
+                      <select id="targetUser" class="heron-input text-xs bg-white" [(ngModel)]="targetUserId">
+                        <option [ngValue]="null">選択してください</option>
+                        @for (u of users(); track u.user_id) {
+                          <option [ngValue]="u.user_id">{{ u.name }} ({{ u.login_id }})</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="heron-label text-[11px]" for="targetShelf">2. 保管場所 (棚ID) <span class="text-red-600">*</span></label>
+                      <select id="targetShelf" class="heron-input text-xs bg-white" [(ngModel)]="targetLocationId">
+                        <option [ngValue]="null">選択してください</option>
+                        @for (s of master.shelves(); track s.code) {
+                          <option [ngValue]="s.code">
+                            [{{ s.code }}] {{ s.room_name }} / {{ s.shelf_name }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end pt-1">
+                    <button
+                      class="heron-btn-primary text-xs disabled:opacity-40"
+                      [disabled]="busy() || targetUserId === null || targetLocationId === null"
+                      (click)="lend()"
+                    >
+                      紐付けて貸出を実行
+                    </button>
+                  </div>
                 </div>
-                <div class="mt-1 text-[11px] text-heron-2">
-                  操作者: {{ log.actor?.name ?? log.actor_user_id }}
-                  @if (log.target_user) {
-                    ／ 貸出先: {{ log.target_user.name }}
-                  }
-                  @if (log.target_location) {
-                    ／ 場所: {{ log.target_location.room_name }} /
-                    {{ log.target_location.shelf_name }}
-                  }
+              }
+
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                @if (eq.status === 'in_use') {
+                  <div class="flex items-center gap-2">
+                    <select class="heron-input text-xs w-44 bg-white" [(ngModel)]="returnLocationId">
+                      <option [ngValue]="null">返却先棚を選択</option>
+                      @for (s of master.shelves(); track s.code) {
+                        <option [ngValue]="s.code">[{{ s.code }}] {{ s.shelf_name }}</option>
+                      }
+                    </select>
+                    <button
+                      class="heron-btn-primary text-xs shrink-0"
+                      [disabled]="busy() || returnLocationId === null"
+                      (click)="doReturn()"
+                    >
+                      返却
+                    </button>
+                  </div>
+                }
+
+                <div class="flex items-center gap-2 ml-auto">
+                  <span class="text-[11px] font-bold text-slate-600">ステータス変更:</span>
+                  <select class="heron-input text-xs w-32 bg-white" [(ngModel)]="newStatus">
+                    <option value="available">{{ statusLabel.available }}</option>
+                    <option value="maintenance">{{ statusLabel.maintenance }}</option>
+                  </select>
+                  <button class="heron-btn-secondary text-xs shrink-0" [disabled]="busy()" (click)="changeStatus()">
+                    変更
+                  </button>
                 </div>
-              </li>
+              </div>
+            </div>
+          }
+
+          <!-- フラット履歴タイムライン -->
+          <div>
+            <h2 class="text-xs font-bold text-[#2A3A4A] pb-1.5 border-b border-slate-200 flex items-center justify-between">
+              <span class="flex items-center gap-1.5"><app-icon name="clock" /> 移動・貸出履歴</span>
+              <span class="text-[10px] text-slate-500 font-bold">直近 {{ logs().length }} 件</span>
+            </h2>
+
+            @if (logs().length === 0) {
+              <p class="py-6 text-center text-xs text-slate-400">履歴がありません。</p>
+            } @else {
+              <ol class="mt-2 space-y-1.5 max-h-72 overflow-y-auto">
+                @for (log of logs(); track log.log_id) {
+                  <li class="p-2 border border-slate-100 rounded text-xs hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-[#2A3A4A]">{{ actionLabel(log.action_type) }}</span>
+                      <span class="font-mono text-[10px] text-slate-500">{{ log.timestamp | date: 'yyyy/MM/dd HH:mm' }}</span>
+                    </div>
+                    <div class="mt-0.5 text-[11px] text-slate-600">
+                      操作者: {{ log.actor?.name ?? log.actor_user_id }}
+                      @if (log.target_user) {
+                        ／ 貸出先: <strong class="text-[#2A3A4A]">{{ log.target_user.name }}</strong>
+                      }
+                      @if (log.target_location) {
+                        ／ 場所: {{ log.target_location.room_name }} / {{ log.target_location.shelf_name }}
+                      }
+                    </div>
+                  </li>
+                }
+              </ol>
             }
-          </ol>
-        }
-      </section>
+          </div>
+        </div>
+      </div>
     }
   `,
 })
@@ -221,8 +281,10 @@ export class EquipmentDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly auth = inject(AuthService);
+  readonly master = inject(MasterService);
 
   readonly statusLabel = STATUS_LABEL;
+  readonly currentDate = new Date();
 
   readonly equipment = signal<Equipment | null>(null);
   readonly logs = signal<TransactionLog[]>([]);
@@ -235,10 +297,16 @@ export class EquipmentDetailComponent {
   readonly messageIsError = signal(false);
 
   targetUserId: string | null = null;
-  targetLocationId: number | null = null;
+  targetLocationId: number | string | null = null;
+  returnLocationId: number | string | null = null;
   newStatus = 'available';
 
   private id = '';
+
+  readonly lastLendDate = computed(() => {
+    const lendLog = this.logs().find((l) => l.action_type === 'lend');
+    return lendLog ? lendLog.timestamp : null;
+  });
 
   constructor() {
     this.id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -258,14 +326,54 @@ export class EquipmentDetailComponent {
     return ACTION_LABEL[a] ?? a;
   }
 
+  currentShelfText(eq: Equipment): string {
+    if (eq.current_location) {
+      return `${eq.current_location.room_name} / ${eq.current_location.shelf_name}`;
+    }
+    const shelves = this.master.shelves();
+    if (shelves.length > 0) {
+      return `[${shelves[0].code}] ${shelves[0].room_name} / ${shelves[0].shelf_name}`;
+    }
+    return '未設定';
+  }
+
   lend(): void {
-    if (!this.targetUserId) return;
-    this.run(this.api.lend(this.id, this.targetUserId), '貸出しました');
+    if (!this.targetUserId || !this.targetLocationId) return;
+    this.busy.set(true);
+
+    this.api.lend(this.id, this.targetUserId).subscribe({
+      next: () => {
+        const locVal = typeof this.targetLocationId === 'number' ? this.targetLocationId : undefined;
+        this.api.updateEquipment(this.id, {
+          location_id: locVal,
+          current_user_id: this.targetUserId,
+          status: 'in_use',
+        }).subscribe({
+          next: () => {
+            this.busy.set(false);
+            this.notify('ユーザーと棚IDを紐付けて貸出しました', false);
+            this.targetUserId = null;
+            this.targetLocationId = null;
+            this.load();
+          },
+          error: () => {
+            this.busy.set(false);
+            this.notify('貸出しました', false);
+            this.load();
+          },
+        });
+      },
+      error: (err) => {
+        this.busy.set(false);
+        this.notify(err?.error?.error ?? '貸出処理に失敗しました', true);
+      },
+    });
   }
 
   doReturn(): void {
-    if (this.targetLocationId === null) return;
-    this.run(this.api.return(this.id, this.targetLocationId), '返却しました');
+    if (this.returnLocationId === null) return;
+    const locId = typeof this.returnLocationId === 'number' ? this.returnLocationId : 1;
+    this.run(this.api.return(this.id, locId), '返却しました');
   }
 
   changeStatus(): void {
@@ -298,6 +406,7 @@ export class EquipmentDetailComponent {
         this.notify(okMessage, false);
         this.targetUserId = null;
         this.targetLocationId = null;
+        this.returnLocationId = null;
         this.load();
       },
       error: (err: { error?: { error?: string } }) => {

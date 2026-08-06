@@ -24,8 +24,8 @@ const IDPrefix = "HRN"
 // categoryPattern はカテゴリの許容形（英大文字 2〜3 文字）。
 var categoryPattern = regexp.MustCompile(`^[A-Z]{2,3}$`)
 
-// EquipmentIDPattern は機材ID全体の形式（HRN-[A-Z]{2,3}-[0-9]{4}）。
-var EquipmentIDPattern = regexp.MustCompile(`^HRN-[A-Z]{2,3}-\d{4}$`)
+// EquipmentIDPattern は機材ID全体の形式（例: DEV-PC-00001, HRN-TAB-0001）。
+var EquipmentIDPattern = regexp.MustCompile(`^[A-Z0-9]{2,10}-[A-Z]{2,4}-\d{4,5}$`)
 
 // NormalizeCategory はカテゴリを大文字に正規化し、形式を検証する。
 func NormalizeCategory(category string) (string, error) {
@@ -36,18 +36,18 @@ func NormalizeCategory(category string) (string, error) {
 	return c, nil
 }
 
-// NextEquipmentID はカテゴリごとの連番を払い出し、機材IDを生成する。
-//
-// 同時登録による採番衝突を防ぐため、category_sequences の該当行をロックした
-// うえで採番する。ロックは PostgreSQL のみで有効（SQLite は単一ライタのため
-// トランザクションの直列化で足りる）。
-//
-// 呼び出し側のトランザクション tx 内で実行すること。
-func NextEquipmentID(tx *gorm.DB, category string) (string, error) {
+// NextEquipmentIDWithDept は「部署ID - カテゴリ - 連番」の形式で機材IDを生成する。
+func NextEquipmentIDWithDept(tx *gorm.DB, deptID, category string) (string, error) {
+	dept := strings.ToUpper(strings.TrimSpace(deptID))
+	if dept == "" {
+		dept = IDPrefix
+	}
 	cat, err := NormalizeCategory(category)
 	if err != nil {
 		return "", err
 	}
+
+	seqKey := fmt.Sprintf("%s_%s", dept, cat)
 
 	q := tx.Model(&models.CategorySequence{})
 	if isPostgres(tx) {
@@ -55,11 +55,10 @@ func NextEquipmentID(tx *gorm.DB, category string) (string, error) {
 	}
 
 	var seq models.CategorySequence
-	err = q.Where("category = ?", cat).Take(&seq).Error
+	err = q.Where("category = ?", seqKey).Take(&seq).Error
 	switch {
 	case err == gorm.ErrRecordNotFound:
-		// 当該カテゴリの初回登録。0001 から払い出す。
-		seq = models.CategorySequence{Category: cat, NextSeq: 1}
+		seq = models.CategorySequence{Category: seqKey, NextSeq: 1}
 		if err := tx.Create(&seq).Error; err != nil {
 			return "", fmt.Errorf("採番レコードの作成に失敗しました: %w", err)
 		}
@@ -69,15 +68,20 @@ func NextEquipmentID(tx *gorm.DB, category string) (string, error) {
 
 	assigned := seq.NextSeq
 	if err := tx.Model(&models.CategorySequence{}).
-		Where("category = ?", cat).
+		Where("category = ?", seqKey).
 		Update("next_seq", assigned+1).Error; err != nil {
 		return "", fmt.Errorf("採番の更新に失敗しました: %w", err)
 	}
 
-	if assigned > 9999 {
-		return "", fmt.Errorf("カテゴリ %s の連番が上限(9999)に達しました", cat)
+	if assigned > 99999 {
+		return "", fmt.Errorf("部署 %s カテゴリ %s の連番が上限(99999)に達しました", dept, cat)
 	}
-	return fmt.Sprintf("%s-%s-%04d", IDPrefix, cat, assigned), nil
+	return fmt.Sprintf("%s-%s-%05d", dept, cat, assigned), nil
+}
+
+// NextEquipmentID は標準の固定プレフィックスで機材IDを生成する。
+func NextEquipmentID(tx *gorm.DB, category string) (string, error) {
+	return NextEquipmentIDWithDept(tx, IDPrefix, category)
 }
 
 // NormalizeEquipmentID はスキャン結果の機材IDを正規化する。

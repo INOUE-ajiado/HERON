@@ -2,91 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 
+ * HERON プレミアムエンタープライズ UI システム (テーマカラー: #2A3A4A)
+ */
 @layer base {
-  html,
   body {
-    @apply h-full;
+    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    margin: 0;
+    padding: 0;
   }
+}
 
-  body {
-    @apply bg-heron-silver text-heron-navy antialiased;
-  }
-
-  /* モバイルでの連続スキャン時、意図しないタップハイライトを抑える。 */
-  button,
-  a {
-    -webkit-tap-highlight-color: transparent;
+@layer utilities {
+  .heron-brand-font {
+    font-family: 'Outfit', 'Montserrat', -apple-system, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer components {
+  /* シームレス・コンテナ */
   .heron-card {
-    @apply rounded-xl border border-heron-5/60 bg-white shadow-sm;
+    @apply bg-white rounded-none border-none p-0;
   }
 
+  /* 上質フォーム入力要素 */
+  .heron-input {
+    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 shadow-sm
+           transition-all duration-150 placeholder:text-slate-400
+           focus:border-[#2A3A4A] focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]/20;
+  }
+
+  /* リッチボタンシステム */
   .heron-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
-           text-sm font-semibold transition
-           disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold
+           shadow-sm transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
+  /*HERON Navy (#2A3A4A) プライマリボタン */
   .heron-btn-primary {
-    @apply heron-btn bg-heron-navy text-white hover:bg-heron-1 active:bg-heron-navy;
+    @apply heron-btn bg-[#2A3A4A] text-white hover:bg-[#1E2B37] active:bg-[#151F28] shadow-slate-900/10;
   }
 
   .heron-btn-secondary {
-    @apply heron-btn border border-heron-4 bg-white text-heron-navy hover:bg-heron-silver;
+    @apply heron-btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400;
   }
 
   .heron-btn-ghost {
-    @apply heron-btn text-heron-2 hover:bg-heron-silver hover:text-heron-navy;
-  }
-
-  .heron-input {
-    @apply w-full rounded-lg border border-heron-4 bg-white px-3 py-2.5 text-sm
-           text-heron-navy placeholder:text-heron-3
-           focus:border-heron-1 focus:outline-none focus:ring-2 focus:ring-heron-3/40;
+    @apply heron-btn text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-none;
   }
 
   .heron-label {
-    @apply mb-1.5 block text-xs font-semibold tracking-wide text-heron-2;
+    @apply block text-[11px] font-bold text-slate-700 mb-1;
   }
 
-  .heron-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1
-           text-xs font-semibold text-white;
-  }
-
-  /* 機材IDは等幅で表示し、ラベルとの目視照合をしやすくする。 */
   .heron-mono {
-    font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
-    @apply tracking-tight;
-  }
-}
-
-/*
- * ラベル印刷（設計書 第3部 4章）。
- *
- * NIIMBOT M2 で使用するシールの実寸 30mm × 15mm に合わせ、
- * 余白ゼロで描画領域を厳密に定義する。
- */
-@page {
-  size: 30mm 15mm;
-  margin: 0;
-}
-
-@media print {
-  html,
-  body {
-    width: 30mm;
-    height: 15mm;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-  }
-
-  /* 印刷対象のラベル以外は一切出力しない。 */
-  .no-print {
-    display: none !important;
+    font-family: 'Consolas', 'SFMono-Regular', monospace;
   }
 }

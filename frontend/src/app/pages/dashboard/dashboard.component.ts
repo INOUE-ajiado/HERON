@@ -3,129 +3,155 @@ import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
-import { Equipment, STATUS_LABEL, Stats } from '../../core/models';
+import { CATEGORY_LABEL, Equipment } from '../../core/models';
 import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * ホーム画面。
- *
- * 一般ユーザー: 自身が借用中の機材一覧（設計書 第1部 2章）。
- * 管理者: 上記に加えてステータス別の集計と主要操作への導線。
+ * ダッシュボード (HERON Navy テーマカラー ＆ プレミアム UI)。
  */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [RouterLink, StatusBadgeComponent, IconComponent],
   template: `
-    <h1 class="text-xl font-bold text-heron-navy">
-      こんにちは、{{ auth.user()?.name }} さん
-    </h1>
-    <p class="mt-1 text-xs text-heron-2">
-      {{ auth.isAdmin() ? '管理者 (Admin)' : '一般 (General)' }} として
-      ログインしています
-    </p>
+    <!-- タイトルバー -->
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+      <div>
+        <h1 class="text-lg font-bold text-[#2A3A4A] flex items-center gap-2">
+          <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
+          ダッシュボード
+        </h1>
+        <p class="text-xs text-slate-500 mt-0.5">ようこそ、{{ auth.user()?.name }} さん</p>
+      </div>
 
-    @if (auth.isAdmin()) {
-      <!-- 管理者向け: ステータス別サマリ -->
-      <section class="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        @for (card of statCards(); track card.key) {
-          <div class="heron-card p-4">
-            <div class="text-[11px] font-semibold text-heron-2">{{ card.label }}</div>
-            <div class="mt-1 text-3xl font-bold text-heron-navy">{{ card.value }}</div>
-          </div>
+      <div class="flex items-center gap-2">
+        <a routerLink="/equipments" class="heron-btn-secondary text-xs">
+          <app-icon name="box" />
+          機材検索・台帳
+        </a>
+        @if (auth.isAdmin()) {
+          <a routerLink="/equipments/new" class="heron-btn-primary text-xs">
+            <app-icon name="plus" />
+            機材を登録
+          </a>
         }
-      </section>
+      </div>
+    </div>
 
-      <!-- 管理者向け: 主要操作 -->
-      <section class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <a routerLink="/scan" class="heron-card bg-heron-gradient p-5 text-white transition hover:opacity-90">
-          <app-icon name="camera" class="text-[1.6rem]" />
-          <div class="mt-2 text-sm font-bold">貸出・返却スキャン</div>
-          <div class="mt-1 text-[11px] opacity-90">QRを読んで1タップで処理</div>
-        </a>
-        <a routerLink="/inventory" class="heron-card p-5 transition hover:bg-heron-silver">
-          <app-icon name="shelf" class="text-[1.6rem] text-heron-1" />
-          <div class="mt-2 text-sm font-bold text-heron-navy">棚卸しモード</div>
-          <div class="mt-1 text-[11px] text-heron-2">棚を選んで連続スキャン</div>
-        </a>
-        <a routerLink="/equipments/new" class="heron-card p-5 transition hover:bg-heron-silver">
-          <app-icon name="plus" class="text-[1.6rem] text-heron-1" />
-          <div class="mt-2 text-sm font-bold text-heron-navy">機材の新規登録</div>
-          <div class="mt-1 text-[11px] text-heron-2">IDを自動採番して登録</div>
-        </a>
-      </section>
-    }
+    <!-- HERON Navy 統計インジケーター -->
+    <div class="grid grid-cols-3 gap-4 py-4 border-b border-slate-200">
+      <div class="flex items-center gap-3 p-2 rounded-lg bg-slate-100/70 border border-slate-200/60 shadow-2xs">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2A3A4A] text-white shadow-xs">
+          <app-icon name="box" />
+        </div>
+        <div>
+          <div class="text-[11px] font-bold text-slate-600">総機材数</div>
+          <div class="font-mono text-xl font-bold text-[#2A3A4A]">{{ items().length }} <span class="text-xs font-normal text-slate-500">件</span></div>
+        </div>
+      </div>
 
-    <!-- 自身が借用中の機材 -->
-    <section class="mt-8">
-      <h2 class="text-sm font-bold text-heron-navy">現在お借りしている機材</h2>
+      <div class="flex items-center gap-3 p-2 rounded-lg bg-blue-50/60 border border-blue-200/60 shadow-2xs">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
+          <app-icon name="user" />
+        </div>
+        <div>
+          <div class="text-[11px] font-bold text-blue-900">貸出中</div>
+          <div class="font-mono text-xl font-bold text-blue-950">{{ countInUse() }} <span class="text-xs font-normal text-slate-500">件</span></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 p-2 rounded-lg bg-emerald-50/60 border border-emerald-200/60 shadow-2xs">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
+          <app-icon name="check" />
+        </div>
+        <div>
+          <div class="text-[11px] font-bold text-emerald-900">保管中</div>
+          <div class="font-mono text-xl font-bold text-emerald-950">{{ countAvailable() }} <span class="text-xs font-normal text-slate-500">件</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- プレミアムテーブル -->
+    <div class="mt-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <h2 class="text-xs font-bold text-[#2A3A4A] flex items-center gap-1.5">
+          <app-icon name="box" />
+          最新の機材管理状況
+        </h2>
+        <a routerLink="/equipments" class="text-xs font-bold text-[#2A3A4A] hover:text-blue-700 hover:underline">
+          すべて見る ({{ items().length }}件) →
+        </a>
+      </div>
 
       @if (loading()) {
-        <p class="mt-3 text-xs text-heron-3">読み込み中...</p>
-      } @else if (mine().length === 0) {
-        <div class="heron-card mt-3 p-6 text-center text-xs text-heron-2">
-          現在借用中の機材はありません。
-        </div>
+        <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
+      } @else if (items().length === 0) {
+        <p class="py-12 text-center text-xs text-slate-400">登録されている機材がありません。</p>
       } @else {
-        <ul class="mt-3 space-y-2">
-          @for (eq of mine(); track eq.equipment_id) {
-            <li>
-              <a
-                [routerLink]="['/equipments', eq.equipment_id]"
-                class="heron-card flex items-center justify-between gap-3 p-4 transition hover:bg-heron-silver"
-              >
-                <div class="min-w-0">
-                  <div class="heron-mono text-xs font-semibold text-heron-2">
-                    {{ eq.equipment_id }}
-                  </div>
-                  <div class="truncate text-sm font-semibold text-heron-navy">
-                    {{ eq.name }}
-                  </div>
-                </div>
-                <app-status-badge [status]="eq.status" />
-              </a>
-            </li>
-          }
-        </ul>
+        <div class="overflow-x-auto mt-2 rounded-md border border-slate-200/80 shadow-2xs">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px]">
+                <th class="py-2.5 px-3.5">機材ID / 名称</th>
+                <th class="py-2.5 px-3.5">カテゴリ</th>
+                <th class="py-2.5 px-3.5">ステータス</th>
+                <th class="py-2.5 px-3.5 text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+              @for (eq of items().slice(0, 10); track eq.equipment_id) {
+                <tr class="hover:bg-slate-50/90 transition-colors duration-150">
+                  <td class="py-2.5 px-3.5">
+                    <div class="heron-mono font-bold text-[#2A3A4A] text-xs">{{ eq.equipment_id }}</div>
+                    <div class="font-bold text-slate-900 text-xs truncate max-w-xs">{{ eq.name }}</div>
+                  </td>
+                  <td class="py-2.5 px-3.5 text-slate-600 font-medium">
+                    {{ categoryLabel(eq.category) }}
+                  </td>
+                  <td class="py-2.5 px-3.5">
+                    <app-status-badge [status]="eq.status" />
+                  </td>
+                  <td class="py-2.5 px-3.5 text-right">
+                    <a [routerLink]="['/equipments', eq.equipment_id]" class="inline-flex items-center gap-1 text-xs text-[#2A3A4A] hover:text-blue-700 hover:underline font-bold">
+                      詳細
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
-    </section>
+    </div>
   `,
 })
 export class DashboardComponent {
   private readonly api = inject(ApiService);
   readonly auth = inject(AuthService);
 
-  readonly mine = signal<Equipment[]>([]);
+  readonly items = signal<Equipment[]>([]);
   readonly loading = signal(true);
-  readonly statCards = signal<{ key: string; label: string; value: number }[]>([]);
 
   constructor() {
-    this.api.myEquipments().subscribe({
-      next: (res) => {
-        this.mine.set(res.items ?? []);
+    this.api.listEquipments().subscribe({
+      next: (r) => {
+        this.items.set(r.items ?? []);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
-
-    if (this.auth.isAdmin()) {
-      this.api.stats().subscribe({
-        next: (s) => this.statCards.set(toCards(s)),
-      });
-    }
   }
-}
 
-function toCards(s: Stats): { key: string; label: string; value: number }[] {
-  return [
-    { key: 'total', label: '稼働機材 合計', value: s.active_total },
-    { key: 'available', label: STATUS_LABEL.available, value: s.by_status.available ?? 0 },
-    { key: 'in_use', label: STATUS_LABEL.in_use, value: s.by_status.in_use ?? 0 },
-    {
-      key: 'maintenance',
-      label: STATUS_LABEL.maintenance,
-      value: s.by_status.maintenance ?? 0,
-    },
-  ];
+  categoryLabel(c: string): string {
+    return CATEGORY_LABEL[c] ?? c;
+  }
+
+  countInUse(): number {
+    return this.items().filter((i) => i.status === 'in_use').length;
+  }
+
+  countAvailable(): number {
+    return this.items().filter((i) => i.status === 'available').length;
+  }
 }

@@ -123,12 +123,14 @@ func (h *Handler) GetEquipment(c *gin.Context) {
 }
 
 type createEquipmentRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Category    string `json:"category" binding:"required"`
-	ModelNumber string `json:"model_number"`
-	LocationID  *int   `json:"location_id"`
-	PurchasedAt string `json:"purchased_at"` // YYYY-MM-DD
-	Note        string `json:"note"`
+	Name        string  `json:"name" binding:"required"`
+	Category    string  `json:"category" binding:"required"`
+	DeptID      string  `json:"dept_id"`
+	ModelNumber string  `json:"model_number"`
+	LocationID  *int    `json:"location_id"`
+	UserID      *string `json:"user_id"`
+	PurchasedAt string  `json:"purchased_at"` // YYYY-MM-DD
+	Note        string  `json:"note"`
 }
 
 // CreateEquipment は POST /api/equipments 。ID採番を伴う新規登録（管理者のみ）。
@@ -153,7 +155,7 @@ func (h *Handler) CreateEquipment(c *gin.Context) {
 	var created models.Equipment
 
 	err := h.gdb.Transaction(func(tx *gorm.DB) error {
-		newID, err := service.NextEquipmentID(tx, req.Category)
+		newID, err := service.NextEquipmentIDWithDept(tx, req.DeptID, req.Category)
 		if err != nil {
 			return err
 		}
@@ -181,6 +183,20 @@ func (h *Handler) CreateEquipment(c *gin.Context) {
 			eq.CurrentLocationID = &loc.LocationID
 		}
 
+		// 使用者の指定があれば検証したうえで設定し、利用中ステータスにする。
+		if req.UserID != nil && strings.TrimSpace(*req.UserID) != "" {
+			var usr models.User
+			uID := strings.TrimSpace(*req.UserID)
+			if err := tx.Where("user_id = ?", uID).Take(&usr).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return service.ErrUserNotFound
+				}
+				return err
+			}
+			eq.CurrentUserID = &usr.UserID
+			eq.Status = models.StatusInUse
+		}
+
 		if err := tx.Create(&eq).Error; err != nil {
 			return err
 		}
@@ -188,6 +204,7 @@ func (h *Handler) CreateEquipment(c *gin.Context) {
 			EquipmentID:      eq.EquipmentID,
 			ActionType:       models.ActionCreate,
 			ActorUserID:      actorID,
+			TargetUserID:     eq.CurrentUserID,
 			TargetLocationID: eq.CurrentLocationID,
 			Timestamp:        time.Now().UTC(),
 		}).Error; err != nil {
