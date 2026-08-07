@@ -7,6 +7,8 @@
 export const environment = {
   production: true,
   apiBase: '/api',
+  /** Firebase Hosting 上には Go API が無いため、Firestore を正のデータストアとして使う。 */
+  useFirestore: true,
   firebase: {
     apiKey: "AIzaSyAAM5TeESJ_iJf9CepgFqU2cQeT5lpe0V0",
     authDomain: "heron-dcd38.firebaseapp.com",

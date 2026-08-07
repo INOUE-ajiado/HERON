@@ -1,4 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { onAuthStateChanged } from 'firebase/auth';
+
+import { FirebaseService } from './firebase.service';
+import { FirestoreDataService } from './firestore-data.service';
 
 export interface DepartmentMaster {
   code: string;
@@ -16,126 +20,156 @@ export interface ShelfMaster {
   shelf_name: string;
 }
 
-const DEFAULT_DEPARTMENTS: DepartmentMaster[] = [
-  { code: 'DEV', name: '開発部' },
-  { code: 'ANIM', name: '制作部' },
-  { code: 'SALES', name: '営業部' },
-  { code: 'HQ', name: '管理部・本社' },
-];
+/**
+ * 直近に読み込んだ Firestore の内容を端末に控えておくキャッシュ。
+ * 初期描画を空にしないためだけに使い、正はつねに Firestore 側。
+ */
+const CACHE_KEY = 'heron.master.cache.v2';
 
-const DEFAULT_CATEGORIES: CategoryMaster[] = [
-  { code: 'PC', name: 'パソコン' },
-  { code: 'DSP', name: 'ディスプレイ' },
-  { code: 'TAB', name: 'ペンタブ・液タブ' },
-  { code: 'CAM', name: 'カメラ' },
-];
+interface MasterCache {
+  departments: DepartmentMaster[];
+  categories: CategoryMaster[];
+  shelves: ShelfMaster[];
+}
 
-const DEFAULT_SHELVES: ShelfMaster[] = [
-  { code: 'SHELF-A1', room_name: '第1作画室', shelf_name: '機材棚A-1段目' },
-  { code: 'SHELF-B2', room_name: '第2作画室', shelf_name: '機材棚B-2段目' },
-  { code: 'SHELF-DEV01', room_name: '開発室', shelf_name: 'メイン保管庫' },
-];
+function readCache(): MasterCache {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return { departments: [], categories: [], shelves: [] };
+    const parsed = JSON.parse(raw) as Partial<MasterCache>;
+    return {
+      departments: parsed.departments ?? [],
+      categories: parsed.categories ?? [],
+      shelves: parsed.shelves ?? [],
+    };
+  } catch {
+    return { departments: [], categories: [], shelves: [] };
+  }
+}
 
-const DEPT_KEY = 'heron.master.departments';
-const CAT_KEY = 'heron.master.categories';
-const SHELF_KEY = 'heron.master.shelves';
-
+/**
+ * 部署・カテゴリ・棚のマスタ管理（Firestore による全端末共有）。
+ *
+ * 画面側は同期的な signal を読むだけで済むよう、Firestore への書き込みは
+ * 内部で非同期に行い、signal は即時更新する（楽観更新）。
+ */
 @Injectable({ providedIn: 'root' })
 export class MasterService {
-  readonly departments = signal<DepartmentMaster[]>(this.loadDepartments());
-  readonly categories = signal<CategoryMaster[]>(this.loadCategories());
-  readonly shelves = signal<ShelfMaster[]>(this.loadShelves());
+  private readonly store = inject(FirestoreDataService);
+  private readonly firebase = inject(FirebaseService);
+
+  private readonly cache = readCache();
+
+  readonly departments = signal<DepartmentMaster[]>(this.cache.departments);
+  readonly categories = signal<CategoryMaster[]>(this.cache.categories);
+  readonly shelves = signal<ShelfMaster[]>(this.cache.shelves);
+  readonly loaded = signal(false);
+
+  constructor() {
+    void this.refresh();
+
+    // 認証が確立した（あるいは別アカウントに切り替わった）時点で読み直す
+    onAuthStateChanged(this.firebase.getAuth(), (user) => {
+      if (user) void this.refresh();
+    });
+  }
+
+  /** Firestore から最新のマスタを読み直す。 */
+  async refresh(): Promise<void> {
+    try {
+      const [departments, categories, shelves] = await Promise.all([
+        this.store.listDepartments(),
+        this.store.listCategories(),
+        this.store.listShelves(),
+      ]);
+      this.departments.set(departments);
+      this.categories.set(categories);
+      this.shelves.set(shelves);
+      this.saveCache();
+    } catch (err) {
+      console.warn('[HERON] マスタの読み込みに失敗しました:', err);
+    } finally {
+      this.loaded.set(true);
+    }
+  }
 
   addDepartment(dept: DepartmentMaster): void {
-    const codeUpper = dept.code.toUpperCase().trim();
-    const current = this.departments();
-    if (current.some((d) => d.code === codeUpper)) {
-      throw new Error(`部署コード「${codeUpper}」は既に存在します`);
+    const code = dept.code.toUpperCase().trim();
+    if (this.departments().some((d) => d.code === code)) {
+      throw new Error(`部署コード「${code}」は既に存在します`);
     }
-    const updated = [...current, { code: codeUpper, name: dept.name.trim() }];
-    this.saveDepartments(updated);
+    const entry: DepartmentMaster = { code, name: dept.name.trim() };
+    this.departments.set([...this.departments(), entry]);
+    this.saveCache();
+    void this.persist(() => this.store.saveDepartment(entry), '部署の保存');
   }
 
   removeDepartment(code: string): void {
-    const updated = this.departments().filter((d) => d.code !== code);
-    this.saveDepartments(updated);
+    this.departments.set(this.departments().filter((d) => d.code !== code));
+    this.saveCache();
+    void this.persist(() => this.store.deleteDepartment(code), '部署の削除');
   }
 
   addCategory(cat: CategoryMaster): void {
-    const codeUpper = cat.code.toUpperCase().trim();
-    const current = this.categories();
-    if (current.some((c) => c.code === codeUpper)) {
-      throw new Error(`カテゴリコード「${codeUpper}」は既に存在します`);
+    const code = cat.code.toUpperCase().trim();
+    if (this.categories().some((c) => c.code === code)) {
+      throw new Error(`カテゴリコード「${code}」は既に存在します`);
     }
-    const updated = [...current, { code: codeUpper, name: cat.name.trim() }];
-    this.saveCategories(updated);
+    const entry: CategoryMaster = { code, name: cat.name.trim() };
+    this.categories.set([...this.categories(), entry]);
+    this.saveCache();
+    void this.persist(() => this.store.saveCategory(entry), 'カテゴリの保存');
   }
 
   removeCategory(code: string): void {
-    const updated = this.categories().filter((c) => c.code !== code);
-    this.saveCategories(updated);
+    this.categories.set(this.categories().filter((c) => c.code !== code));
+    this.saveCache();
+    void this.persist(() => this.store.deleteCategory(code), 'カテゴリの削除');
   }
 
   addShelf(shelf: ShelfMaster): void {
-    const codeUpper = shelf.code.toUpperCase().trim();
-    const current = this.shelves();
-    if (current.some((s) => s.code === codeUpper)) {
-      throw new Error(`棚コード「${codeUpper}」は既に存在します`);
+    const code = shelf.code.toUpperCase().trim();
+    if (this.shelves().some((s) => s.code === code)) {
+      throw new Error(`棚コード「${code}」は既に存在します`);
     }
-    const updated = [
-      ...current,
-      { code: codeUpper, room_name: shelf.room_name.trim(), shelf_name: shelf.shelf_name.trim() },
-    ];
-    this.saveShelves(updated);
+    const entry: ShelfMaster = {
+      code,
+      room_name: shelf.room_name.trim(),
+      shelf_name: shelf.shelf_name.trim(),
+    };
+    this.shelves.set([...this.shelves(), entry]);
+    this.saveCache();
+    void this.persist(() => this.store.saveShelf(entry), '保管場所の保存');
   }
 
   removeShelf(code: string): void {
-    const updated = this.shelves().filter((s) => s.code !== code);
-    this.saveShelves(updated);
+    this.shelves.set(this.shelves().filter((s) => s.code !== code));
+    this.saveCache();
+    void this.persist(() => this.store.deleteShelf(code), '保管場所の削除');
   }
 
-  private loadDepartments(): DepartmentMaster[] {
-    const raw = localStorage.getItem(DEPT_KEY);
-    if (!raw) return DEFAULT_DEPARTMENTS;
+  /** 書き込みに失敗したら Firestore の内容へ戻す（画面と DB の食い違いを残さない）。 */
+  private async persist(op: () => Promise<void>, label: string): Promise<void> {
     try {
-      return JSON.parse(raw);
-    } catch {
-      return DEFAULT_DEPARTMENTS;
+      await op();
+    } catch (err) {
+      console.error(`[HERON] ${label}に失敗しました:`, err);
+      await this.refresh();
     }
   }
 
-  private saveDepartments(list: DepartmentMaster[]): void {
-    localStorage.setItem(DEPT_KEY, JSON.stringify(list));
-    this.departments.set(list);
-  }
-
-  private loadCategories(): CategoryMaster[] {
-    const raw = localStorage.getItem(CAT_KEY);
-    if (!raw) return DEFAULT_CATEGORIES;
+  private saveCache(): void {
     try {
-      return JSON.parse(raw);
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          departments: this.departments(),
+          categories: this.categories(),
+          shelves: this.shelves(),
+        }),
+      );
     } catch {
-      return DEFAULT_CATEGORIES;
+      /* 保存できなくても動作に支障はない */
     }
-  }
-
-  private saveCategories(list: CategoryMaster[]): void {
-    localStorage.setItem(CAT_KEY, JSON.stringify(list));
-    this.categories.set(list);
-  }
-
-  private loadShelves(): ShelfMaster[] {
-    const raw = localStorage.getItem(SHELF_KEY);
-    if (!raw) return DEFAULT_SHELVES;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return DEFAULT_SHELVES;
-    }
-  }
-
-  private saveShelves(list: ShelfMaster[]): void {
-    localStorage.setItem(SHELF_KEY, JSON.stringify(list));
-    this.shelves.set(list);
   }
 }

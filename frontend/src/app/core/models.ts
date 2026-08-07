@@ -57,6 +57,8 @@ export interface Equipment {
   status: EquipmentStatus;
   current_user_id?: string | null;
   current_location_id?: number | null;
+  /** 棚マスタのコード（画面の保管場所プルダウンが扱う値） */
+  shelf_code?: string | null;
   purchased_at?: string | null;
   note?: string;
 
@@ -70,6 +72,8 @@ export interface Equipment {
 
 /** 取引・移動ログ */
 export interface TransactionLog {
+  /** Firestore ドキュメント ID（一覧の trackBy に使う一意キー） */
+  id?: string;
   log_id: number;
   equipment_id: string;
   action_type: ActionType;

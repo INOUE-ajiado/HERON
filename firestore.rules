@@ -2,13 +2,58 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // テストメンバー (ホワイトリスト) コレクション: 認証済みユーザーのみ読み書き可能
-    match /test_members/{email} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+    // ログイン済み (Google 認証) かどうか
+    function signedIn() {
+      return request.auth != null;
     }
 
-    // その他のコレクションはデフォルトで遮断
+    // テストメンバー (ホワイトリスト)
+    match /test_members/{email} {
+      allow read, write: if signedIn();
+    }
+
+    // 機材
+    match /equipments/{equipmentId} {
+      allow read, write: if signedIn();
+    }
+
+    // 操作ログ (監査履歴)。改ざん防止のため追記のみ許可し、更新・削除は禁止。
+    match /logs/{logId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+
+    // 保管場所
+    match /locations/{locationId} {
+      allow read, write: if signedIn();
+    }
+
+    // 利用者
+    match /users/{userId} {
+      allow read, write: if signedIn();
+    }
+
+    // マスタ (部署・カテゴリ・棚)
+    match /departments/{code} {
+      allow read, write: if signedIn();
+    }
+    match /categories/{code} {
+      allow read, write: if signedIn();
+    }
+    match /shelves/{code} {
+      allow read, write: if signedIn();
+    }
+
+    // 採番カウンタ・初期化フラグ
+    match /counters/{name} {
+      allow read, write: if signedIn();
+    }
+    match /system/{docId} {
+      allow read, write: if signedIn();
+    }
+
+    // 上記以外はすべて遮断
     match /{document=**} {
       allow read, write: if false;
     }

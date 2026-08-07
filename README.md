@@ -181,9 +181,36 @@ macOS の場合は 2. を「システム設定 → プリンタとスキャナ�
 
 ---
 
+## Firebase 版のデータ保存先（Cloud Firestore）
+
+Firebase Hosting（https://heron-dcd38.web.app）には Go API が存在しないため、
+そこで動く HERON は **Cloud Firestore を正のデータストアとして直接読み書きする**。
+これによりテストメンバー全員が同じ機材・履歴を共有できる（以前は端末ごとの
+localStorage に保存していたため、他の人からは何も見えなかった）。
+
+| コレクション | ドキュメントID | 内容 |
+| --- | --- | --- |
+| `equipments` | 機材ID（例 `DEV-TAB-00001`） | 機材本体。状態・貸出先・保管場所・付属品 |
+| `logs` | 自動生成 | 操作ログ（登録・更新・貸出・返却・棚卸し・除却）。**追記のみ／更新削除不可** |
+| `locations` | 保管場所ID | 部屋名・棚名 |
+| `users` | ユーザーID | 利用者。Google ログインしたメンバーを自動登録 |
+| `departments` / `categories` / `shelves` | コード | 部署・カテゴリ・棚マスタ |
+| `counters` | `DEV_TAB` 等 | 機材IDの連番カウンタ（トランザクションで採番） |
+| `system` | `bootstrap` | 初期データ投入済みフラグ |
+| `test_members` | メールアドレス | ログイン許可リスト |
+
+- アクセス制御は `firestore.rules`（Google 認証済みユーザーのみ読み書き可）。
+  変更したら `firebase deploy --only firestore:rules` が必要。
+- 初期データ（保管場所・マスタ・デモユーザー）は最初のログイン時に自動投入される。
+- 旧バージョンの localStorage に機材が残っている端末は、初回ログイン時に
+  Firestore へ自動移行される（同じ機材IDが既にある場合は上書きしない）。
+- 切り替えは `frontend/src/environments/environment*.ts` の `useFirestore`。
+  `false` にすると Go API を使い、通信に失敗したときだけ Firestore を使う。
+
 ## API 仕様
 
 すべて `Authorization: Bearer <token>` が必要（`/api/auth/login` と `/healthz` を除く）。
+※ Go API を使う構成（Docker / ローカル実行）向け。Firebase Hosting 版は上記の Firestore を直接参照する。
 
 ### 認証
 

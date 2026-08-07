@@ -759,7 +759,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                 <p class="py-4 text-center text-xs text-slate-400">履歴がありません。</p>
               } @else {
                 <ol class="space-y-1.5 max-h-48 overflow-y-auto">
-                  @for (log of drawerLogs(); track log.log_id) {
+                  @for (log of drawerLogs(); track log.id ?? log.log_id) {
                     <li class="p-2 border border-slate-100 rounded text-xs bg-slate-50/50">
                       <div class="flex items-center justify-between">
                         <span class="font-bold text-[#2A3A4A]">{{ actionLabel(log.action_type) }}</span>
@@ -1146,7 +1146,7 @@ export class EquipmentListComponent {
     // 編集用初期化
     this.formName = eq.name;
     this.formModelNumber = eq.model_number || '';
-    this.formLocationId = eq.current_location_id ?? null;
+    this.formLocationId = eq.shelf_code ?? eq.current_location_id ?? null;
 
     this.api.getEquipment(eq.equipment_id).subscribe({
       next: (res) => {
@@ -1166,7 +1166,6 @@ export class EquipmentListComponent {
       return;
     }
     this.actionBusy.set(true);
-    const locVal = typeof this.formLocationId === 'number' ? this.formLocationId : null;
 
     this.api
       .createEquipment({
@@ -1174,7 +1173,7 @@ export class EquipmentListComponent {
         category: this.formCategory,
         dept_id: this.formDeptId,
         model_number: this.formModelNumber.trim(),
-        location_id: locVal,
+        location_id: this.formLocationId,
         accessories: this.formAccessories,
       })
       .subscribe({

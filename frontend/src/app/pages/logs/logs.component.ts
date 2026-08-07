@@ -36,7 +36,7 @@ import { ACTION_LABEL, ActionType, TransactionLog } from '../../core/models';
     } @else {
       <div class="mt-4 overflow-hidden rounded-md border border-slate-200/80 bg-white shadow-2xs">
         <ol class="divide-y divide-slate-100">
-          @for (log of items(); track log.log_id) {
+          @for (log of items(); track log.id ?? log.log_id) {
             <li class="p-3.5 hover:bg-slate-50/80 transition-colors duration-150 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div class="flex items-start gap-3 min-w-0">
                 <span

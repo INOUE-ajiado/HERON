@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import { onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
   doc,
@@ -12,10 +13,9 @@ import {
 
 import { environment } from '../../environments/environment';
 import { FirebaseService } from './firebase.service';
+import { FirestoreDataService } from './firestore-data.service';
 import { LoginResponse, User } from './models';
-
-const TOKEN_KEY = 'heron.token';
-const USER_KEY = 'heron.user';
+import { TOKEN_KEY, USER_KEY, clearStoredSession, readStoredUser, writeStoredUser } from './session';
 
 /** コードレベルでのプリセットメンバー (初回 Firestore マイグレーション用) */
 const PRESET_TEST_MEMBERS = [
@@ -36,6 +36,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly firebase = inject(FirebaseService);
+  private readonly store = inject(FirestoreDataService);
 
   private readonly _user = signal<User | null>(readStoredUser());
   private readonly _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
@@ -53,6 +54,12 @@ export class AuthService {
   constructor() {
     // Firestore からテストメンバーを非同期読み込み
     this.loadTestMembersFromFirestore();
+
+    // Firebase Auth のセッション復元は非同期。認証が確立した時点で読み直す
+    // （Firestore の読み取りには認証が必要なため）。
+    onAuthStateChanged(this.firebase.getAuth(), (fbUser) => {
+      if (fbUser) void this.loadTestMembersFromFirestore();
+    });
   }
 
   /** Firestore からテストメンバーリストを読み込み */
@@ -162,35 +169,33 @@ export class AuthService {
       );
   }
 
-  loginWithFirebaseUser(user: User, token: string): void {
+  async loginWithFirebaseUser(user: User, token: string): Promise<void> {
     const userEmail = (user.login_id || '').trim().toLowerCase();
+
+    // Google 認証が済んだ直後なら Firestore を読めるので、他端末で追加された
+    // テストメンバーを取り込んでから検証する。
+    await this.loadTestMembersFromFirestore();
+
     // ホワイトリスト検証
     if (!this.isAllowedEmail(userEmail)) {
       throw new Error(`アクセス権限がありません (ユーザー: ${userEmail})。HERON管理者に「テストメンバー」としての追加を依頼してください。`);
     }
 
     localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    writeStoredUser(user);
     this._token.set(token);
     this._user.set(user);
+
+    // 貸出先の選択肢などで参照できるよう、ログインしたメンバーを users コレクションへ登録
+    void this.store.upsertUser(user).catch((err) => {
+      console.warn('[HERON] ユーザー情報の Firestore 登録に失敗しました:', err);
+    });
   }
 
   logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    clearStoredSession();
     this._token.set(null);
     this._user.set(null);
     void this.router.navigate(['/login']);
-  }
-}
-
-function readStoredUser(): User | null {
-  const raw = localStorage.getItem(USER_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as User;
-  } catch {
-    localStorage.removeItem(USER_KEY);
-    return null;
   }
 }

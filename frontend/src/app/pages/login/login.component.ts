@@ -104,7 +104,7 @@ export class LoginComponent {
         role: 'admin',
       };
 
-      this.api.loginWithFirebaseUser(heronUser, idToken);
+      await this.api.loginWithFirebaseUser(heronUser, idToken);
 
       const redirect = this.route.snapshot.queryParamMap.get('redirect') ?? '/';
       void this.router.navigateByUrl(redirect);

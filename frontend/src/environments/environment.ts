@@ -8,6 +8,11 @@
 export const environment = {
   production: false,
   apiBase: '/api',
+  /**
+   * true: 機材・ログ・マスタを Cloud Firestore に直接読み書きする（テストメンバー全員で共有）。
+   * false: Go API を使い、通信に失敗したときだけ Firestore にフォールバックする。
+   */
+  useFirestore: true,
   firebase: {
     apiKey: "AIzaSyAAM5TeESJ_iJf9CepgFqU2cQeT5lpe0V0",
     authDomain: "heron-dcd38.firebaseapp.com",
