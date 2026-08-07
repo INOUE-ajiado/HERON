@@ -2,14 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { ApiService } from '../../core/api.service';
+import { ApiService, getDefaultAccessories } from '../../core/api.service';
 import { MasterService } from '../../core/master.service';
-import { CATEGORY_LABEL, Location, User } from '../../core/models';
+import { AccessoryItem, CATEGORY_LABEL, Location, User } from '../../core/models';
 
 /**
- * 機材の新規登録（設計書 3.1 / API `POST /api/equipments`）。
- *
- * 登録完了後は中間の確認画面を挟まず、直ちに「機材ラベル印刷」画面へ自動リダイレクトする。
+ * 機材の新規登録 (付属品チェックリスト対応)。
  */
 @Component({
   selector: 'app-equipment-form',
@@ -22,7 +20,7 @@ import { CATEGORY_LABEL, Location, User } from '../../core/models';
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
           機材の新規登録
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">カテゴリ指定により管理IDが自動採番されます</p>
+        <p class="text-xs text-slate-500 mt-0.5">カテゴリ指定により管理IDが自動採番され、標準付属品セットが提示されます</p>
       </div>
 
       <a routerLink="/equipments" class="heron-btn-secondary text-xs">
@@ -59,7 +57,7 @@ import { CATEGORY_LABEL, Location, User } from '../../core/models';
           <label class="heron-label" for="category">
             カテゴリ <span class="text-red-600">*</span>
           </label>
-          <select id="category" name="category" class="heron-input" [(ngModel)]="category">
+          <select id="category" name="category" class="heron-input" [(ngModel)]="category" (change)="onCategoryChange()">
             @for (c of master.categories(); track c.code) {
               <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
             }
@@ -70,6 +68,32 @@ import { CATEGORY_LABEL, Location, User } from '../../core/models';
       <p class="text-[11px] text-slate-500 font-medium">
         ※ 機材管理IDは 「{{ deptId ? deptId.toUpperCase() : 'HRN' }}-{{ category }}-XXXXX」 の形式で自動採番されます。
       </p>
+
+      <!-- 付属品チェックリストテンプレート -->
+      <div class="rounded-lg bg-slate-50 p-3.5 border border-slate-200 space-y-2">
+        <label class="heron-label text-xs font-bold text-[#2A3A4A] flex items-center justify-between">
+          <span>セット付属品チェックリスト (ペン・ACアダプター等)</span>
+          <span class="text-[10px] text-slate-500 font-normal">個別シール不要</span>
+        </label>
+        <div class="space-y-1.5">
+          @for (acc of accessories; track acc.name; let i = $index) {
+            <div class="flex items-center justify-between text-xs bg-white px-3 py-1.5 rounded border border-slate-200">
+              <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                <input
+                  type="checkbox"
+                  class="rounded text-blue-600 focus:ring-blue-500"
+                  [(ngModel)]="acc.present"
+                  [name]="'acc_' + i"
+                />
+                <span>{{ acc.name }}</span>
+              </label>
+              <span class="text-[10px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                {{ acc.present ? '✓ 付属' : '✗ 欠品' }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
 
       <div>
         <label class="heron-label" for="model">型番</label>
@@ -161,6 +185,8 @@ export class EquipmentFormComponent {
   purchasedAt = '';
   note = '';
 
+  accessories: AccessoryItem[] = getDefaultAccessories('TAB');
+
   readonly locations = signal<Location[]>([]);
   readonly users = signal<User[]>([]);
   readonly saving = signal(false);
@@ -169,6 +195,10 @@ export class EquipmentFormComponent {
   constructor() {
     this.api.listLocations().subscribe({ next: (r) => this.locations.set(r.items ?? []) });
     this.api.listUsers().subscribe({ next: (r) => this.users.set(r.items ?? []) });
+  }
+
+  onCategoryChange(): void {
+    this.accessories = getDefaultAccessories(this.category);
   }
 
   categoryLabel(c: string): string {
@@ -195,11 +225,11 @@ export class EquipmentFormComponent {
         user_id: this.userId,
         purchased_at: this.purchasedAt || undefined,
         note: this.note.trim(),
+        accessories: this.accessories,
       })
       .subscribe({
         next: (eq) => {
           this.saving.set(false);
-          // 中間完了画面を挟まず直ちに機材ラベル印刷画面へ自動リダイレクト
           void this.router.navigate(['/print/label', eq.equipment_id]);
         },
         error: (err) => {

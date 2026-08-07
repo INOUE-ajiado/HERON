@@ -431,7 +431,7 @@ export class EquipmentDetailComponent {
       next: (detail) => {
         this.equipment.set(detail.equipment);
         this.logs.set(detail.recent_logs ?? []);
-        this.targetLocationId = detail.equipment.current_location_id;
+        this.targetLocationId = detail.equipment.current_location_id ?? null;
         this.loading.set(false);
       },
       error: (err) => {

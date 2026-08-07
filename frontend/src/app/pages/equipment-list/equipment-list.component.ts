@@ -3,12 +3,13 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { ApiService } from '../../core/api.service';
+import { ApiService, getDefaultAccessories } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { MasterService } from '../../core/master.service';
 import {
   ACTION_LABEL,
   ActionType,
+  AccessoryItem,
   CATEGORY_LABEL,
   Equipment,
   EquipmentStatus,
@@ -20,7 +21,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * 機材台帳・検索 (統計インジケーター集約 ＆ 右サイドスライド詳細ドロワー付き)。
+ * 機材台帳・検索 (付属品チェックリスト ＆ 欠品・完品管理 ＆ 右サイドスライド詳細ドロワー対応)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -34,7 +35,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
           機材台帳・検索
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">全機材の管理・リアルタイム統計・検索・貸出返却操作</p>
+        <p class="text-xs text-slate-500 mt-0.5">全機材の管理・付属品(欠品/完品)チェック・貸出返却操作</p>
       </div>
 
       @if (auth.isAdmin()) {
@@ -151,7 +152,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
       }
     </div>
 
-    <!-- HERON Navy テーマテーブル -->
+    <!-- HERON Navy テーマテーブル (付属品・完品/欠品バッジ表示付き) -->
     <div class="mt-3">
       @if (loading()) {
         <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
@@ -165,7 +166,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
             <thead>
               <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px]">
                 <th class="py-2.5 px-3.5">機材ID / 機材名</th>
-                <th class="py-2.5 px-3.5">カテゴリ</th>
+                <th class="py-2.5 px-3.5">カテゴリ / 付属品状態</th>
                 <th class="py-2.5 px-3.5">型番</th>
                 <th class="py-2.5 px-3.5">ステータス / 所在</th>
               </tr>
@@ -182,7 +183,18 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                     <div class="font-bold text-slate-900 text-xs">{{ eq.name }}</div>
                   </td>
                   <td class="py-2.5 px-3.5 text-slate-600 font-medium">
-                    {{ categoryLabel(eq.category) }}
+                    <div>{{ categoryLabel(eq.category) }}</div>
+                    <div class="mt-0.5">
+                      @if (isComplete(eq)) {
+                        <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                          ✓ 完品
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
+                          ⚠ 欠品あり ({{ missingSummary(eq) }})
+                        </span>
+                      }
+                    </div>
                   </td>
                   <td class="py-2.5 px-3.5 font-mono text-slate-600">
                     {{ eq.model_number || '—' }}
@@ -257,6 +269,45 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                 {{ drawerMessage() }}
               </p>
             }
+
+            <!-- 付属品チェックリスト (ペン・ACアダプター等) -->
+            <div class="rounded-md border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 shadow-2xs">
+              <div class="flex items-center justify-between pb-1 border-b border-slate-200">
+                <h3 class="text-xs font-bold text-[#2A3A4A] flex items-center gap-1.5">
+                  <app-icon name="box" /> 付属品チェックリスト (ペン・ACアダプター)
+                </h3>
+
+                @if (isComplete(eq)) {
+                  <span class="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                    ✓ 完品
+                  </span>
+                } @else {
+                  <span class="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                    ⚠ 欠品あり
+                  </span>
+                }
+              </div>
+
+              <div class="space-y-1.5">
+                @for (acc of drawerAccessories(); track acc.name; let i = $index) {
+                  <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded border border-slate-200">
+                    <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                      <input
+                        type="checkbox"
+                        class="rounded text-blue-600 focus:ring-blue-500"
+                        [checked]="acc.present"
+                        (change)="toggleAccessory(i)"
+                      />
+                      <span>{{ acc.name }}</span>
+                    </label>
+
+                    <span class="text-[11px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                      {{ acc.present ? '✓ 付属' : '✗ 欠品中' }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
 
             <!-- 貸出中ハイライト -->
             @if (eq.status === 'in_use') {
@@ -449,6 +500,7 @@ export class EquipmentListComponent {
   readonly drawerOpen = signal(false);
   readonly drawerLoading = signal(false);
   readonly activeEquipment = signal<Equipment | null>(null);
+  readonly drawerAccessories = signal<AccessoryItem[]>([]);
   readonly drawerLogs = signal<TransactionLog[]>([]);
   readonly drawerMessage = signal('');
   readonly drawerMessageIsError = signal(false);
@@ -513,6 +565,17 @@ export class EquipmentListComponent {
     return '未設定';
   }
 
+  isComplete(eq: Equipment): boolean {
+    const list = eq.accessories || getDefaultAccessories(eq.category);
+    return list.every((a) => a.present);
+  }
+
+  missingSummary(eq: Equipment): string {
+    const list = eq.accessories || getDefaultAccessories(eq.category);
+    const missing = list.filter((a) => !a.present).map((a) => a.name);
+    return missing.join(', ') || '欠品';
+  }
+
   countInUse(): number {
     return this.items().filter((i) => i.status === 'in_use').length;
   }
@@ -523,6 +586,7 @@ export class EquipmentListComponent {
 
   openDrawer(eq: Equipment): void {
     this.activeEquipment.set(eq);
+    this.drawerAccessories.set(eq.accessories || getDefaultAccessories(eq.category));
     this.drawerOpen.set(true);
     this.drawerLoading.set(true);
     this.drawerMessage.set('');
@@ -532,11 +596,28 @@ export class EquipmentListComponent {
     this.api.getEquipment(eq.equipment_id).subscribe({
       next: (res) => {
         this.activeEquipment.set(res.equipment);
+        this.drawerAccessories.set(res.equipment.accessories || getDefaultAccessories(res.equipment.category));
         this.drawerLogs.set(res.recent_logs ?? []);
         this.drawerLoading.set(false);
       },
       error: () => this.drawerLoading.set(false),
     });
+  }
+
+  toggleAccessory(index: number): void {
+    const list = [...this.drawerAccessories()];
+    if (list[index]) {
+      list[index] = { ...list[index], present: !list[index].present };
+      this.drawerAccessories.set(list);
+
+      const active = this.activeEquipment();
+      if (active) {
+        active.accessories = list;
+        this.api.updateEquipment(active.equipment_id, { accessories: list }).subscribe({
+          next: () => this.loadData(),
+        });
+      }
+    }
   }
 
   closeDrawer(): void {

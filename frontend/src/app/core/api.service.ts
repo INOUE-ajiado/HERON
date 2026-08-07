@@ -6,6 +6,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
   ActionType,
+  AccessoryItem,
   Equipment,
   EquipmentDetail,
   InventoryResult,
@@ -33,6 +34,35 @@ const LOCAL_EQUIPMENTS_KEY = 'heron.local.equipments';
 const LOCAL_SEQ_KEY = 'heron.local.seq';
 const LOCAL_LOGS_KEY = 'heron.local.logs';
 
+/** カテゴリごとの標準付属品テンプレートを生成 */
+export function getDefaultAccessories(category: string): AccessoryItem[] {
+  switch (category) {
+    case 'TAB':
+      return [
+        { name: 'タッチペン (Pro Pen)', present: true },
+        { name: 'ACアダプター & 電源コード', present: true },
+        { name: '接続ケーブル (USB-C/DisplayPort)', present: true },
+        { name: '専用スタンド', present: true },
+      ];
+    case 'LAP':
+      return [
+        { name: 'ACアダプター & 電源コード', present: true },
+        { name: '専用ケース / 保護カバー', present: true },
+        { name: 'マウス', present: true },
+      ];
+    case 'DSP':
+      return [
+        { name: '電源コード', present: true },
+        { name: 'HDMI / DisplayPort ケーブル', present: true },
+      ];
+    default:
+      return [
+        { name: '電源コード / アダプター', present: true },
+        { name: '附属ケーブル', present: true },
+      ];
+  }
+}
+
 function getStoredEquipments(): Equipment[] {
   const raw = localStorage.getItem(LOCAL_EQUIPMENTS_KEY);
   if (!raw) return [];
@@ -50,7 +80,6 @@ function saveStoredEquipments(list: Equipment[]): void {
 function getStoredLogs(): TransactionLog[] {
   const raw = localStorage.getItem(LOCAL_LOGS_KEY);
   if (!raw) {
-    // デフォルトの初期デモログを生成
     const defaultLogs: TransactionLog[] = [
       {
         log_id: 101,
@@ -139,9 +168,14 @@ export class ApiService {
     return this.http.get<Paged<Equipment>>(`${this.base}/equipments`, { params }).pipe(
       catchError(() => {
         const items = getStoredEquipments();
+        // 付属品が未設定のアイテムには自動補填
+        const itemsWithAcc = items.map((i) => ({
+          ...i,
+          accessories: i.accessories || getDefaultAccessories(i.category),
+        }));
         return of({
-          items,
-          total: items.length,
+          items: itemsWithAcc,
+          total: itemsWithAcc.length,
           page: 1,
           per_page: 50,
         });
@@ -164,7 +198,9 @@ export class ApiService {
           current_location_id: 1,
           purchased_at: new Date().toISOString().split('T')[0],
           note: '',
+          accessories: getDefaultAccessories('TAB'),
         };
+        eq.accessories = eq.accessories || getDefaultAccessories(eq.category);
         const allLogs = getStoredLogs();
         const eqLogs = allLogs.filter((l) => l.equipment_id === id);
         return of({
@@ -184,6 +220,7 @@ export class ApiService {
     user_id?: string | null;
     purchased_at?: string;
     note?: string;
+    accessories?: AccessoryItem[];
   }): Observable<Equipment> {
     return this.http.post<Equipment>(`${this.base}/equipments`, body).pipe(
       catchError(() => {
@@ -198,11 +235,11 @@ export class ApiService {
           current_location_id: body.location_id || null,
           purchased_at: body.purchased_at || new Date().toISOString().split('T')[0],
           note: body.note || '',
+          accessories: body.accessories || getDefaultAccessories(body.category),
         };
         const current = getStoredEquipments();
         saveStoredEquipments([eq, ...current]);
 
-        // 操作ログを保存
         addStoredLog({
           equipment_id: newId,
           action_type: 'create',
@@ -224,12 +261,11 @@ export class ApiService {
           list[idx] = { ...list[idx], ...body } as Equipment;
           saveStoredEquipments(list);
 
-          // 操作ログを保存
           addStoredLog({
             equipment_id: id,
             action_type: 'update',
             equipment_name: list[idx].name,
-            note: '機材情報更新',
+            note: '機材情報・付属品更新',
           });
 
           return of(list[idx]);
