@@ -82,6 +82,13 @@ export const routes: Routes = [
           import('./pages/spec/spec.component').then((m) => m.SpecComponent),
       },
       {
+        path: 'system-spec',
+        loadComponent: () =>
+          import('./pages/system-spec/system-spec.component').then(
+            (m) => m.SystemSpecComponent,
+          ),
+      },
+      {
         path: 'test-members',
         canActivate: [adminGuard],
         loadComponent: () =>

@@ -67,6 +67,16 @@ interface NavItem {
             <span>仕様書</span>
           </a>
 
+          <!-- システム仕様書 (仕様書のすぐ下) -->
+          <a
+            routerLink="/system-spec"
+            routerLinkActive="bg-blue-600 text-white font-bold"
+            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+          >
+            <app-icon name="doc" class="text-base text-[#90CFD6]" />
+            <span>システム仕様書</span>
+          </a>
+
           @if (auth.isAdmin()) {
             <a
               routerLink="/test-members"
@@ -148,6 +158,14 @@ interface NavItem {
         >
           <app-icon name="box" class="text-base" />
           <span>仕様書</span>
+        </a>
+        <a
+          routerLink="/system-spec"
+          routerLinkActive="text-blue-700 font-bold"
+          class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[9px] font-medium text-slate-500"
+        >
+          <app-icon name="doc" class="text-base" />
+          <span class="whitespace-nowrap">システム仕様</span>
         </a>
       </nav>
     </div>

@@ -15,7 +15,8 @@ export type IconName =
   | 'lend'
   | 'return'
   | 'check'
-  | 'close';
+  | 'close'
+  | 'doc';
 
 /**
  * CSS のみで描画するアイコン。
@@ -80,6 +81,37 @@ export type IconName =
         border: var(--sw) solid currentColor;
         border-top: 0;
         border-radius: 0 0 0.08em 0.08em;
+      }
+
+      /* ---- doc: 書類（枠 + 本文の罫線3本） ---- */
+      :host([data-icon='doc'])::before {
+        left: 16%;
+        top: 6%;
+        width: 68%;
+        height: 88%;
+        border: var(--sw) solid currentColor;
+        border-radius: 0.08em;
+      }
+      :host([data-icon='doc'])::after {
+        left: 30%;
+        top: 30%;
+        width: 40%;
+        height: var(--sw);
+        background: currentColor;
+      }
+      :host([data-icon='doc']) i::before {
+        left: 30%;
+        top: 50%;
+        width: 40%;
+        height: var(--sw);
+        background: currentColor;
+      }
+      :host([data-icon='doc']) i::after {
+        left: 30%;
+        top: 70%;
+        width: 24%;
+        height: var(--sw);
+        background: currentColor;
       }
 
       /* ---- box: 梱包箱 ---- */
