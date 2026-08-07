@@ -111,7 +111,7 @@ import { IconComponent } from '../../shared/icon.component';
         @if (shelves().length === 0) {
           <p class="py-8 text-center text-xs text-slate-400">保管場所が登録されていません。</p>
         } @else {
-          <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
             @for (s of shelves(); track s.code) {
               <div class="rounded-md border border-slate-200/80 p-3 bg-white hover:border-[#2A3A4A]/50 hover:shadow-xs transition-all duration-150 flex flex-col justify-between gap-2">
                 <div>

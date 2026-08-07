@@ -4,12 +4,14 @@
 
 /* 
  * HERON プレミアムエンタープライズ UI システム (テーマカラー: #2A3A4A)
+ * モニターサイズ自動最適化 & テキスト変形・不自然改行防御レスポンシブシステム
  */
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900 antialiased font-sans;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
   }
 }
 
@@ -18,6 +20,13 @@
     font-family: 'Outfit', 'Montserrat', -apple-system, sans-serif;
     font-weight: 800;
     letter-spacing: -0.01em;
+  }
+
+  /* テキストの無理な改行・縦伸ばし防止ユーティリティ */
+  .truncate-nowrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -34,13 +43,14 @@
            focus:border-[#2A3A4A] focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]/20;
   }
 
-  /* リッチボタンシステム */
+  /* リッチボタンシステム (画面縮小時の潰れ・縦伸び完全防護: whitespace-nowrap shrink-0) */
   .heron-btn {
     @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-semibold
-           shadow-sm transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
+           whitespace-nowrap shrink-0 shadow-sm transition-all duration-150 active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
-  /*HERON Navy (#2A3A4A) プライマリボタン */
+  /* HERON Navy (#2A3A4A) プライマリボタン */
   .heron-btn-primary {
     @apply heron-btn bg-[#2A3A4A] text-white hover:bg-[#1E2B37] active:bg-[#151F28] shadow-slate-900/10;
   }
@@ -54,7 +64,7 @@
   }
 
   .heron-label {
-    @apply block text-[11px] font-bold text-slate-700 mb-1;
+    @apply block text-[11px] font-bold text-slate-700 mb-1 whitespace-nowrap;
   }
 
   .heron-mono {

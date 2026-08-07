@@ -48,39 +48,39 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       }
     </div>
 
-    <!-- 集約されたリアルタイム統計インジケーターパネル -->
-    <div class="grid grid-cols-3 gap-3 py-3 border-b border-slate-200">
+    <!-- 集約されたリアルタイム統計インジケーターパネル (画面幅に応じて自動調整) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 py-3 border-b border-slate-200">
       <div class="flex items-center gap-2.5 p-2 rounded-md bg-slate-100/70 border border-slate-200/60 shadow-2xs">
-        <div class="flex h-8 w-8 items-center justify-center rounded bg-[#2A3A4A] text-white shadow-xs">
+        <div class="flex h-8 w-8 items-center justify-center rounded bg-[#2A3A4A] text-white shadow-xs shrink-0">
           <app-icon name="box" />
         </div>
-        <div>
-          <div class="text-[10px] font-bold text-slate-600">総機材数</div>
-          <div class="font-mono text-base font-bold text-[#2A3A4A] leading-none mt-0.5">
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold text-slate-600 truncate-nowrap">総機材数</div>
+          <div class="font-mono text-base font-bold text-[#2A3A4A] leading-none mt-0.5 whitespace-nowrap">
             {{ items().length }} <span class="text-[10px] font-normal text-slate-500">件</span>
           </div>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5 p-2 rounded-md bg-blue-50/60 border border-blue-200/60 shadow-2xs">
-        <div class="flex h-8 w-8 items-center justify-center rounded bg-blue-600 text-white shadow-xs">
+        <div class="flex h-8 w-8 items-center justify-center rounded bg-blue-600 text-white shadow-xs shrink-0">
           <app-icon name="user" />
         </div>
-        <div>
-          <div class="text-[10px] font-bold text-blue-900">貸出中</div>
-          <div class="font-mono text-base font-bold text-blue-950 leading-none mt-0.5">
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold text-blue-900 truncate-nowrap">貸出中</div>
+          <div class="font-mono text-base font-bold text-blue-950 leading-none mt-0.5 whitespace-nowrap">
             {{ countInUse() }} <span class="text-[10px] font-normal text-slate-500">件</span>
           </div>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5 p-2 rounded-md bg-emerald-50/60 border border-emerald-200/60 shadow-2xs">
-        <div class="flex h-8 w-8 items-center justify-center rounded bg-emerald-600 text-white shadow-xs">
+        <div class="flex h-8 w-8 items-center justify-center rounded bg-emerald-600 text-white shadow-xs shrink-0">
           <app-icon name="check" />
         </div>
-        <div>
-          <div class="text-[10px] font-bold text-emerald-900">保管中</div>
-          <div class="font-mono text-base font-bold text-emerald-950 leading-none mt-0.5">
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold text-emerald-900 truncate-nowrap">保管中</div>
+          <div class="font-mono text-base font-bold text-emerald-950 leading-none mt-0.5 whitespace-nowrap">
             {{ countAvailable() }} <span class="text-[10px] font-normal text-slate-500">件</span>
           </div>
         </div>
@@ -91,7 +91,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
     <div class="py-3 border-b border-slate-200 bg-slate-100/60 -mx-4 px-4 md:-mx-6 md:px-6">
       <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <!-- バーコード/QR照合入力 -->
-        <form (ngSubmit)="scanMatch()" class="flex items-center gap-2 flex-1 max-w-md">
+        <form (ngSubmit)="scanMatch()" class="flex items-center gap-2 flex-1 w-full lg:max-w-md">
           <div class="relative w-full">
             <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
               <app-icon name="box" />
@@ -113,15 +113,15 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               <app-icon name="camera" />
             </button>
           </div>
-          <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold" [disabled]="scanning()">
+          <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold whitespace-nowrap" [disabled]="scanning()">
             {{ scanning() ? '照合中...' : '照合' }}
           </button>
         </form>
 
         <!-- フィルタ項目 -->
         <div class="flex flex-wrap items-center gap-2 text-xs">
-          <div class="flex items-center gap-1.5 min-w-[180px]">
-            <span class="text-slate-600 font-bold text-[11px]">検索:</span>
+          <div class="flex items-center gap-1.5 min-w-[160px] flex-1 sm:flex-none">
+            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">検索:</span>
             <input
               type="search"
               class="heron-input text-xs bg-white"
@@ -131,7 +131,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
           </div>
 
           <div class="flex items-center gap-1.5">
-            <span class="text-slate-600 font-bold text-[11px]">カテゴリ:</span>
+            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">カテゴリ:</span>
             <select class="heron-input text-xs bg-white w-28" [(ngModel)]="categoryFilter">
               <option value="">すべて</option>
               @for (c of master.categories(); track c.code) {
@@ -141,7 +141,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
           </div>
 
           <div class="flex items-center gap-1.5">
-            <span class="text-slate-600 font-bold text-[11px]">ステータス:</span>
+            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">ステータス:</span>
             <select class="heron-input text-xs bg-white w-28" [(ngModel)]="statusFilter">
               <option value="">すべて</option>
               <option value="available">{{ statusLabel.available }}</option>
@@ -151,7 +151,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             </select>
           </div>
 
-          <div class="text-[11px] text-slate-500 font-bold ml-auto bg-white px-2.5 py-1 rounded border border-slate-200 shadow-2xs">
+          <div class="text-[11px] text-slate-500 font-bold ml-auto bg-white px-2.5 py-1 rounded border border-slate-200 shadow-2xs whitespace-nowrap">
             該当: <span class="text-[#2A3A4A] font-mono text-sm font-extrabold">{{ filtered().length }}</span> 件
           </div>
         </div>
@@ -162,7 +162,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       }
     </div>
 
-    <!-- HERON Navy テーマテーブル -->
+    <!-- HERON Navy テーマテーブル (レスポンシブ横スクロール保護) -->
     <div class="mt-3">
       @if (loading()) {
         <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
@@ -172,7 +172,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         </div>
       } @else {
         <div class="overflow-x-auto rounded-md border border-slate-200/80 shadow-2xs">
-          <table class="w-full text-left text-xs">
+          <table class="w-full min-w-[620px] text-left text-xs">
             <thead>
               <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px]">
                 <th class="py-2.5 px-3.5">機材ID / 機材名</th>
@@ -239,9 +239,9 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         (click)="closeDrawer()"
       ></div>
 
-      <!-- スライドパネル -->
+      <!-- スライドパネル (小画面では全幅・中大型画面ではmax-w-lgに自動調整) -->
       <div
-        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col bg-white shadow-2xl"
+        class="fixed inset-y-0 right-0 z-50 flex w-full sm:max-w-lg flex-col bg-white shadow-2xl"
         [class.drawer-slide-in]="!isClosing()"
         [class.drawer-slide-out]="isClosing()"
       >

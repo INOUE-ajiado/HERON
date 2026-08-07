@@ -39,8 +39,8 @@ import { IconComponent } from '../../shared/icon.component';
     </div>
 
     <!-- メンバー追加フォーム -->
-    <form (ngSubmit)="addMember()" class="mt-4 flex items-center gap-3 bg-white p-4 rounded-lg border border-slate-200 shadow-2xs max-w-xl">
-      <div class="flex-1">
+    <form (ngSubmit)="addMember()" class="mt-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-4 rounded-lg border border-slate-200 shadow-2xs max-w-xl">
+      <div class="flex-1 w-full">
         <label class="heron-label text-xs">新規許可メールアドレス (Googleアカウント)</label>
         <input
           type="email"
@@ -52,7 +52,7 @@ import { IconComponent } from '../../shared/icon.component';
         />
       </div>
 
-      <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold self-end py-2 px-4">
+      <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold sm:self-end py-2 px-4 whitespace-nowrap">
         <app-icon name="plus" />
         テストメンバーを追加
       </button>
@@ -71,8 +71,8 @@ import { IconComponent } from '../../shared/icon.component';
         アクセス許可済みGoogleアカウント一覧
       </h2>
 
-      <div class="overflow-hidden rounded-md border border-slate-200/80 bg-white shadow-2xs">
-        <table class="w-full text-left text-xs">
+      <div class="overflow-x-auto rounded-md border border-slate-200/80 bg-white shadow-2xs">
+        <table class="w-full min-w-[480px] text-left text-xs">
           <thead>
             <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px]">
               <th class="py-2.5 px-3.5">メールアドレス</th>
