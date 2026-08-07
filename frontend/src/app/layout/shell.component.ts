@@ -13,7 +13,7 @@ interface NavItem {
 }
 
 /**
- * 共通シェル (「++」上付き完全調整).
+ * 共通シェル (「機材台帳・検索」一本化ナビゲーション).
  */
 @Component({
   selector: 'app-shell',
@@ -125,7 +125,6 @@ export class ShellComponent {
   readonly user = this.auth.user;
 
   private readonly nav = signal<NavItem[]>([
-    { path: '/', label: 'ホーム', icon: 'home', adminOnly: false, exact: true },
     { path: '/equipments', label: '機材台帳・検索', icon: 'box', adminOnly: false, exact: false },
     { path: '/inventory', label: '棚卸し', icon: 'shelf', adminOnly: true, exact: false },
     { path: '/locations', label: '保管場所', icon: 'pin', adminOnly: true, exact: false },

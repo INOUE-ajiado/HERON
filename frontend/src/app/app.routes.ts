@@ -5,8 +5,7 @@ import { adminGuard, authGuard } from './core/guards';
 /**
  * 画面構成。
  *
- * 貸出・返却・棚卸し・マスタ管理・履歴は管理者限定（設計書 第1部 2章）。
- * 一般ユーザーはダッシュボード（自身の貸出中一覧）と機材検索のみ利用できる。
+ * デフォルトの着陸画面は「機材台帳・検索」(/equipments) に集約。
  */
 export const routes: Routes = [
   {
@@ -15,10 +14,6 @@ export const routes: Routes = [
       import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
-    /*
-     * ラベル印刷用の隠しルート（設計書 第3部 4章）。
-     * 共通シェルの外に置き、印刷時に余計な UI が乗らないようにする。
-     */
     path: 'print/label/:id',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
@@ -42,10 +37,8 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () =>
-          import('./pages/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent,
-          ),
+        redirectTo: 'equipments',
+        pathMatch: 'full',
       },
       {
         path: 'equipments',
@@ -106,5 +99,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'equipments' },
 ];

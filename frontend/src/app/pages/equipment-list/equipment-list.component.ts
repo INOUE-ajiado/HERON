@@ -20,7 +20,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * 機材台帳・検索 (行クリックによる右サイドスライド詳細ドロワー対応)。
+ * 機材台帳・検索 (統計インジケーター集約 ＆ 右サイドスライド詳細ドロワー付き)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -34,7 +34,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
           機材台帳・検索
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">行をクリックすると右側に詳細・貸出操作パネルが開きます</p>
+        <p class="text-xs text-slate-500 mt-0.5">全機材の管理・リアルタイム統計・検索・貸出返却操作</p>
       </div>
 
       @if (auth.isAdmin()) {
@@ -43,6 +43,45 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           機材新規登録
         </a>
       }
+    </div>
+
+    <!-- 集約されたリアルタイム統計インジケーターパネル -->
+    <div class="grid grid-cols-3 gap-3 py-3 border-b border-slate-200">
+      <div class="flex items-center gap-2.5 p-2 rounded-md bg-slate-100/70 border border-slate-200/60 shadow-2xs">
+        <div class="flex h-8 w-8 items-center justify-center rounded bg-[#2A3A4A] text-white shadow-xs">
+          <app-icon name="box" />
+        </div>
+        <div>
+          <div class="text-[10px] font-bold text-slate-600">総機材数</div>
+          <div class="font-mono text-base font-bold text-[#2A3A4A] leading-none mt-0.5">
+            {{ items().length }} <span class="text-[10px] font-normal text-slate-500">件</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 p-2 rounded-md bg-blue-50/60 border border-blue-200/60 shadow-2xs">
+        <div class="flex h-8 w-8 items-center justify-center rounded bg-blue-600 text-white shadow-xs">
+          <app-icon name="user" />
+        </div>
+        <div>
+          <div class="text-[10px] font-bold text-blue-900">貸出中</div>
+          <div class="font-mono text-base font-bold text-blue-950 leading-none mt-0.5">
+            {{ countInUse() }} <span class="text-[10px] font-normal text-slate-500">件</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 p-2 rounded-md bg-emerald-50/60 border border-emerald-200/60 shadow-2xs">
+        <div class="flex h-8 w-8 items-center justify-center rounded bg-emerald-600 text-white shadow-xs">
+          <app-icon name="check" />
+        </div>
+        <div>
+          <div class="text-[10px] font-bold text-emerald-900">保管中</div>
+          <div class="font-mono text-base font-bold text-emerald-950 leading-none mt-0.5">
+            {{ countAvailable() }} <span class="text-[10px] font-normal text-slate-500">件</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- フラットコントロールバー (検索・バーコードスキャン一体型) -->
@@ -112,7 +151,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
       }
     </div>
 
-    <!-- HERON Navy テーマテーブル (行クリックでドロワー展開のため操作カラムを排除) -->
+    <!-- HERON Navy テーマテーブル -->
     <div class="mt-3">
       @if (loading()) {
         <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
@@ -362,7 +401,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           }
         </div>
 
-        <!-- ドロワーフッター (印刷ページへの移動など) -->
+        <!-- ドロワーフッター -->
         @if (activeEquipment(); as eq) {
           <div class="border-t border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-3">
             <a
@@ -472,6 +511,14 @@ export class EquipmentListComponent {
       return `[${shelves[0].code}] ${shelves[0].room_name} / ${shelves[0].shelf_name}`;
     }
     return '未設定';
+  }
+
+  countInUse(): number {
+    return this.items().filter((i) => i.status === 'in_use').length;
+  }
+
+  countAvailable(): number {
+    return this.items().filter((i) => i.status === 'available').length;
   }
 
   openDrawer(eq: Equipment): void {
