@@ -60,6 +60,42 @@ export class AuthService {
     onAuthStateChanged(this.firebase.getAuth(), (fbUser) => {
       if (fbUser) void this.loadTestMembersFromFirestore();
     });
+
+    void this.syncSessionWithFirebaseAuth();
+  }
+
+  /**
+   * 端末に保存されたログイン情報を、実際に Google 認証されているアカウントに合わせる。
+   *
+   * 保存値は前回ログイン時のスナップショットなので、旧バージョンのデモ用アカウント
+   * などが残っていると、その端末の操作がすべて別人の名前で記録されてしまう。
+   */
+  private async syncSessionWithFirebaseAuth(): Promise<void> {
+    const fbUser = await this.firebase.waitForAuth();
+
+    if (!fbUser) {
+      // Google 認証セッションが無いのに HERON のセッションだけ残っている端末は
+      // 操作者を特定できないため、ログインし直してもらう。
+      if (this._token()) {
+        console.warn('[HERON] Google 認証セッションが無いため再ログインが必要です');
+        this.logout();
+      }
+      return;
+    }
+
+    const stored = this._user();
+    const actual: User = {
+      user_id: fbUser.uid,
+      login_id: (fbUser.email ?? stored?.login_id ?? fbUser.uid).toLowerCase(),
+      name: fbUser.displayName ?? fbUser.email ?? 'Google User',
+      role: stored?.user_id === fbUser.uid ? stored.role : 'admin',
+    };
+
+    if (stored?.user_id === actual.user_id && stored.name === actual.name) return;
+
+    writeStoredUser(actual);
+    this._user.set(actual);
+    void this.store.upsertUser(actual).catch(() => undefined);
   }
 
   /** Firestore からテストメンバーリストを読み込み */

@@ -250,15 +250,28 @@ export class FirestoreDataService {
       });
     }
 
+    const actor = this.currentActor();
     for (const log of logs) {
       if (!log?.equipment_id) continue;
       const stamp = log.log_id || Date.parse(log.timestamp ?? '') || 0;
       const id = `legacy-${stamp}-${log.equipment_id}`;
+      const payload = { ...log } as unknown as Record<string, unknown>;
+
+      // 旧版は操作者をデモ用の管理者アカウントで固定していた。実際に操作したのは
+      // この端末の利用者なので、その人に付け替える（判別不能なら不明として残す）。
+      if (!payload['actor_user_id'] || payload['actor_user_id'] === 'u-admin') {
+        delete payload['actor'];
+        payload['actor_user_id'] = actor?.user_id ?? 'unknown';
+        payload['actor_name'] = actor?.name ?? '不明なユーザー (旧データ)';
+        payload['actor_login_id'] = actor?.login_id ?? '';
+        payload['actor_reassigned_on_migration'] = true;
+      }
+
       // logs は追記のみ許可のため、既存ドキュメントには書き込まない
       await attempt(`操作ログ ${id}`, async () => {
         const ref = doc(this.db, COL.logs, id);
         if ((await getDoc(ref)).exists()) return;
-        await setDoc(ref, clean({ ...log } as unknown as Record<string, unknown>));
+        await setDoc(ref, clean(payload));
       });
     }
 
@@ -658,6 +671,31 @@ export class FirestoreDataService {
 
   // ---------------------------------------------------------------- 操作ログ
 
+  /**
+   * 操作者を特定する。
+   *
+   * localStorage の保存値は前回ログイン時のスナップショットで、古いセッションが
+   * 残っている端末では別人（デモ用の管理者アカウント等）のままになりうる。
+   * そのため実際に Google 認証されているアカウントを最優先で採用する。
+   */
+  private currentActor(): User | null {
+    const fbUser = this.firebase.getAuth().currentUser;
+    const stored = readStoredUser();
+
+    if (fbUser) {
+      // 認証済みアカウントと保存値が一致するときだけ、保存されている表示名を使う
+      const sameUser = stored?.user_id === fbUser.uid;
+      return {
+        user_id: fbUser.uid,
+        login_id: (fbUser.email ?? stored?.login_id ?? '').toLowerCase(),
+        name: fbUser.displayName ?? (sameUser ? stored!.name : (fbUser.email ?? '不明なユーザー')),
+        role: sameUser ? stored!.role : 'admin',
+      };
+    }
+
+    return stored;
+  }
+
   /** ログを 1 件追記する（表示用に操作者・機材名などを非正規化して保存）。 */
   private async writeLog(entry: {
     equipment_id: string;
@@ -668,7 +706,7 @@ export class FirestoreDataService {
     equipment_name?: string;
     note?: string;
   }): Promise<void> {
-    const me = readStoredUser();
+    const me = this.currentActor();
     const now = new Date();
     const logId = now.getTime();
     const docId = `${now.toISOString()}_${entry.equipment_id}_${Math.random()
