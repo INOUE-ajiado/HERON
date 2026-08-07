@@ -13,7 +13,7 @@ interface NavItem {
 }
 
 /**
- * 共通シェル (「機材台帳・検索」一本化ナビゲーション ＆ サイドバー下部テストメンバー表示対応).
+ * 共通シェル (「機材台帳・検索」一本化ナビゲーション ＆ サイドバー下部仕様書・テストメンバー表示対応).
  */
 @Component({
   selector: 'app-shell',
@@ -55,8 +55,18 @@ interface NavItem {
           }
         </nav>
 
-        <!-- サイドバー下部 (テストメンバー ＆ ログインユーザー表示) -->
-        <div class="border-t border-slate-800 p-3 space-y-2">
+        <!-- サイドバー下部 (仕様書 ＆ テストメンバー ＆ ログインユーザー表示) -->
+        <div class="border-t border-slate-800 p-3 space-y-1.5">
+          <!-- 仕様書リンク (マイメンバーのすぐ上に配置) -->
+          <a
+            routerLink="/spec"
+            routerLinkActive="bg-blue-600 text-white font-bold"
+            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+          >
+            <app-icon name="box" class="text-base text-[#90CFD6]" />
+            <span>仕様書</span>
+          </a>
+
           @if (auth.isAdmin()) {
             <a
               routerLink="/test-members"
@@ -68,13 +78,13 @@ interface NavItem {
             </a>
           }
 
-          <div class="pt-1 px-1">
+          <div class="pt-1.5 px-1 border-t border-slate-800/80">
             <div class="text-xs font-bold text-white truncate">{{ user()?.name }}</div>
             <div class="text-[10px] text-slate-400">{{ roleLabel() }}</div>
             <button
               type="button"
               (click)="auth.logout()"
-              class="mt-1.5 text-[11px] text-slate-400 underline underline-offset-2 hover:text-white"
+              class="mt-1 text-[11px] text-slate-400 underline underline-offset-2 hover:text-white"
             >
               ログアウト
             </button>
@@ -131,16 +141,14 @@ interface NavItem {
             <span>{{ item.label }}</span>
           </a>
         }
-        @if (auth.isAdmin()) {
-          <a
-            routerLink="/test-members"
-            routerLinkActive="text-blue-700 font-bold"
-            class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-slate-500"
-          >
-            <app-icon name="user" class="text-base" />
-            <span>テスト</span>
-          </a>
-        }
+        <a
+          routerLink="/spec"
+          routerLinkActive="text-blue-700 font-bold"
+          class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-slate-500"
+        >
+          <app-icon name="box" class="text-base" />
+          <span>仕様書</span>
+        </a>
       </nav>
     </div>
   `,

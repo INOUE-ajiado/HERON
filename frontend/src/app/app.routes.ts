@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard } from './core/guards';
 
 /**
- * 画面構成 (テストメンバー管理機能追加).
+ * 画面構成 (仕様書 PDF 閲覧機能追加).
  */
 export const routes: Routes = [
   {
@@ -75,6 +75,11 @@ export const routes: Routes = [
           import('./pages/locations/locations.component').then(
             (m) => m.LocationsComponent,
           ),
+      },
+      {
+        path: 'spec',
+        loadComponent: () =>
+          import('./pages/spec/spec.component').then((m) => m.SpecComponent),
       },
       {
         path: 'test-members',
