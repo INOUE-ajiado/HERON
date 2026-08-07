@@ -2,6 +2,13 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // テストメンバー (ホワイトリスト) コレクション: 認証済みユーザーのみ読み書き可能
+    match /test_members/{email} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // その他のコレクションはデフォルトで遮断
     match /{document=**} {
       allow read, write: if false;
     }

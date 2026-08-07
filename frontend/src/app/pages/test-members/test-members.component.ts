@@ -5,7 +5,7 @@ import { AuthService } from '../../core/auth.service';
 import { IconComponent } from '../../shared/icon.component';
 
 /**
- * HERON 単体テストサーバー環境「テストメンバー」アクセス許可管理画面。
+ * HERON 単体テストサーバー環境「テストメンバー」アクセス許可管理画面 (Firestore 永続保存対応)。
  */
 @Component({
   selector: 'app-test-members',
@@ -21,8 +21,18 @@ import { IconComponent } from '../../shared/icon.component';
         <p class="text-xs text-slate-500 mt-0.5">現在公開されているHERON単体テスト環境にGoogle認証でログイン可能なユーザーを管理します</p>
       </div>
 
-      <div class="text-xs text-slate-500 font-bold bg-white px-3 py-1 rounded border border-slate-200 shadow-2xs">
-        許可メンバー: <span class="text-[#2A3A4A] font-mono text-sm font-extrabold">{{ auth.testMembers().length }}</span> 名
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="refreshData()"
+          class="heron-btn-secondary text-xs font-bold"
+          [disabled]="refreshing()"
+        >
+          {{ refreshing() ? '同期中...' : 'Firestore同期' }}
+        </button>
+        <div class="text-xs text-slate-500 font-bold bg-white px-3 py-1 rounded border border-slate-200 shadow-2xs whitespace-nowrap">
+          許可メンバー: <span class="text-[#2A3A4A] font-mono text-sm font-extrabold">{{ auth.testMembers().length }}</span> 名
+        </div>
       </div>
     </div>
 
@@ -34,7 +44,8 @@ import { IconComponent } from '../../shared/icon.component';
       <p>
         ・本HERONアプリは現在、他基幹システムへの接続前の<strong>単体テストサーバー環境</strong>です。<br />
         ・セキュリティ保護のため、ここで登録された Google アカウント（メールアドレス）を持つメンバーのみがGoogleログインできます。<br />
-        ・未登録のGoogleアカウントからのログインは自動的にアクセスが遮断・拒否されます。
+        ・未登録のGoogleアカウントからのログインは自動的にアクセスが遮断・拒否されます。<br />
+        ・<strong>テストメンバーデータは Firebase Firestore に保存され、全端末で即時同期されます。</strong>
       </p>
     </div>
 
@@ -52,9 +63,9 @@ import { IconComponent } from '../../shared/icon.component';
         />
       </div>
 
-      <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold sm:self-end py-2 px-4 whitespace-nowrap">
+      <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold sm:self-end py-2 px-4 whitespace-nowrap" [disabled]="saving()">
         <app-icon name="plus" />
-        テストメンバーを追加
+        {{ saving() ? '登録中...' : 'テストメンバーを追加' }}
       </button>
     </form>
 
@@ -68,7 +79,7 @@ import { IconComponent } from '../../shared/icon.component';
     <!-- 許可メンバー一覧テーブル -->
     <div class="mt-5 max-w-xl">
       <h2 class="text-xs font-bold text-[#2A3A4A] mb-2 flex items-center gap-1.5">
-        アクセス許可済みGoogleアカウント一覧
+        アクセス許可済みGoogleアカウント一覧 <span class="text-[10px] font-normal text-slate-400">(Firestore 保存)</span>
       </h2>
 
       <div class="overflow-x-auto rounded-md border border-slate-200/80 bg-white shadow-2xs">
@@ -99,6 +110,7 @@ import { IconComponent } from '../../shared/icon.component';
                       type="button"
                       (click)="removeMember(email)"
                       class="text-xs text-rose-600 hover:text-rose-800 font-bold bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded transition border border-rose-200"
+                      [disabled]="saving()"
                     >
                       許可解除
                     </button>
@@ -118,8 +130,10 @@ export class TestMembersComponent {
   newEmail = '';
   readonly message = signal('');
   readonly messageIsError = signal(false);
+  readonly saving = signal(false);
+  readonly refreshing = signal(false);
 
-  addMember(): void {
+  async addMember(): Promise<void> {
     if (!this.newEmail.trim() || !this.newEmail.includes('@')) {
       this.message.set('有効なメールアドレスを入力してください');
       this.messageIsError.set(true);
@@ -127,17 +141,47 @@ export class TestMembersComponent {
     }
 
     const email = this.newEmail.trim().toLowerCase();
-    this.auth.addTestMember(email);
-    this.newEmail = '';
-    this.message.set(`メールアドレス「${email}」をテストメンバーに登録・アクセス許可しました！`);
-    this.messageIsError.set(false);
+    this.saving.set(true);
+    try {
+      await this.auth.addTestMember(email);
+      this.newEmail = '';
+      this.message.set(`メールアドレス「${email}」をテストメンバーに登録しました (Firestore 保存済み)`);
+      this.messageIsError.set(false);
+    } catch (err) {
+      this.message.set('Firestore への保存に失敗しました。再度お試しください。');
+      this.messageIsError.set(true);
+    } finally {
+      this.saving.set(false);
+    }
   }
 
-  removeMember(email: string): void {
-    if (confirm(`「${email}」の単体テスト環境アクセス許可を解除しますか？`)) {
-      this.auth.removeTestMember(email);
-      this.message.set(`「${email}」のアクセス許可を解除しました`);
+  async removeMember(email: string): Promise<void> {
+    if (!confirm(`「${email}」の単体テスト環境アクセス許可を解除しますか？`)) return;
+
+    this.saving.set(true);
+    try {
+      await this.auth.removeTestMember(email);
+      this.message.set(`「${email}」のアクセス許可を解除しました (Firestore から削除済み)`);
       this.messageIsError.set(false);
+    } catch (err) {
+      this.message.set('Firestore からの削除に失敗しました。再度お試しください。');
+      this.messageIsError.set(true);
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  async refreshData(): Promise<void> {
+    this.refreshing.set(true);
+    try {
+      await this.auth.refreshTestMembers();
+      this.message.set('Firestore から最新データを同期しました');
+      this.messageIsError.set(false);
+    } catch {
+      this.message.set('同期に失敗しました');
+      this.messageIsError.set(true);
+    } finally {
+      this.refreshing.set(false);
     }
   }
 }

@@ -2,14 +2,22 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import {
+  collection,
+  doc,
+  getDocs,
+  setDoc,
+  deleteDoc,
+} from 'firebase/firestore';
 
 import { environment } from '../../environments/environment';
+import { FirebaseService } from './firebase.service';
 import { LoginResponse, User } from './models';
 
 const TOKEN_KEY = 'heron.token';
 const USER_KEY = 'heron.user';
-const TEST_MEMBERS_KEY = 'heron.test_members';
 
+/** コードレベルでのプリセットメンバー (初回 Firestore マイグレーション用) */
 const PRESET_TEST_MEMBERS = [
   'inoue@ajiado.co.jp',
   'admin@heron.app',
@@ -20,32 +28,19 @@ const PRESET_TEST_MEMBERS = [
   'shimako@ajiado.co.jp',
 ];
 
-function getStoredTestMembers(): string[] {
-  const raw = localStorage.getItem(TEST_MEMBERS_KEY);
-  if (!raw) {
-    localStorage.setItem(TEST_MEMBERS_KEY, JSON.stringify(PRESET_TEST_MEMBERS));
-    return PRESET_TEST_MEMBERS;
-  }
-  try {
-    const list: string[] = JSON.parse(raw);
-    const merged = Array.from(new Set([...PRESET_TEST_MEMBERS, ...list]));
-    return merged;
-  } catch {
-    return PRESET_TEST_MEMBERS;
-  }
-}
-
 /**
- * 認証状態を保持するサービス (全端末対話型Google認証アクセス制御機能付き)。
+ * 認証状態を保持するサービス (Firestore ベース全端末同期型 Google 認証アクセス制御)。
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly firebase = inject(FirebaseService);
 
   private readonly _user = signal<User | null>(readStoredUser());
   private readonly _token = signal<string | null>(localStorage.getItem(TOKEN_KEY));
-  readonly testMembers = signal<string[]>(getStoredTestMembers());
+  readonly testMembers = signal<string[]>([]);
+  readonly testMembersLoaded = signal(false);
 
   readonly user = this._user.asReadonly();
   readonly isLoggedIn = computed(() => this._token() !== null);
@@ -55,27 +50,87 @@ export class AuthService {
     return this._token();
   }
 
-  /** テストメンバー (ホワイトリスト) の追加 */
-  addTestMember(email: string): void {
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail) return;
-    const current = this.testMembers();
-    if (!current.includes(cleanEmail)) {
-      const updated = [...current, cleanEmail];
-      localStorage.setItem(TEST_MEMBERS_KEY, JSON.stringify(updated));
-      this.testMembers.set(updated);
+  constructor() {
+    // Firestore からテストメンバーを非同期読み込み
+    this.loadTestMembersFromFirestore();
+  }
+
+  /** Firestore からテストメンバーリストを読み込み */
+  private async loadTestMembersFromFirestore(): Promise<void> {
+    try {
+      const db = this.firebase.getDb();
+      const colRef = collection(db, 'test_members');
+      const snapshot = await getDocs(colRef);
+
+      if (snapshot.empty) {
+        // 初回起動: プリセットメンバーを Firestore へマイグレーション
+        await this.migratePresetToFirestore();
+        this.testMembers.set([...PRESET_TEST_MEMBERS]);
+      } else {
+        const emails = snapshot.docs.map((d) => d.id);
+        this.testMembers.set(emails);
+      }
+      this.testMembersLoaded.set(true);
+    } catch (err) {
+      // Firestore 読み込み失敗時はプリセットをフォールバック使用
+      console.warn('Firestore テストメンバー読み込み失敗、プリセットを使用:', err);
+      this.testMembers.set([...PRESET_TEST_MEMBERS]);
+      this.testMembersLoaded.set(true);
     }
   }
 
-  /** テストメンバーの削除 */
-  removeTestMember(email: string): void {
-    const current = this.testMembers();
-    const updated = current.filter((m) => m !== email.trim().toLowerCase());
-    localStorage.setItem(TEST_MEMBERS_KEY, JSON.stringify(updated));
-    this.testMembers.set(updated);
+  /** プリセットメンバーを Firestore へ初回マイグレーション */
+  private async migratePresetToFirestore(): Promise<void> {
+    const db = this.firebase.getDb();
+    for (const email of PRESET_TEST_MEMBERS) {
+      const docRef = doc(db, 'test_members', email);
+      await setDoc(docRef, { email, addedAt: new Date().toISOString() });
+    }
   }
 
-  /** ホワイトリスト検証 (社内ドメイン @ajiado.co.jp 全員自動アクセス許可 ＆ 登録メンバー検証) */
+  /** テストメンバー (ホワイトリスト) の追加 → Firestore に永続保存 */
+  async addTestMember(email: string): Promise<void> {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return;
+
+    const current = this.testMembers();
+    if (current.includes(cleanEmail)) return;
+
+    try {
+      const db = this.firebase.getDb();
+      const docRef = doc(db, 'test_members', cleanEmail);
+      await setDoc(docRef, { email: cleanEmail, addedAt: new Date().toISOString() });
+
+      this.testMembers.set([...current, cleanEmail]);
+    } catch (err) {
+      console.error('Firestore テストメンバー追加失敗:', err);
+      throw err;
+    }
+  }
+
+  /** テストメンバーの削除 → Firestore から永久削除 */
+  async removeTestMember(email: string): Promise<void> {
+    const cleanEmail = email.trim().toLowerCase();
+
+    try {
+      const db = this.firebase.getDb();
+      const docRef = doc(db, 'test_members', cleanEmail);
+      await deleteDoc(docRef);
+
+      const current = this.testMembers();
+      this.testMembers.set(current.filter((m) => m !== cleanEmail));
+    } catch (err) {
+      console.error('Firestore テストメンバー削除失敗:', err);
+      throw err;
+    }
+  }
+
+  /** Firestore データを強制リフレッシュ */
+  async refreshTestMembers(): Promise<void> {
+    await this.loadTestMembersFromFirestore();
+  }
+
+  /** ホワイトリスト検証 (社内ドメイン @ajiado.co.jp 全員自動アクセス許可 ＆ Firestore 登録メンバー検証) */
   isAllowedEmail(email: string): boolean {
     const clean = (email || '').trim().toLowerCase();
     if (!clean) return false;
@@ -86,7 +141,7 @@ export class AuthService {
     // デモ・開発用ID
     if (clean === 'admin' || clean === 'animator1' || clean === 'animator2') return true;
 
-    // 登録済み・プリセットテストメンバーリストとの検証
+    // Firestore 登録済みテストメンバーリストとの検証
     const members = this.testMembers();
     return members.some((m) => m.toLowerCase() === clean);
   }
