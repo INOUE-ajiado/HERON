@@ -3,9 +3,7 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard } from './core/guards';
 
 /**
- * 画面構成 (1画面完結 1-Page Drawer System に対応)。
- *
- * 個別詳細ページ・新規登録ページは廃止し、すべて `/equipments` に集約。
+ * 画面構成 (テストメンバー管理機能追加).
  */
 export const routes: Routes = [
   {
@@ -76,6 +74,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/locations/locations.component').then(
             (m) => m.LocationsComponent,
+          ),
+      },
+      {
+        path: 'test-members',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/test-members/test-members.component').then(
+            (m) => m.TestMembersComponent,
           ),
       },
       {

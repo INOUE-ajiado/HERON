@@ -13,7 +13,7 @@ interface NavItem {
 }
 
 /**
- * 共通シェル (「機材台帳・検索」一本化ナビゲーション).
+ * 共通シェル (「機材台帳・検索」一本化ナビゲーション ＆ サイドバー下部テストメンバー表示対応).
  */
 @Component({
   selector: 'app-shell',
@@ -39,6 +39,7 @@ interface NavItem {
           </div>
         </div>
 
+        <!-- ナビゲーション -->
         <nav class="flex-1 space-y-0.5 p-3">
           @for (item of visibleNav(); track item.path) {
             <a
@@ -54,16 +55,30 @@ interface NavItem {
           }
         </nav>
 
-        <div class="border-t border-slate-800 p-4">
-          <div class="text-xs font-bold text-white">{{ user()?.name }}</div>
-          <div class="text-[10px] text-slate-400">{{ roleLabel() }}</div>
-          <button
-            type="button"
-            (click)="auth.logout()"
-            class="mt-2 text-[11px] text-slate-400 underline underline-offset-2 hover:text-white"
-          >
-            ログアウト
-          </button>
+        <!-- サイドバー下部 (テストメンバー ＆ ログインユーザー表示) -->
+        <div class="border-t border-slate-800 p-3 space-y-2">
+          @if (auth.isAdmin()) {
+            <a
+              routerLink="/test-members"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-[#90CFD6] hover:bg-slate-800 hover:text-white transition border border-slate-700/60 bg-slate-900/40"
+            >
+              <app-icon name="user" class="text-base" />
+              <span>テストメンバー</span>
+            </a>
+          }
+
+          <div class="pt-1 px-1">
+            <div class="text-xs font-bold text-white truncate">{{ user()?.name }}</div>
+            <div class="text-[10px] text-slate-400">{{ roleLabel() }}</div>
+            <button
+              type="button"
+              (click)="auth.logout()"
+              class="mt-1.5 text-[11px] text-slate-400 underline underline-offset-2 hover:text-white"
+            >
+              ログアウト
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -114,6 +129,16 @@ interface NavItem {
           >
             <app-icon [name]="item.icon" class="text-base" />
             <span>{{ item.label }}</span>
+          </a>
+        }
+        @if (auth.isAdmin()) {
+          <a
+            routerLink="/test-members"
+            routerLinkActive="text-blue-700 font-bold"
+            class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-slate-500"
+          >
+            <app-icon name="user" class="text-base" />
+            <span>テスト</span>
           </a>
         }
       </nav>
