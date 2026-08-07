@@ -11,7 +11,6 @@ import {
   ActionType,
   CATEGORY_LABEL,
   Equipment,
-  EquipmentDetail,
   EquipmentStatus,
   STATUS_LABEL,
   TransactionLog,
@@ -21,7 +20,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * 機材台帳・検索 (右サイドスライド式詳細ドロワー付き).
+ * 機材台帳・検索 (行クリックによる右サイドスライド詳細ドロワー対応)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -113,7 +112,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
       }
     </div>
 
-    <!-- HERON Navy テーマテーブル -->
+    <!-- HERON Navy テーマテーブル (行クリックでドロワー展開のため操作カラムを排除) -->
     <div class="mt-3">
       @if (loading()) {
         <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
@@ -130,7 +129,6 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                 <th class="py-2.5 px-3.5">カテゴリ</th>
                 <th class="py-2.5 px-3.5">型番</th>
                 <th class="py-2.5 px-3.5">ステータス / 所在</th>
-                <th class="py-2.5 px-3.5 text-right">操作</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 bg-white">
@@ -161,15 +159,6 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                         }
                       </span>
                     </div>
-                  </td>
-                  <td class="py-2.5 px-3.5 text-right">
-                    <button
-                      type="button"
-                      (click)="openDrawer(eq); $event.stopPropagation()"
-                      class="inline-flex items-center gap-1 text-xs text-[#2A3A4A] hover:text-blue-700 font-bold bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded transition"
-                    >
-                      詳細・操作 →
-                    </button>
                   </td>
                 </tr>
               }
