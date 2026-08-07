@@ -233,12 +233,12 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
       <!-- スライドパネル -->
       <div
-        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col bg-white shadow-2xl border-l border-slate-200"
+        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col bg-white shadow-2xl"
         [class.drawer-slide-in]="!isClosing()"
         [class.drawer-slide-out]="isClosing()"
       >
         <!-- ドロワーヘッダー -->
-        <div class="flex items-center justify-between border-b border-slate-200 bg-[#2A3A4A] px-5 py-4 text-white">
+        <div class="flex items-center justify-between border-b border-slate-700/50 bg-[#2A3A4A] px-5 py-4 text-white">
           <div class="flex items-center gap-2.5 min-w-0">
             <div class="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-white">
               <app-icon [name]="drawerMode() === 'create' ? 'plus' : 'box'" />
