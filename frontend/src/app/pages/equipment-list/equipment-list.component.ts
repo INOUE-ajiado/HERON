@@ -23,7 +23,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
 export type DrawerMode = 'detail' | 'create' | 'edit';
 
 /**
- * 機材台帳・検索 (付属品自由追加削除・固定ヘッダー高さ・カメラ棚QRスキャン機能搭載)。
+ * 機材台帳・検索 (PC画面完全保護 ＆ スマホ専用最適化UXデュアルビュー搭載)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -37,51 +37,52 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
           機材台帳・検索
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">新規登録・詳細表示・編集・貸出返却・付属品自由追加・棚QRスキャン</p>
+        <p class="text-xs text-slate-500 mt-0.5 hidden sm:block">新規登録・詳細表示・編集・貸出返却・付属品自由追加・棚QRスキャン</p>
       </div>
 
       @if (auth.isAdmin()) {
         <button type="button" (click)="openCreateDrawer()" class="heron-btn-primary text-xs font-bold shadow-xs">
           <app-icon name="plus" />
-          機材新規登録
+          <span class="hidden sm:inline">機材新規登録</span>
+          <span class="inline sm:hidden">新規登録</span>
         </button>
       }
     </div>
 
-    <!-- 集約されたリアルタイム統計インジケーターパネル (画面幅に応じて自動調整) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 py-3 border-b border-slate-200">
-      <div class="flex items-center gap-2.5 p-2 rounded-md bg-slate-100/70 border border-slate-200/60 shadow-2xs">
-        <div class="flex h-8 w-8 items-center justify-center rounded bg-[#2A3A4A] text-white shadow-xs shrink-0">
+    <!-- 集約されたリアルタイム統計インジケーターパネル -->
+    <div class="grid grid-cols-3 gap-2 sm:gap-3 py-2.5 sm:py-3 border-b border-slate-200">
+      <div class="flex items-center gap-2 sm:gap-2.5 p-2 rounded-md bg-slate-100/70 border border-slate-200/60 shadow-2xs">
+        <div class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded bg-[#2A3A4A] text-white shadow-xs shrink-0">
           <app-icon name="box" />
         </div>
         <div class="min-w-0">
-          <div class="text-[10px] font-bold text-slate-600 truncate-nowrap">総機材数</div>
-          <div class="font-mono text-base font-bold text-[#2A3A4A] leading-none mt-0.5 whitespace-nowrap">
-            {{ items().length }} <span class="text-[10px] font-normal text-slate-500">件</span>
+          <div class="text-[9px] sm:text-[10px] font-bold text-slate-600 truncate-nowrap">総機材数</div>
+          <div class="font-mono text-sm sm:text-base font-bold text-[#2A3A4A] leading-none mt-0.5 whitespace-nowrap">
+            {{ items().length }} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500">件</span>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5 p-2 rounded-md bg-blue-50/60 border border-blue-200/60 shadow-2xs">
-        <div class="flex h-8 w-8 items-center justify-center rounded bg-blue-600 text-white shadow-xs shrink-0">
+      <div class="flex items-center gap-2 sm:gap-2.5 p-2 rounded-md bg-blue-50/60 border border-blue-200/60 shadow-2xs">
+        <div class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded bg-blue-600 text-white shadow-xs shrink-0">
           <app-icon name="user" />
         </div>
         <div class="min-w-0">
-          <div class="text-[10px] font-bold text-blue-900 truncate-nowrap">貸出中</div>
-          <div class="font-mono text-base font-bold text-blue-950 leading-none mt-0.5 whitespace-nowrap">
-            {{ countInUse() }} <span class="text-[10px] font-normal text-slate-500">件</span>
+          <div class="text-[9px] sm:text-[10px] font-bold text-blue-900 truncate-nowrap">貸出中</div>
+          <div class="font-mono text-sm sm:text-base font-bold text-blue-950 leading-none mt-0.5 whitespace-nowrap">
+            {{ countInUse() }} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500">件</span>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5 p-2 rounded-md bg-emerald-50/60 border border-emerald-200/60 shadow-2xs">
-        <div class="flex h-8 w-8 items-center justify-center rounded bg-emerald-600 text-white shadow-xs shrink-0">
+      <div class="flex items-center gap-2 sm:gap-2.5 p-2 rounded-md bg-emerald-50/60 border border-emerald-200/60 shadow-2xs">
+        <div class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded bg-emerald-600 text-white shadow-xs shrink-0">
           <app-icon name="check" />
         </div>
         <div class="min-w-0">
-          <div class="text-[10px] font-bold text-emerald-900 truncate-nowrap">保管中</div>
-          <div class="font-mono text-base font-bold text-emerald-950 leading-none mt-0.5 whitespace-nowrap">
-            {{ countAvailable() }} <span class="text-[10px] font-normal text-slate-500">件</span>
+          <div class="text-[9px] sm:text-[10px] font-bold text-emerald-900 truncate-nowrap">保管中</div>
+          <div class="font-mono text-sm sm:text-base font-bold text-emerald-950 leading-none mt-0.5 whitespace-nowrap">
+            {{ countAvailable() }} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500">件</span>
           </div>
         </div>
       </div>
@@ -99,7 +100,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             <input
               type="text"
               class="heron-input pl-8 pr-9 text-xs font-mono uppercase bg-white"
-              placeholder="バーコード / 機材IDをスキャン・入力"
+              placeholder="バーコード / 機材IDを照合"
               [(ngModel)]="scanInput"
               name="scanInput"
               autofocus
@@ -120,7 +121,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
         <!-- フィルタ項目 -->
         <div class="flex flex-wrap items-center gap-2 text-xs">
-          <div class="flex items-center gap-1.5 min-w-[160px] flex-1 sm:flex-none">
+          <div class="flex items-center gap-1.5 min-w-[140px] flex-1 sm:flex-none">
             <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">検索:</span>
             <input
               type="search"
@@ -132,7 +133,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
           <div class="flex items-center gap-1.5">
             <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">カテゴリ:</span>
-            <select class="heron-input text-xs bg-white w-28" [(ngModel)]="categoryFilter">
+            <select class="heron-input text-xs bg-white w-24 sm:w-28" [(ngModel)]="categoryFilter">
               <option value="">すべて</option>
               @for (c of master.categories(); track c.code) {
                 <option [value]="c.code">{{ c.name }}</option>
@@ -141,8 +142,8 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
           </div>
 
           <div class="flex items-center gap-1.5">
-            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">ステータス:</span>
-            <select class="heron-input text-xs bg-white w-28" [(ngModel)]="statusFilter">
+            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">状態:</span>
+            <select class="heron-input text-xs bg-white w-24 sm:w-28" [(ngModel)]="statusFilter">
               <option value="">すべて</option>
               <option value="available">{{ statusLabel.available }}</option>
               <option value="in_use">{{ statusLabel.in_use }}</option>
@@ -151,7 +152,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             </select>
           </div>
 
-          <div class="text-[11px] text-slate-500 font-bold ml-auto bg-white px-2.5 py-1 rounded border border-slate-200 shadow-2xs whitespace-nowrap">
+          <div class="text-[11px] text-slate-500 font-bold ml-auto bg-white px-2 py-1 rounded border border-slate-200 shadow-2xs whitespace-nowrap">
             該当: <span class="text-[#2A3A4A] font-mono text-sm font-extrabold">{{ filtered().length }}</span> 件
           </div>
         </div>
@@ -162,8 +163,10 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       }
     </div>
 
-    <!-- HERON Navy テーマテーブル (レスポンシブ横スクロール保護) -->
-    <div class="mt-3">
+    <!-- ========================================================= -->
+    <!-- VIEW A: PC画面専用プレミアムテーブル (hidden md:block で無傷保護) -->
+    <!-- ========================================================= -->
+    <div class="mt-3 hidden md:block">
       @if (loading()) {
         <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
       } @else if (filtered().length === 0) {
@@ -229,24 +232,99 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       }
     </div>
 
-    <!-- 右サイドスライド式マルチモード詳細ドロワー (全モード高さ統一 ＆ アニメーション) -->
+    <!-- ========================================================= -->
+    <!-- VIEW B: スマホ専用最適化カード型機材リスト (block md:hidden) -->
+    <!-- ========================================================= -->
+    <div class="mt-3 space-y-2.5 block md:hidden">
+      @if (loading()) {
+        <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
+      } @else if (filtered().length === 0) {
+        <div class="py-12 text-center text-xs text-slate-400">
+          該当する機材が見つかりません。
+        </div>
+      } @else {
+        @for (eq of filtered(); track eq.equipment_id) {
+          <div
+            (click)="openDetailDrawer(eq)"
+            class="p-3.5 rounded-lg border border-slate-200 bg-white shadow-2xs active:bg-blue-50/80 transition-colors cursor-pointer space-y-2"
+          >
+            <!-- 上段: ID + ステータスバッジ -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+              <div class="font-mono font-bold text-xs text-[#2A3A4A] bg-slate-100 px-2 py-0.5 rounded">
+                {{ eq.equipment_id }}
+              </div>
+              <app-status-badge [status]="eq.status" />
+            </div>
+
+            <!-- 中段: 機材名 + 型番 -->
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 leading-snug">{{ eq.name }}</h3>
+              <p class="text-xs text-slate-500 font-mono mt-0.5">型番: {{ eq.model_number || '—' }}</p>
+            </div>
+
+            <!-- 下段: 付属品状態 ＆ 保管場所/借用者 -->
+            <div class="flex items-center justify-between pt-1 text-xs">
+              <div>
+                @if (isComplete(eq)) {
+                  <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                    <app-icon name="check" /> 完品
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
+                    欠品あり
+                  </span>
+                }
+              </div>
+
+              <div class="text-[11px] font-bold text-slate-700">
+                @if (eq.status === 'in_use') {
+                  {{ eq.current_user?.name }}
+                } @else {
+                  {{ currentShelfText(eq) }}
+                }
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- スマホ専用固定ワンタップフローティングアクションバー (FAB) -->
+    <div class="fixed bottom-20 right-4 z-30 flex flex-col gap-2 md:hidden">
+      <button
+        type="button"
+        (click)="triggerShelfScan('create')"
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg active:scale-95 transition"
+        title="カメラでQRコードをスキャン"
+      >
+        <app-icon name="camera" class="text-xl" />
+      </button>
+    </div>
+
+    <!-- 右サイド / スマホボトムシート スライド式マルチモード詳細ドロワー -->
     @if (drawerOpen()) {
       <!-- バックドロップ領域 -->
       <div
-        class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs"
+        class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs"
         [class.backdrop-fade-in]="!isClosing()"
         [class.backdrop-fade-out]="isClosing()"
         (click)="closeDrawer()"
       ></div>
 
-      <!-- スライドパネル (小画面では全幅・中大型画面ではmax-w-lgに自動調整) -->
+      <!-- スライドパネル (PC: 右サイドスライド / スマホ: ボトムシート型に自動変形) -->
       <div
-        class="fixed inset-y-0 right-0 z-50 flex w-full sm:max-w-lg flex-col bg-white shadow-2xl"
+        class="fixed z-50 flex flex-col bg-white shadow-2xl
+               inset-x-0 bottom-0 max-h-[90vh] rounded-t-2xl md:rounded-none md:inset-y-0 md:right-0 md:left-auto md:w-full md:max-w-lg md:max-h-full"
         [class.drawer-slide-in]="!isClosing()"
         [class.drawer-slide-out]="isClosing()"
       >
+        <!-- スマホ時のみ表示される引き下げハンドル -->
+        <div class="w-full flex justify-center py-2 md:hidden shrink-0">
+          <div class="w-12 h-1 bg-slate-300 rounded-full"></div>
+        </div>
+
         <!-- 統一固定高さドロワーヘッダー (h-16 px-5) -->
-        <div class="h-16 px-5 flex items-center justify-between shrink-0 border-b border-slate-700/50 bg-[#2A3A4A] text-white">
+        <div class="h-14 sm:h-16 px-5 flex items-center justify-between shrink-0 border-b border-slate-700/50 bg-[#2A3A4A] text-white rounded-t-2xl md:rounded-none">
           <div class="flex items-center gap-2.5 min-w-0">
             <div class="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-white shrink-0">
               <app-icon [name]="drawerMode() === 'create' ? 'plus' : 'box'" />
@@ -295,7 +373,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         </div>
 
         <!-- ドロワー本文 -->
-        <div class="flex-1 overflow-y-auto p-5 space-y-5">
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
           <!-- 通知メッセージ -->
           @if (drawerMessage()) {
             <p class="rounded px-3 py-2 text-xs font-medium shadow-2xs"
@@ -525,7 +603,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                   <input
                     type="text"
                     class="heron-input text-xs flex-1 bg-white"
-                    placeholder="新しい付属品名を入力 (例: 変換コネクタ)..."
+                    placeholder="新しい付属品名を入力..."
                     [(ngModel)]="newAccessoryInput"
                     name="newAccessoryInput"
                   />
@@ -755,19 +833,39 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
     `
       @keyframes slideInRight {
         0% {
-          transform: translateX(100%);
+          transform: translateY(100%);
         }
         100% {
-          transform: translateX(0);
+          transform: translateY(0);
         }
       }
 
       @keyframes slideOutRight {
         0% {
-          transform: translateX(0);
+          transform: translateY(0);
         }
         100% {
-          transform: translateX(100%);
+          transform: translateY(100%);
+        }
+      }
+
+      @media (min-width: 768px) {
+        @keyframes slideInRight {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes slideOutRight {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
       }
 
@@ -995,8 +1093,7 @@ export class EquipmentListComponent {
 
     this.shelfScanStatus.set('棚シール情報を解析中...');
     const shelves = this.master.shelves();
-    
-    // カメラ撮影画像名や属性から合致する棚を検索
+
     setTimeout(() => {
       const found = shelves.find((s) => file.name.includes(s.code) || file.name.includes(s.shelf_name)) || shelves[0];
       const targetCode = found ? found.code : '1';
