@@ -23,7 +23,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
 export type DrawerMode = 'detail' | 'create' | 'edit';
 
 /**
- * 機材台帳・検索 (1画面完結 3モード右サイドスライドドロワーシステム)。
+ * 機材台帳・検索 (右からにゅっと出るスライド出入りアニメーション付き)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -221,17 +221,21 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       }
     </div>
 
-    <!-- 右サイドスライド式マルチモード詳細ドロワー (Slide-over Drawer Panel) -->
+    <!-- 右サイドスライド式マルチモード詳細ドロワー (にゅっと出入りアニメーション付き) -->
     @if (drawerOpen()) {
       <!-- バックドロップ領域 -->
       <div
-        class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+        class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs"
+        [class.backdrop-fade-in]="!isClosing()"
+        [class.backdrop-fade-out]="isClosing()"
         (click)="closeDrawer()"
       ></div>
 
       <!-- スライドパネル -->
       <div
-        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out border-l border-slate-200"
+        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col bg-white shadow-2xl border-l border-slate-200"
+        [class.drawer-slide-in]="!isClosing()"
+        [class.drawer-slide-out]="isClosing()"
       >
         <!-- ドロワーヘッダー -->
         <div class="flex items-center justify-between border-b border-slate-200 bg-[#2A3A4A] px-5 py-4 text-white">
@@ -605,6 +609,61 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       </div>
     }
   `,
+  styles: [
+    `
+      @keyframes slideInRight {
+        0% {
+          transform: translateX(100%);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes slideOutRight {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .drawer-slide-in {
+        animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .drawer-slide-out {
+        animation: slideOutRight 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+      }
+
+      .backdrop-fade-in {
+        animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .backdrop-fade-out {
+        animation: fadeOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+      }
+    `,
+  ],
 })
 export class EquipmentListComponent {
   private readonly api = inject(ApiService);
@@ -630,6 +689,7 @@ export class EquipmentListComponent {
 
   // 右サイドドロワー関連の状態
   readonly drawerOpen = signal(false);
+  readonly isClosing = signal(false);
   readonly drawerLoading = signal(false);
   readonly drawerMode = signal<DrawerMode>('detail');
   readonly activeEquipment = signal<Equipment | null>(null);
@@ -730,6 +790,7 @@ export class EquipmentListComponent {
   }
 
   openCreateDrawer(): void {
+    this.isClosing.set(false);
     this.drawerMode.set('create');
     this.drawerMessage.set('');
     this.formName = '';
@@ -742,6 +803,7 @@ export class EquipmentListComponent {
   }
 
   openDetailDrawer(eq: Equipment): void {
+    this.isClosing.set(false);
     this.drawerMode.set('detail');
     this.activeEquipment.set(eq);
     this.drawerAccessories.set(eq.accessories || getDefaultAccessories(eq.category));
@@ -845,9 +907,14 @@ export class EquipmentListComponent {
   }
 
   closeDrawer(): void {
-    this.drawerOpen.set(false);
-    this.activeEquipment.set(null);
-    this.drawerMessage.set('');
+    if (this.isClosing() || !this.drawerOpen()) return;
+    this.isClosing.set(true);
+    setTimeout(() => {
+      this.drawerOpen.set(false);
+      this.isClosing.set(false);
+      this.activeEquipment.set(null);
+      this.drawerMessage.set('');
+    }, 240);
   }
 
   drawerLend(eq: Equipment): void {
