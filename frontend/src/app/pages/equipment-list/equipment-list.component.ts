@@ -10,7 +10,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * 機材台帳・検索 (HERON Navy テーマカラー ＆ プレミアム UI)。
+ * 機材台帳・検索 (二重貸出防止ガード付き)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -141,7 +141,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                   [disabled]="actionBusy() || !targetUserId || !targetLocationId"
                   (click)="quickLend(match)"
                 >
-                  貸出
+                  {{ actionBusy() ? '処理中...' : '貸出' }}
                 </button>
               </div>
             } @else if (match.status === 'in_use') {
@@ -311,7 +311,11 @@ export class EquipmentListComponent {
   }
 
   quickLend(eq: Equipment): void {
-    if (!this.targetUserId || !this.targetLocationId) return;
+    if (!this.targetUserId || !this.targetLocationId || this.actionBusy()) return;
+    if (eq.status === 'in_use') {
+      this.scanError.set('この機材はすでに貸出中であるため、二重貸出はできません');
+      return;
+    }
     this.actionBusy.set(true);
 
     this.api.lend(eq.equipment_id, this.targetUserId).subscribe({
@@ -320,11 +324,15 @@ export class EquipmentListComponent {
         this.matchedEquipment.set(null);
         this.loadData();
       },
-      error: () => this.actionBusy.set(false),
+      error: (err) => {
+        this.actionBusy.set(false);
+        this.scanError.set(err?.error?.error ?? 'この機材はすでに貸出中です。二重貸出はできません。');
+      },
     });
   }
 
   quickReturn(eq: Equipment): void {
+    if (this.actionBusy()) return;
     this.actionBusy.set(true);
     this.api.return(eq.equipment_id, 1).subscribe({
       next: () => {

@@ -20,7 +20,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
 /**
- * 機材詳細 (HERON Navy テーマカラー ＆ プレミアム UI)。
+ * 機材詳細 (二重貸出防止ガード付き).
  */
 @Component({
   selector: 'app-equipment-detail',
@@ -156,7 +156,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
         <!-- 右カラム (7/12): 管理者割当操作 ＆ 履歴 -->
         <div class="space-y-5 lg:col-span-7">
-          <!-- 管理者割当操作 -->
+          <!-- 管理者割当操作 (保管中 available の場合のみ貸出フォームを表示し二重貸出を防止) -->
           @if (auth.isAdmin()) {
             <div class="space-y-3">
               <h2 class="text-xs font-bold text-[#2A3A4A] pb-1.5 border-b border-slate-200 flex items-center gap-1.5">
@@ -164,10 +164,10 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                 管理者割当・貸出返却
               </h2>
 
-              @if (eq.status === 'available' || eq.status === 'in_use') {
+              @if (eq.status === 'available') {
                 <div class="rounded-md bg-slate-50/80 p-3.5 border border-slate-200 shadow-2xs space-y-3">
                   <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-[#2A3A4A]">ユーザー紐付け・貸出操作</span>
+                    <span class="text-xs font-bold text-[#2A3A4A]">ユーザー紐付け・貸出登録</span>
                     <span class="text-[10px] text-slate-500">※ ユーザー名・棚ID必須</span>
                   </div>
 
@@ -201,9 +201,14 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                       [disabled]="busy() || targetUserId === null || targetLocationId === null"
                       (click)="lend()"
                     >
-                      紐付けて貸出を実行
+                      {{ busy() ? '処理中...' : '紐付けて貸出を実行' }}
                     </button>
                   </div>
+                </div>
+              } @else if (eq.status === 'in_use') {
+                <!-- 貸出中の場合は二重貸出を防止するため返却操作のみ案内 -->
+                <div class="rounded-md bg-blue-50/50 p-3 border border-blue-200/70 text-xs text-blue-900 flex items-center justify-between">
+                  <span class="font-bold">この機材は現在貸出中です（二重貸出防止ブロック中）</span>
                 </div>
               }
 
@@ -217,11 +222,11 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                       }
                     </select>
                     <button
-                      class="heron-btn-primary text-xs shrink-0"
+                      class="heron-btn-primary text-xs shrink-0 bg-emerald-700 hover:bg-emerald-800"
                       [disabled]="busy() || returnLocationId === null"
                       (click)="doReturn()"
                     >
-                      返却
+                      返却処理
                     </button>
                   </div>
                 }
@@ -339,8 +344,13 @@ export class EquipmentDetailComponent {
 
   lend(): void {
     if (!this.targetUserId || !this.targetLocationId) return;
-    this.busy.set(true);
+    const currentEq = this.equipment();
+    if (currentEq && currentEq.status === 'in_use') {
+      this.notify('この機材はすでに貸出中であるため貸出できません', true);
+      return;
+    }
 
+    this.busy.set(true);
     this.api.lend(this.id, this.targetUserId).subscribe({
       next: () => {
         const locVal = typeof this.targetLocationId === 'number' ? this.targetLocationId : undefined;
@@ -365,7 +375,7 @@ export class EquipmentDetailComponent {
       },
       error: (err) => {
         this.busy.set(false);
-        this.notify(err?.error?.error ?? '貸出処理に失敗しました', true);
+        this.notify(err?.error?.error ?? 'この機材はすでに貸出中です。二重貸出はできません。', true);
       },
     });
   }
