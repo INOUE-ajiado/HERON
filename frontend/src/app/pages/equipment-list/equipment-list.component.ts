@@ -831,41 +831,30 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
   `,
   styles: [
     `
-      @keyframes slideInRight {
+      /*
+       * PC は右サイドから左へ、スマホはボトムシートとして下から出す。
+       *
+       * 方向は「隠れている位置」を表すカスタムプロパティだけで切り替える。
+       * Angular のスタイルスコープは @keyframes 名を書き換えるが、
+       * その書き換えは @media の外側にしか及ばない（@media 内の
+       * @keyframes 定義も animation-name の参照も素通しになる）。
+       * そのため @media 内でアニメーション名に触れる書き方は使えない。
+       */
+      @keyframes drawerSlideIn {
         0% {
-          transform: translateY(100%);
+          transform: var(--drawer-hidden-position);
         }
         100% {
-          transform: translateY(0);
+          transform: translate(0);
         }
       }
 
-      @keyframes slideOutRight {
+      @keyframes drawerSlideOut {
         0% {
-          transform: translateY(0);
+          transform: translate(0);
         }
         100% {
-          transform: translateY(100%);
-        }
-      }
-
-      @media (min-width: 768px) {
-        @keyframes slideInRight {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideOutRight {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(100%);
-          }
+          transform: var(--drawer-hidden-position);
         }
       }
 
@@ -887,12 +876,26 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         }
       }
 
+      /* スマホ (ボトムシート): 画面下に隠れている */
+      .drawer-slide-in,
+      .drawer-slide-out {
+        --drawer-hidden-position: translateY(100%);
+      }
+
+      /* md 以上 (PC の右サイドドロワー): 画面右外に隠れている */
+      @media (min-width: 768px) {
+        .drawer-slide-in,
+        .drawer-slide-out {
+          --drawer-hidden-position: translateX(100%);
+        }
+      }
+
       .drawer-slide-in {
-        animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: drawerSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
       .drawer-slide-out {
-        animation: slideOutRight 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+        animation: drawerSlideOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
       }
 
       .backdrop-fade-in {
