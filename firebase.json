@@ -18,14 +18,22 @@
     ],
     "headers": [
       {
-        "comment": "index.html は常に取得し直す。ここをキャッシュすると古いバンドルが動き続ける",
-        "source": "/index.html",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
       },
       {
-        "comment": "ファイル名にハッシュが付く成果物は長期キャッシュしてよい",
-        "source": "**/*.@(js|css|woff2)",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        "source": "**/*.@(js|css|woff2|png|jpg|svg|ico)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
       }
     ]
   }
