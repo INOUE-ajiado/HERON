@@ -32,7 +32,7 @@ interface NavItem {
           </div>
           <div class="flex flex-col justify-center min-w-0">
             <div class="heron-brand-font text-lg text-white leading-none tracking-tight flex items-center">
-              <span class="inline-block text-[11px] font-extrabold text-[#90CFD6] mr-0.5 relative -top-1.5 leading-none">++</span>
+              <span class="inline-block text-[12px] font-[900] text-[#90CFD6] mr-0.5 relative -top-1.5 leading-none" style="-webkit-text-stroke: 0.4px #90CFD6;">++</span>
               <span>HERON..</span>
             </div>
             <div class="mt-1 text-[10px] text-slate-400 leading-none">社内機材管理システム</div>
@@ -76,7 +76,7 @@ interface NavItem {
             <img src="icon.png" alt="HERON Logo" class="h-full w-full object-contain scale-110" />
           </div>
           <div class="heron-brand-font text-base text-white tracking-tight flex items-center">
-            <span class="inline-block text-[10px] font-extrabold text-[#90CFD6] mr-0.5 relative -top-1.5 leading-none">++</span>
+            <span class="inline-block text-[11px] font-[900] text-[#90CFD6] mr-0.5 relative -top-1.5 leading-none" style="-webkit-text-stroke: 0.4px #90CFD6;">++</span>
             <span>HERON..</span>
           </div>
         </div>
