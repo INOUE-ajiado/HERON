@@ -88,7 +88,7 @@ import { IconComponent } from '../../shared/icon.component';
                 </td>
                 <td class="py-2.5 px-3.5">
                   <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
-                    ✓ アクセス許可
+                    <app-icon name="check" /> アクセス許可
                   </span>
                 </td>
                 <td class="py-2.5 px-3.5 text-right">

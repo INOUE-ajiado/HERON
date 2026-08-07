@@ -51,7 +51,7 @@ import { IconComponent } from '../../shared/icon.component';
                 required
               />
               <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-blue-700 font-bold pointer-events-none" title="カメラで棚QR読み取り">
-                📷
+                <app-icon name="camera" />
               </span>
             </div>
           </div>

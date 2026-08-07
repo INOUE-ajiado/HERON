@@ -108,9 +108,9 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               type="button"
               (click)="triggerShelfScan('create')"
               title="カメラでQRコードを読み取る"
-              class="absolute inset-y-0 right-0 flex items-center pr-2 text-blue-700 hover:text-blue-900 font-bold"
+              class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-blue-700 hover:text-blue-900 font-bold"
             >
-              📷
+              <app-icon name="camera" />
             </button>
           </div>
           <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold" [disabled]="scanning()">
@@ -197,11 +197,11 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     <div class="mt-0.5">
                       @if (isComplete(eq)) {
                         <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
-                          ✓ 完品
+                          <app-icon name="check" /> 完品
                         </span>
                       } @else {
                         <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
-                          ⚠ 欠品あり ({{ missingSummary(eq) }})
+                          欠品あり ({{ missingSummary(eq) }})
                         </span>
                       }
                     </div>
@@ -286,9 +286,10 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             <button
               type="button"
               (click)="closeDrawer()"
-              class="rounded-md p-1.5 text-slate-300 hover:bg-white/10 hover:text-white transition"
+              class="rounded-md p-1.5 text-slate-300 hover:bg-white/10 hover:text-white transition flex items-center justify-center"
+              aria-label="閉じる"
             >
-              ✕
+              <app-icon name="close" />
             </button>
           </div>
         </div>
@@ -354,7 +355,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     (click)="triggerShelfScan('create')"
                     class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
                   >
-                    📷 カメラで棚QRを読み取る
+                    <app-icon name="camera" /> カメラで棚QRを読み取る
                   </button>
                 </div>
                 <select class="heron-input text-xs" [(ngModel)]="formLocationId" name="formLocationId">
@@ -381,15 +382,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                       </label>
 
                       <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-[10px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
-                          {{ acc.present ? '✓ 付属' : '✗ 欠品' }}
+                        <span class="text-[10px] font-bold flex items-center gap-1" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                          @if (acc.present) { <app-icon name="check" /> 付属 } @else { 欠品 }
                         </span>
                         <button
                           type="button"
                           (click)="removeAccessoryItem(formAccessories, i)"
-                          class="text-slate-400 hover:text-rose-600 text-xs px-1"
+                          class="text-slate-400 hover:text-rose-600 text-xs px-1 flex items-center justify-center"
+                          aria-label="削除"
                         >
-                          ✕
+                          <app-icon name="close" />
                         </button>
                       </div>
                     </div>
@@ -445,7 +447,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     (click)="triggerShelfScan('edit')"
                     class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
                   >
-                    📷 カメラで棚QRを読み取る
+                    <app-icon name="camera" /> カメラで棚QRを読み取る
                   </button>
                 </div>
                 <select class="heron-input text-xs" [(ngModel)]="formLocationId" name="editLoc">
@@ -475,12 +477,12 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                 </h3>
 
                 @if (isComplete(eq)) {
-                  <span class="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                    ✓ 完品
+                  <span class="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 flex items-center gap-1">
+                    <app-icon name="check" /> 完品
                   </span>
                 } @else {
                   <span class="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
-                    ⚠ 欠品あり
+                    欠品あり
                   </span>
                 }
               </div>
@@ -499,16 +501,17 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     </label>
 
                     <div class="flex items-center gap-2 shrink-0">
-                      <span class="text-[11px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
-                        {{ acc.present ? '✓ 付属' : '✗ 欠品中' }}
+                      <span class="text-[11px] font-bold flex items-center gap-1" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                        @if (acc.present) { <app-icon name="check" /> 付属 } @else { 欠品中 }
                       </span>
                       @if (auth.isAdmin()) {
                         <button
                           type="button"
                           (click)="removeAccessoryInDetail(i)"
-                          class="text-slate-400 hover:text-rose-600 text-xs px-1"
+                          class="text-slate-400 hover:text-rose-600 text-xs px-1 flex items-center justify-center"
+                          aria-label="削除"
                         >
-                          ✕
+                          <app-icon name="close" />
                         </button>
                       }
                     </div>
@@ -593,7 +596,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                           (click)="triggerShelfScan('lend')"
                           class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
                         >
-                          📷 カメラで棚QRを読み取る
+                          <app-icon name="camera" /> カメラで棚QRを読み取る
                         </button>
                       </div>
                       <select class="heron-input text-xs bg-white" [(ngModel)]="targetLocationId">
@@ -621,7 +624,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                         (click)="triggerShelfScan('return')"
                         class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
                       >
-                        📷 カメラで棚QRを読み取る
+                        <app-icon name="camera" /> カメラで棚QRを読み取る
                       </button>
                     </div>
                     <div class="flex items-center gap-2">
@@ -713,23 +716,25 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       </div>
     }
 
-    <!-- 📷 カメラ棚QRスキャン モーダル -->
+    <!-- カメラ棚QRスキャン モーダル -->
     @if (shelfScanModalOpen()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
         <div class="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl border border-slate-200">
           <div class="flex items-center justify-between border-b border-slate-200 pb-3">
             <h3 class="text-sm font-bold text-[#2A3A4A] flex items-center gap-2">
-              📷 カメラで棚QRスキャン
+              <app-icon name="camera" /> カメラで棚QRスキャン
             </h3>
-            <button (click)="closeShelfScanModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+            <button (click)="closeShelfScanModal()" class="text-slate-400 hover:text-slate-600 flex items-center justify-center" aria-label="閉じる">
+              <app-icon name="close" />
+            </button>
           </div>
 
           <div class="mt-4 space-y-3 text-center">
             <p class="text-xs text-slate-600">棚シールに印字されたQRコードをカメラにかざすか、画像を撮影してください:</p>
 
             <div class="flex flex-col gap-2">
-              <label class="heron-btn-primary cursor-pointer py-2.5 text-xs font-bold">
-                📷 カメラ起動 / 棚QRを選択
+              <label class="heron-btn-primary cursor-pointer py-2.5 text-xs font-bold flex items-center justify-center gap-1.5">
+                <app-icon name="camera" /> カメラ起動 / 棚QRを選択
                 <input type="file" accept="image/*" capture="environment" class="hidden" (change)="handleShelfQrImageUpload($event)" />
               </label>
             </div>
