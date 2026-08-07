@@ -41,14 +41,19 @@ import { IconComponent } from '../../shared/icon.component';
             <label class="heron-label text-[11px]" for="shelfCode">
               棚コード <span class="text-red-600">*</span>
             </label>
-            <input
-              id="shelfCode"
-              name="shelfCode"
-              class="heron-input text-xs uppercase bg-white font-mono"
-              placeholder="例: SHELF-DEV01"
-              [(ngModel)]="shelfCode"
-              required
-            />
+            <div class="relative">
+              <input
+                id="shelfCode"
+                name="shelfCode"
+                class="heron-input text-xs uppercase bg-white font-mono pr-8"
+                placeholder="例: SHELF-DEV01"
+                [(ngModel)]="shelfCode"
+                required
+              />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-blue-700 font-bold pointer-events-none" title="カメラで棚QR読み取り">
+                📷
+              </span>
+            </div>
           </div>
 
           <div>

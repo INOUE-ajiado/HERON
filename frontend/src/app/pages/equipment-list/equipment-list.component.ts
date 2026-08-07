@@ -98,12 +98,20 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             </span>
             <input
               type="text"
-              class="heron-input pl-8 text-xs font-mono uppercase bg-white"
+              class="heron-input pl-8 pr-9 text-xs font-mono uppercase bg-white"
               placeholder="バーコード / 機材IDをスキャン・入力"
               [(ngModel)]="scanInput"
               name="scanInput"
               autofocus
             />
+            <button
+              type="button"
+              (click)="triggerShelfScan('create')"
+              title="カメラでQRコードを読み取る"
+              class="absolute inset-y-0 right-0 flex items-center pr-2 text-blue-700 hover:text-blue-900 font-bold"
+            >
+              📷
+            </button>
           </div>
           <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold" [disabled]="scanning()">
             {{ scanning() ? '照合中...' : '照合' }}

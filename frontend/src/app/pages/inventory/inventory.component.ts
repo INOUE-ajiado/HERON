@@ -88,16 +88,21 @@ import { IconComponent } from '../../shared/icon.component';
         </p>
       }
 
-      <!-- 手入力 -->
+      <!-- 手入力 ＆ カメラQR読み取り -->
       <div class="heron-card mt-3 p-3">
         <div class="flex gap-2">
-          <input
-            class="heron-input heron-mono"
-            placeholder="HRN-TAB-0108（手入力で追加）"
-            [(ngModel)]="manualId"
-            (keyup.enter)="addManual()"
-          />
-          <button class="heron-btn-secondary shrink-0" (click)="addManual()">追加</button>
+          <div class="relative flex-1">
+            <input
+              class="heron-input heron-mono pr-8 w-full"
+              placeholder="DEV-TAB-00001 (手入力/カメラ読み取り)"
+              [(ngModel)]="manualId"
+              (keyup.enter)="addManual()"
+            />
+            <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-blue-700 font-bold pointer-events-none">
+              📷
+            </span>
+          </div>
+          <button class="heron-btn-secondary shrink-0 font-bold" (click)="addManual()">追加</button>
         </div>
       </div>
 
