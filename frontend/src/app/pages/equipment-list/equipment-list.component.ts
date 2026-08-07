@@ -20,8 +20,10 @@ import {
 import { IconComponent } from '../../shared/icon.component';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
+export type DrawerMode = 'detail' | 'create' | 'edit';
+
 /**
- * 機材台帳・検索 (付属品チェックリスト ＆ 欠品・完品管理 ＆ 右サイドスライド詳細ドロワー対応)。
+ * 機材台帳・検索 (1画面完結 3モード右サイドスライドドロワーシステム)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -35,14 +37,14 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
           機材台帳・検索
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">全機材の管理・付属品(欠品/完品)チェック・貸出返却操作</p>
+        <p class="text-xs text-slate-500 mt-0.5">新規登録・詳細表示・編集・貸出返却・付属品管理をこの1画面で完全集約</p>
       </div>
 
       @if (auth.isAdmin()) {
-        <a routerLink="/equipments/new" class="heron-btn-primary text-xs">
+        <button type="button" (click)="openCreateDrawer()" class="heron-btn-primary text-xs font-bold shadow-xs">
           <app-icon name="plus" />
           機材新規登録
-        </a>
+        </button>
       }
     </div>
 
@@ -103,7 +105,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
               autofocus
             />
           </div>
-          <button type="submit" class="heron-btn-primary shrink-0 text-xs" [disabled]="scanning()">
+          <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold" [disabled]="scanning()">
             {{ scanning() ? '照合中...' : '照合' }}
           </button>
         </form>
@@ -152,7 +154,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
       }
     </div>
 
-    <!-- HERON Navy テーマテーブル (付属品・完品/欠品バッジ表示付き) -->
+    <!-- HERON Navy テーマテーブル -->
     <div class="mt-3">
       @if (loading()) {
         <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
@@ -174,9 +176,9 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
             <tbody class="divide-y divide-slate-100 bg-white">
               @for (eq of filtered(); track eq.equipment_id) {
                 <tr
-                  (click)="openDrawer(eq)"
+                  (click)="openDetailDrawer(eq)"
                   class="cursor-pointer hover:bg-blue-50/60 transition-colors duration-150"
-                  [class.bg-blue-50/90]="activeEquipment()?.equipment_id === eq.equipment_id"
+                  [class.bg-blue-50/90]="activeEquipment()?.equipment_id === eq.equipment_id && drawerOpen()"
                 >
                   <td class="py-2.5 px-3.5">
                     <div class="heron-mono font-bold text-[#2A3A4A] text-xs">{{ eq.equipment_id }}</div>
@@ -219,7 +221,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
       }
     </div>
 
-    <!-- 右サイドスライド式詳細ドロワー (Slide-over Drawer Panel) -->
+    <!-- 右サイドスライド式マルチモード詳細ドロワー (Slide-over Drawer Panel) -->
     @if (drawerOpen()) {
       <!-- バックドロップ領域 -->
       <div
@@ -235,41 +237,177 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
         <div class="flex items-center justify-between border-b border-slate-200 bg-[#2A3A4A] px-5 py-4 text-white">
           <div class="flex items-center gap-2.5 min-w-0">
             <div class="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-white">
-              <app-icon name="box" />
+              <app-icon [name]="drawerMode() === 'create' ? 'plus' : 'box'" />
             </div>
             <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="font-mono text-xs font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
-                @if (activeEquipment(); as eq) {
-                  <app-status-badge [status]="eq.status" />
-                }
-              </div>
-              <h2 class="text-sm font-bold text-white truncate">{{ activeEquipment()?.name }}</h2>
+              @if (drawerMode() === 'create') {
+                <div class="text-xs font-bold text-[#90CFD6]">新規機材登録</div>
+                <h2 class="text-sm font-bold text-white truncate">新しい機材を追加</h2>
+              } @else if (drawerMode() === 'edit') {
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
+                  <span class="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">編集モード</span>
+                </div>
+                <h2 class="text-sm font-bold text-white truncate">{{ activeEquipment()?.name }}</h2>
+              } @else {
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
+                  @if (activeEquipment(); as eq) {
+                    <app-status-badge [status]="eq.status" />
+                  }
+                </div>
+                <h2 class="text-sm font-bold text-white truncate">{{ activeEquipment()?.name }}</h2>
+              }
             </div>
           </div>
 
-          <button
-            type="button"
-            (click)="closeDrawer()"
-            class="rounded-md p-1.5 text-slate-300 hover:bg-white/10 hover:text-white transition"
-          >
-            ✕
-          </button>
+          <div class="flex items-center gap-2">
+            @if (drawerMode() === 'detail' && auth.isAdmin() && activeEquipment()) {
+              <button
+                type="button"
+                (click)="drawerMode.set('edit')"
+                class="rounded bg-white/10 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/20 transition"
+              >
+                編集
+              </button>
+            }
+            <button
+              type="button"
+              (click)="closeDrawer()"
+              class="rounded-md p-1.5 text-slate-300 hover:bg-white/10 hover:text-white transition"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <!-- ドロワー本文 -->
         <div class="flex-1 overflow-y-auto p-5 space-y-5">
-          @if (drawerLoading()) {
-            <p class="py-8 text-center text-xs text-slate-400">詳細情報を読み込み中...</p>
-          } @else if (activeEquipment(); as eq) {
-            <!-- 通知メッセージ -->
-            @if (drawerMessage()) {
-              <p class="rounded px-3 py-2 text-xs font-medium shadow-2xs"
-                 [class]="drawerMessageIsError() ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'">
-                {{ drawerMessage() }}
-              </p>
-            }
+          <!-- 通知メッセージ -->
+          @if (drawerMessage()) {
+            <p class="rounded px-3 py-2 text-xs font-medium shadow-2xs"
+               [class]="drawerMessageIsError() ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'">
+              {{ drawerMessage() }}
+            </p>
+          }
 
+          <!-- === MODE 1: 新規機材登録フォーム === -->
+          @if (drawerMode() === 'create') {
+            <form (ngSubmit)="submitCreate()" class="space-y-4">
+              <div>
+                <label class="heron-label text-xs">機材名 <span class="text-red-600">*</span></label>
+                <input
+                  class="heron-input text-xs"
+                  placeholder="例: Wacom Cintiq Pro 24"
+                  [(ngModel)]="formName"
+                  name="formName"
+                  required
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="heron-label text-xs">部署コード <span class="text-red-600">*</span></label>
+                  <select class="heron-input text-xs" [(ngModel)]="formDeptId" name="formDeptId">
+                    @for (d of master.departments(); track d.code) {
+                      <option [value]="d.code">{{ d.code }} — {{ d.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div>
+                  <label class="heron-label text-xs">カテゴリ <span class="text-red-600">*</span></label>
+                  <select class="heron-input text-xs" [(ngModel)]="formCategory" name="formCategory" (change)="onCategoryChange()">
+                    @for (c of master.categories(); track c.code) {
+                      <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-slate-500 font-medium">
+                ※ 機材IDは 「{{ formDeptId }}-{{ formCategory }}-XXXXX」 で自動採番されます。
+              </p>
+
+              <div>
+                <label class="heron-label text-xs">型番</label>
+                <input class="heron-input text-xs font-mono" placeholder="例: DTH-2420" [(ngModel)]="formModelNumber" name="formModelNumber" />
+              </div>
+
+              <div>
+                <label class="heron-label text-xs">保管場所 (棚コード) <span class="text-red-600">*</span></label>
+                <select class="heron-input text-xs" [(ngModel)]="formLocationId" name="formLocationId">
+                  <option [ngValue]="null">選択してください</option>
+                  @for (s of master.shelves(); track s.code) {
+                    <option [ngValue]="s.code">[{{ s.code }}] {{ s.room_name }} / {{ s.shelf_name }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- 付属品テンプレート -->
+              <div class="rounded-lg bg-slate-50 p-3.5 border border-slate-200 space-y-2">
+                <label class="heron-label text-xs font-bold text-[#2A3A4A] flex items-center justify-between">
+                  <span>標準セット付属品チェック</span>
+                  <span class="text-[10px] text-slate-500 font-normal">個別シール貼付不要</span>
+                </label>
+                <div class="space-y-1.5">
+                  @for (acc of formAccessories; track acc.name; let i = $index) {
+                    <div class="flex items-center justify-between text-xs bg-white px-3 py-1.5 rounded border border-slate-200">
+                      <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                        <input type="checkbox" class="rounded text-blue-600" [(ngModel)]="acc.present" [name]="'cacc_' + i" />
+                        <span>{{ acc.name }}</span>
+                      </label>
+                      <span class="text-[10px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                        {{ acc.present ? '✓ 付属' : '✗ 欠品' }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="flex gap-2 pt-3 border-t border-slate-200">
+                <button type="button" (click)="closeDrawer()" class="heron-btn-secondary flex-1 text-xs">キャンセル</button>
+                <button type="submit" class="heron-btn-primary flex-1 text-xs font-bold py-2" [disabled]="actionBusy()">
+                  {{ actionBusy() ? '登録中...' : '機材を登録する' }}
+                </button>
+              </div>
+            </form>
+          }
+
+          <!-- === MODE 2: スペック・付属品編集フォーム === -->
+          @else if (drawerMode() === 'edit' && activeEquipment(); as eq) {
+            <form (ngSubmit)="submitEdit()" class="space-y-4">
+              <div>
+                <label class="heron-label text-xs">機材名 <span class="text-red-600">*</span></label>
+                <input class="heron-input text-xs" [(ngModel)]="formName" name="editName" required />
+              </div>
+
+              <div>
+                <label class="heron-label text-xs">型番</label>
+                <input class="heron-input text-xs font-mono" [(ngModel)]="formModelNumber" name="editModel" />
+              </div>
+
+              <div>
+                <label class="heron-label text-xs">保管場所 (棚コード)</label>
+                <select class="heron-input text-xs" [(ngModel)]="formLocationId" name="editLoc">
+                  <option [ngValue]="null">未指定</option>
+                  @for (s of master.shelves(); track s.code) {
+                    <option [ngValue]="s.code">[{{ s.code }}] {{ s.room_name }} / {{ s.shelf_name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="flex gap-2 pt-3 border-t border-slate-200">
+                <button type="button" (click)="drawerMode.set('detail')" class="heron-btn-secondary flex-1 text-xs">キャンセル</button>
+                <button type="submit" class="heron-btn-primary flex-1 text-xs font-bold py-2" [disabled]="actionBusy()">
+                  {{ actionBusy() ? '保存中...' : '変更を保存する' }}
+                </button>
+              </div>
+            </form>
+          }
+
+          <!-- === MODE 3: 詳細閲覧 ＆ 貸出返却・付属品・履歴 === -->
+          @else if (drawerMode() === 'detail' && activeEquipment(); as eq) {
             <!-- 付属品チェックリスト (ペン・ACアダプター等) -->
             <div class="rounded-md border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 shadow-2xs">
               <div class="flex items-center justify-between pb-1 border-b border-slate-200">
@@ -338,7 +476,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
               </div>
             }
 
-            <!-- 管理者貸出・返却操作 (二重貸出防止ガード付き) -->
+            <!-- 管理者貸出・返却操作 -->
             @if (auth.isAdmin()) {
               <div class="rounded-lg bg-slate-50 p-4 border border-slate-200 space-y-3">
                 <h3 class="text-xs font-bold text-[#2A3A4A] flex items-center gap-1.5">
@@ -386,7 +524,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
                         }
                       </select>
                       <button
-                        class="heron-btn-primary text-xs bg-emerald-700 hover:bg-emerald-800 shrink-0"
+                        class="heron-btn-primary text-xs bg-emerald-700 hover:bg-emerald-800 shrink-0 font-bold"
                         [disabled]="actionBusy() || !targetLocationId"
                         (click)="drawerReturn(eq)"
                       >
@@ -452,21 +590,15 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           }
         </div>
 
-        <!-- ドロワーフッター -->
-        @if (activeEquipment(); as eq) {
+        <!-- ドロワーフッター (印刷直通ボタンなど) -->
+        @if (drawerMode() === 'detail' && activeEquipment(); as eq) {
           <div class="border-t border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-3">
             <a
               [routerLink]="['/print/label', eq.equipment_id]"
-              class="heron-btn-secondary text-xs flex-1 text-center"
+              class="heron-btn-secondary text-xs flex-1 text-center font-bold"
             >
               <app-icon name="printer" />
-              ラベル印刷へ
-            </a>
-            <a
-              [routerLink]="['/equipments', eq.equipment_id]"
-              class="heron-btn-ghost text-xs flex-1 text-center"
-            >
-              個別ページで開く
+              ラベル印刷画面へ
             </a>
           </div>
         }
@@ -499,11 +631,20 @@ export class EquipmentListComponent {
   // 右サイドドロワー関連の状態
   readonly drawerOpen = signal(false);
   readonly drawerLoading = signal(false);
+  readonly drawerMode = signal<DrawerMode>('detail');
   readonly activeEquipment = signal<Equipment | null>(null);
   readonly drawerAccessories = signal<AccessoryItem[]>([]);
   readonly drawerLogs = signal<TransactionLog[]>([]);
   readonly drawerMessage = signal('');
   readonly drawerMessageIsError = signal(false);
+
+  // フォーム用入力フィールド
+  formName = '';
+  formDeptId = 'DEV';
+  formCategory = 'TAB';
+  formModelNumber = '';
+  formLocationId: number | string | null = null;
+  formAccessories: AccessoryItem[] = getDefaultAccessories('TAB');
 
   readonly filtered = computed(() => {
     const q = this.query.trim().toLowerCase();
@@ -546,6 +687,10 @@ export class EquipmentListComponent {
     });
   }
 
+  onCategoryChange(): void {
+    this.formAccessories = getDefaultAccessories(this.formCategory);
+  }
+
   categoryLabel(c: string): string {
     return CATEGORY_LABEL[c] ?? c;
   }
@@ -584,7 +729,20 @@ export class EquipmentListComponent {
     return this.items().filter((i) => i.status === 'available').length;
   }
 
-  openDrawer(eq: Equipment): void {
+  openCreateDrawer(): void {
+    this.drawerMode.set('create');
+    this.drawerMessage.set('');
+    this.formName = '';
+    this.formDeptId = 'DEV';
+    this.formCategory = 'TAB';
+    this.formModelNumber = '';
+    this.formLocationId = null;
+    this.formAccessories = getDefaultAccessories('TAB');
+    this.drawerOpen.set(true);
+  }
+
+  openDetailDrawer(eq: Equipment): void {
+    this.drawerMode.set('detail');
     this.activeEquipment.set(eq);
     this.drawerAccessories.set(eq.accessories || getDefaultAccessories(eq.category));
     this.drawerOpen.set(true);
@@ -592,6 +750,11 @@ export class EquipmentListComponent {
     this.drawerMessage.set('');
     this.targetUserId = null;
     this.targetLocationId = null;
+
+    // 編集用初期化
+    this.formName = eq.name;
+    this.formModelNumber = eq.model_number || '';
+    this.formLocationId = eq.current_location_id ?? null;
 
     this.api.getEquipment(eq.equipment_id).subscribe({
       next: (res) => {
@@ -602,6 +765,67 @@ export class EquipmentListComponent {
       },
       error: () => this.drawerLoading.set(false),
     });
+  }
+
+  submitCreate(): void {
+    if (!this.formName.trim()) {
+      this.drawerMessage.set('機材名を入力してください');
+      this.drawerMessageIsError.set(true);
+      return;
+    }
+    this.actionBusy.set(true);
+    const locVal = typeof this.formLocationId === 'number' ? this.formLocationId : null;
+
+    this.api
+      .createEquipment({
+        name: this.formName.trim(),
+        category: this.formCategory,
+        dept_id: this.formDeptId,
+        model_number: this.formModelNumber.trim(),
+        location_id: locVal,
+        accessories: this.formAccessories,
+      })
+      .subscribe({
+        next: (eq) => {
+          this.actionBusy.set(false);
+          this.loadData();
+          this.openDetailDrawer(eq);
+          this.drawerMessage.set(`機材「${eq.name} (${eq.equipment_id})」を新規登録しました！`);
+          this.drawerMessageIsError.set(false);
+        },
+        error: (err) => {
+          this.actionBusy.set(false);
+          this.drawerMessage.set(err?.error?.error ?? '登録に失敗しました');
+          this.drawerMessageIsError.set(true);
+        },
+      });
+  }
+
+  submitEdit(): void {
+    const active = this.activeEquipment();
+    if (!active || !this.formName.trim()) return;
+
+    this.actionBusy.set(true);
+    this.api
+      .updateEquipment(active.equipment_id, {
+        name: this.formName.trim(),
+        model_number: this.formModelNumber.trim(),
+        current_location_id: this.formLocationId,
+      })
+      .subscribe({
+        next: () => {
+          this.actionBusy.set(false);
+          this.drawerMessage.set('機材情報を更新しました');
+          this.drawerMessageIsError.set(false);
+          this.openDetailDrawer({ ...active, name: this.formName, model_number: this.formModelNumber });
+          this.loadData();
+        },
+        error: () => {
+          this.actionBusy.set(false);
+          this.drawerMessage.set('更新に失敗しました');
+          this.drawerMessageIsError.set(true);
+        },
+      });
   }
 
   toggleAccessory(index: number): void {
@@ -640,7 +864,7 @@ export class EquipmentListComponent {
         this.actionBusy.set(false);
         this.drawerMessage.set('ユーザーと棚IDを紐付けて貸出しました');
         this.drawerMessageIsError.set(false);
-        this.openDrawer(eq);
+        this.openDetailDrawer(eq);
         this.loadData();
       },
       error: (err) => {
@@ -659,12 +883,12 @@ export class EquipmentListComponent {
         this.actionBusy.set(false);
         this.drawerMessage.set('返却処理が完了しました');
         this.drawerMessageIsError.set(false);
-        this.openDrawer(eq);
+        this.openDetailDrawer(eq);
         this.loadData();
       },
       error: (err) => {
         this.actionBusy.set(false);
-        this.drawerMessage.set(err?.error?.error ?? '返却処理に失敗しました');
+        this.drawerMessage.set('返却処理に失敗しました');
         this.drawerMessageIsError.set(true);
       },
     });
@@ -680,7 +904,7 @@ export class EquipmentListComponent {
       next: (res) => {
         this.scanning.set(false);
         this.scanInput = '';
-        this.openDrawer(res.equipment);
+        this.openDetailDrawer(res.equipment);
       },
       error: () => {
         this.scanning.set(false);

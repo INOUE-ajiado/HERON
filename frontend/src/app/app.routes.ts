@@ -3,9 +3,9 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard } from './core/guards';
 
 /**
- * 画面構成。
+ * 画面構成 (1画面完結 1-Page Drawer System に対応)。
  *
- * デフォルトの着陸画面は「機材台帳・検索」(/equipments) に集約。
+ * 個別詳細ページ・新規登録ページは廃止し、すべて `/equipments` に集約。
  */
 export const routes: Routes = [
   {
@@ -49,18 +49,13 @@ export const routes: Routes = [
       },
       {
         path: 'equipments/new',
-        canActivate: [adminGuard],
-        loadComponent: () =>
-          import('./pages/equipment-form/equipment-form.component').then(
-            (m) => m.EquipmentFormComponent,
-          ),
+        redirectTo: 'equipments',
+        pathMatch: 'full',
       },
       {
         path: 'equipments/:id',
-        loadComponent: () =>
-          import('./pages/equipment-detail/equipment-detail.component').then(
-            (m) => m.EquipmentDetailComponent,
-          ),
+        redirectTo: 'equipments',
+        pathMatch: 'full',
       },
       {
         path: 'scan',
