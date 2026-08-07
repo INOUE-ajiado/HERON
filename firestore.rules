@@ -45,6 +45,11 @@ service cloud.firestore {
       allow read, write: if signedIn();
     }
 
+    // バージョン履歴（リリース内容の記録）
+    match /versions/{version} {
+      allow read, write: if signedIn();
+    }
+
     // 採番カウンタ・初期化フラグ
     match /counters/{name} {
       allow read, write: if signedIn();

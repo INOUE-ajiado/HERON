@@ -60,7 +60,28 @@ export const COL = {
   shelves: 'shelves',
   counters: 'counters',
   system: 'system',
+  versions: 'versions',
 } as const;
+
+/** バージョンの繰り上がり種別（大型はほぼ発生しないため通常は使わない） */
+export type VersionBumpType = 'major' | 'minor' | 'patch';
+
+/** リリース履歴の 1 件 */
+export interface VersionEntry {
+  /** 表示用の版数（例: VER1.6.0） */
+  version: string;
+  major: number;
+  minor: number;
+  patch: number;
+  type: VersionBumpType;
+  /** 変更の概要（1 行） */
+  title: string;
+  /** 具体的な変更・更新内容 */
+  description: string;
+  released_at: string;
+  released_by: string;
+  released_by_id?: string;
+}
 
 /** 部署マスタ */
 export interface DepartmentDoc {
@@ -124,6 +145,157 @@ const SEED_SHELVES: ShelfDoc[] = [
   { code: 'SHELF-A1', room_name: '第1作画室', shelf_name: '機材棚A-1段目' },
   { code: 'SHELF-B2', room_name: '第2作画室', shelf_name: '機材棚B-2段目' },
   { code: 'SHELF-DEV01', room_name: '開発室', shelf_name: 'メイン保管庫' },
+];
+
+/**
+ * これまでのリリース履歴（履歴コレクションが空のときだけ投入する初期データ）。
+ * 中型 = 機能・ページの追加、小型 = それ以外の細かい更新。
+ */
+const SEED_VERSIONS: VersionEntry[] = [
+  {
+    version: 'VER1.0.0',
+    major: 1,
+    minor: 0,
+    patch: 0,
+    type: 'major',
+    title: 'HERON 初期リリース',
+    description:
+      '社内機材管理システムの初期実装。機材台帳（登録・編集・検索）、貸出／返却、棚卸し、QRコードラベル印刷、ログイン認証、保管場所・部署・カテゴリのマスタ管理を実装。',
+    released_at: '2026-08-03T00:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.1.0',
+    major: 1,
+    minor: 1,
+    patch: 0,
+    type: 'minor',
+    title: 'UI/UX 全面刷新と機材台帳のドロワー統合',
+    description:
+      'HERON Navy (#2A3A4A) テーマ、Outfit フォント、favicon を適用したフラットデザインに刷新。機材の詳細・新規登録・編集を右スライドのドロワー1画面に統合し、ダッシュボードを廃止して統計指標を機材台帳へ集約。',
+    released_at: '2026-08-06T00:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.2.0',
+    major: 1,
+    minor: 2,
+    patch: 0,
+    type: 'minor',
+    title: '付属品チェックリストとカメラQRスキャン',
+    description:
+      '小物に個別シールを貼らずに管理できる付属品チェックリスト（完備／欠品の判定、付属品の自由な追加・削除）を追加。あわせて機材ID・棚コードの入力欄すべてにカメラでQRを読み取るボタンを設置。',
+    released_at: '2026-08-07T01:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.3.0',
+    major: 1,
+    minor: 3,
+    patch: 0,
+    type: 'minor',
+    title: 'テストメンバー管理ページの追加',
+    description:
+      '単体テスト環境へアクセスできる Google アカウントのホワイトリスト管理ページを追加。未登録アカウントからのログインを遮断する仕組みとサイドバー導線を実装。',
+    released_at: '2026-08-07T02:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.4.0',
+    major: 1,
+    minor: 4,
+    patch: 0,
+    type: 'minor',
+    title: 'モバイル専用ビューの追加',
+    description:
+      'スマートフォン向けに、カード表示・ボトムシート型ドロワー・FAB を備えた専用ビューを追加。PC表示は従来のまま100%維持。',
+    released_at: '2026-08-07T03:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.5.0',
+    major: 1,
+    minor: 5,
+    patch: 0,
+    type: 'minor',
+    title: '仕様書PDF閲覧ページと Google 1タップログイン',
+    description:
+      'サイドバーから仕様書PDFを閲覧できるページを追加。あわせてログイン画面を Google 認証のみの1タップ方式に整理。',
+    released_at: '2026-08-07T04:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.5.1',
+    major: 1,
+    minor: 5,
+    patch: 1,
+    type: 'patch',
+    title: '社内ドメインの自動アクセス許可',
+    description:
+      '@ajiado.co.jp のアカウントを無条件で許可するよう修正し、プリセットのテストメンバーを同期。特定メンバーがログインできない問題を解消。',
+    released_at: '2026-08-07T05:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.6.0',
+    major: 1,
+    minor: 6,
+    patch: 0,
+    type: 'minor',
+    title: 'テストメンバーの全端末同期（Firestore 化）',
+    description:
+      'テストメンバーの保存先を端末ごとの localStorage から Firebase Firestore へ移行。どの端末から追加・削除しても全員に即時反映されるようになった。',
+    released_at: '2026-08-07T06:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.7.0',
+    major: 1,
+    minor: 7,
+    patch: 0,
+    type: 'minor',
+    title: '機材・操作ログ・マスタの Firestore 移行',
+    description:
+      '機材、操作ログ、保管場所、利用者、各種マスタの保存先を Firestore に移行し、テストメンバー全員で同じデータを共有できるようにした。機材IDの採番をトランザクション化して重複を防止。旧 localStorage のデータは初回ログイン時に自動移行。あわせて、新規登録時に選んだ保管場所が保存されない不具合、除却してもステータスが変わらない不具合、存在しない機材IDのスキャンでダミー画面が開く不具合を修正。',
+    released_at: '2026-08-07T07:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.7.1',
+    major: 1,
+    minor: 7,
+    patch: 1,
+    type: 'patch',
+    title: '操作履歴の操作者を実際の作業者で記録',
+    description:
+      '操作者を端末に保存された古いログイン情報から取得していたため、すべての操作が別人の名前で記録される問題を修正。実際に Google 認証しているアカウントを操作者として記録し、認証セッションが無い端末は再ログインを求めるようにした。',
+    released_at: '2026-08-07T08:00:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.7.2',
+    major: 1,
+    minor: 7,
+    patch: 2,
+    type: 'patch',
+    title: 'Hosting のキャッシュ設定を修正',
+    description:
+      'index.html が1時間キャッシュされ、更新後も古い画面が表示され続ける問題を修正。HTML は毎回取得し直し、ハッシュ付きの静的ファイルのみ長期キャッシュする設定に変更。',
+    released_at: '2026-08-07T08:30:00.000Z',
+    released_by: '井上 健二',
+  },
+  {
+    version: 'VER1.8.0',
+    major: 1,
+    minor: 8,
+    patch: 0,
+    type: 'minor',
+    title: 'テスト設定ページとバージョン管理の追加',
+    description:
+      'サイドバーの「テストメンバー」を「テスト設定」に名称変更。アクセス許可済みアカウント一覧の右に Ver情報 欄を新設し、リリースごとの版数と変更内容を Firestore に記録・共有できるようにした。中型アップデート（機能・ページの追加）で中央、小型アップデート（その他の更新）で右端の数字が繰り上がる。',
+    released_at: '2026-08-07T09:00:00.000Z',
+    released_by: '井上 健二',
+  },
 ];
 
 /** 端末ローカル（旧 localStorage 版）データの移行済みフラグ */
@@ -916,6 +1088,108 @@ export class FirestoreDataService {
 
   async deleteShelf(code: string): Promise<void> {
     await deleteDoc(doc(this.db, COL.shelves, code));
+  }
+
+  // ---------------------------------------------------------------- バージョン履歴
+
+  /** 版数から並び替え可能なドキュメント ID を作る（例: 01.008.000）。 */
+  private versionDocId(major: number, minor: number, patch: number): string {
+    return [
+      String(major).padStart(2, '0'),
+      String(minor).padStart(3, '0'),
+      String(patch).padStart(3, '0'),
+    ].join('.');
+  }
+
+  private sortVersions(items: VersionEntry[]): VersionEntry[] {
+    return items.sort(
+      (a, b) => b.major - a.major || b.minor - a.minor || b.patch - a.patch,
+    );
+  }
+
+  async listVersions(): Promise<VersionEntry[]> {
+    await this.ready();
+    await this.ensureVersionHistory();
+    const snap = await getDocs(collection(this.db, COL.versions));
+    return this.sortVersions(snap.docs.map((d) => d.data() as VersionEntry));
+  }
+
+  /** 現在の版（履歴が空なら null）。 */
+  async currentVersion(): Promise<VersionEntry | null> {
+    const all = await this.listVersions();
+    return all[0] ?? null;
+  }
+
+  /**
+   * 新しい版を記録する。
+   * 中型（minor）は機能・ページの追加、小型（patch）はそれ以外の細かい更新。
+   */
+  async addVersion(input: {
+    type: VersionBumpType;
+    title: string;
+    description: string;
+  }): Promise<VersionEntry> {
+    await this.ready();
+    const latest = await this.currentVersion();
+    const base = latest ?? { major: 1, minor: 0, patch: 0 };
+
+    let major = base.major;
+    let minor = base.minor;
+    let patch = base.patch;
+    if (input.type === 'major') {
+      major += 1;
+      minor = 0;
+      patch = 0;
+    } else if (input.type === 'minor') {
+      minor += 1;
+      patch = 0;
+    } else {
+      patch += 1;
+    }
+
+    // 同時操作で版数が衝突した場合は空いている番号まで進める
+    let docId = this.versionDocId(major, minor, patch);
+    while ((await getDoc(doc(this.db, COL.versions, docId))).exists()) {
+      if (input.type === 'major') major += 1;
+      else if (input.type === 'minor') minor += 1;
+      else patch += 1;
+      docId = this.versionDocId(major, minor, patch);
+    }
+
+    const actor = this.currentActor();
+    const entry: VersionEntry = {
+      version: `VER${major}.${minor}.${patch}`,
+      major,
+      minor,
+      patch,
+      type: input.type,
+      title: input.title.trim(),
+      description: input.description.trim(),
+      released_at: new Date().toISOString(),
+      released_by: actor?.name ?? '不明なユーザー',
+      released_by_id: actor?.user_id ?? 'unknown',
+    };
+
+    await setDoc(doc(this.db, COL.versions, docId), clean({ ...entry }));
+    return entry;
+  }
+
+  async deleteVersion(entry: VersionEntry): Promise<void> {
+    await this.ready();
+    await deleteDoc(
+      doc(this.db, COL.versions, this.versionDocId(entry.major, entry.minor, entry.patch)),
+    );
+  }
+
+  /** 履歴が空のときだけ、これまでのリリース内容を投入する。 */
+  private async ensureVersionHistory(): Promise<void> {
+    const snap = await getDocs(query(collection(this.db, COL.versions), limit(1)));
+    if (!snap.empty) return;
+
+    for (const seed of SEED_VERSIONS) {
+      const docId = this.versionDocId(seed.major, seed.minor, seed.patch);
+      await setDoc(doc(this.db, COL.versions, docId), clean({ ...seed }), { merge: true });
+    }
   }
 
   // ---------------------------------------------------------------- 統計
