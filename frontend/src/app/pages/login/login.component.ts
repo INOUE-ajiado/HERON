@@ -1,18 +1,22 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../core/auth.service';
 import { FirebaseService } from '../../core/firebase.service';
 import { User } from '../../core/models';
+import { IconComponent } from '../../shared/icon.component';
 
+/**
+ * HERON ログインページ (Google 認証専用 1タップログイン画面)。
+ */
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [IconComponent],
   template: `
     <div class="flex min-h-screen items-center justify-center bg-heron-navy px-4">
       <div class="w-full max-w-sm">
+        <!-- ロゴ ＆ タイトルヘッダー -->
         <div class="mb-8 text-center flex flex-col items-center">
           <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-1 shadow-md border border-slate-200 mb-3 overflow-hidden">
             <img src="icon.png" alt="HERON Logo" class="h-full w-full object-contain scale-110" />
@@ -21,58 +25,33 @@ import { User } from '../../core/models';
             <span class="inline-block text-base font-[900] text-[#90CFD6] mr-0.5 relative -top-2 leading-none" style="-webkit-text-stroke: 0.5px #90CFD6;">++</span>
             <span>HERON..</span>
           </h1>
-          <p class="mt-1.5 text-xs tracking-wide text-slate-400">社内機材管理システム</p>
+          <p class="mt-1.5 text-xs tracking-wide text-slate-400">社内機材管理システム (単体テスト環境)</p>
         </div>
 
-        <form (ngSubmit)="submit()" class="heron-card space-y-4 p-6 bg-white rounded-xl shadow-lg border border-slate-200">
-          <div>
-            <label class="heron-label" for="loginId">ログインID</label>
-            <input
-              id="loginId"
-              name="loginId"
-              class="heron-input"
-              [(ngModel)]="loginId"
-              autocomplete="username"
-              autocapitalize="none"
-              required
-            />
-          </div>
-
-          <div>
-            <label class="heron-label" for="password">パスワード</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              class="heron-input"
-              [(ngModel)]="password"
-              autocomplete="current-password"
-              required
-            />
+        <!-- Google 認証専用ログインカード -->
+        <div class="heron-card p-6 bg-white rounded-xl shadow-xl border border-slate-200 text-center space-y-5">
+          <div class="space-y-1">
+            <h2 class="text-sm font-bold text-[#2A3A4A] flex items-center justify-center gap-1.5">
+              <app-icon name="user" /> Google アカウントログイン
+            </h2>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              登録された社内 Google アカウントでログインしてください
+            </p>
           </div>
 
           @if (error()) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+            <div class="rounded-lg bg-red-50 p-3 text-xs font-semibold text-red-700 border border-red-200 text-left leading-relaxed">
               {{ error() }}
-            </p>
+            </div>
           }
-
-          <button type="submit" class="heron-btn-primary w-full py-2.5 font-bold" [disabled]="loading()">
-            {{ loading() ? 'ログイン中...' : 'ログイン' }}
-          </button>
-
-          <div class="relative my-4 flex items-center justify-center">
-            <div class="w-full border-t border-slate-200"></div>
-            <span class="absolute bg-white px-3 text-[11px] text-slate-400">または</span>
-          </div>
 
           <button
             type="button"
             (click)="loginWithGoogle()"
-            class="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50"
+            class="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800 transition-all hover:bg-slate-50 hover:border-slate-400 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:opacity-50 active:scale-[0.98]"
             [disabled]="loading()"
           >
-            <svg class="h-4 w-4" viewBox="0 0 24 24">
+            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -90,15 +69,13 @@ import { User } from '../../core/models';
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            Google でログイン
+            <span>{{ loading() ? 'Google 認証処理中...' : 'Google でログイン' }}</span>
           </button>
-        </form>
 
-        <p class="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
-          初期アカウント（SEED_DEMO 有効時）<br />
-          管理者: admin / heron-admin<br />
-          一般: animator1 / heron-user
-        </p>
+          <p class="text-[11px] text-slate-400 font-medium pt-1 border-t border-slate-100">
+            ※ 「テストメンバー」で許可された Google アカウントのみログイン可能です
+          </p>
+        </div>
       </div>
     </div>
   `,
@@ -109,32 +86,8 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  loginId = '';
-  password = '';
   readonly loading = signal(false);
   readonly error = signal('');
-
-  submit(): void {
-    if (!this.loginId || !this.password) {
-      this.error.set('ログインIDとパスワードを入力してください');
-      return;
-    }
-    this.loading.set(true);
-    this.error.set('');
-
-    this.api.login(this.loginId, this.password).subscribe({
-      next: () => {
-        const redirect = this.route.snapshot.queryParamMap.get('redirect') ?? '/';
-        void this.router.navigateByUrl(redirect);
-      },
-      error: (err) => {
-        this.loading.set(false);
-        this.error.set(
-          err?.error?.error ?? 'ログインに失敗しました。時間をおいて再度お試しください。',
-        );
-      },
-    });
-  }
 
   async loginWithGoogle(): Promise<void> {
     this.loading.set(true);
@@ -158,7 +111,7 @@ export class LoginComponent {
     } catch (err: any) {
       this.loading.set(false);
       this.error.set(
-        err?.message ?? 'Google ログインに失敗しました。再度お試しください。',
+        err?.message ?? 'Google ログインに失敗しました。時間をおいて再度お試しください。',
       );
     }
   }
