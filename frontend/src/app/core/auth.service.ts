@@ -10,23 +10,33 @@ const TOKEN_KEY = 'heron.token';
 const USER_KEY = 'heron.user';
 const TEST_MEMBERS_KEY = 'heron.test_members';
 
+const PRESET_TEST_MEMBERS = [
+  'inoue@ajiado.co.jp',
+  'admin@heron.app',
+  'nakamura@ajiado.co.jp',
+  'matsuyama@ajiado.co.jp',
+  'inoue.cq.jwl@gmail.com',
+  'a_yamada@ajiado.co.jp',
+  'shimako@ajiado.co.jp',
+];
+
 function getStoredTestMembers(): string[] {
   const raw = localStorage.getItem(TEST_MEMBERS_KEY);
   if (!raw) {
-    // デフォルトで井上賢治様のメールアドレスを初期許可登録
-    const defaultMembers = ['inoue@ajiado.co.jp', 'admin@heron.app'];
-    localStorage.setItem(TEST_MEMBERS_KEY, JSON.stringify(defaultMembers));
-    return defaultMembers;
+    localStorage.setItem(TEST_MEMBERS_KEY, JSON.stringify(PRESET_TEST_MEMBERS));
+    return PRESET_TEST_MEMBERS;
   }
   try {
-    return JSON.parse(raw);
+    const list: string[] = JSON.parse(raw);
+    const merged = Array.from(new Set([...PRESET_TEST_MEMBERS, ...list]));
+    return merged;
   } catch {
-    return ['inoue@ajiado.co.jp'];
+    return PRESET_TEST_MEMBERS;
   }
 }
 
 /**
- * 認証状態を保持するサービス (Google認証ホワイトリストアクセス制御機能付き)。
+ * 認証状態を保持するサービス (全端末対話型Google認証アクセス制御機能付き)。
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -65,12 +75,19 @@ export class AuthService {
     this.testMembers.set(updated);
   }
 
-  /** ホワイトリストチェック */
+  /** ホワイトリスト検証 (社内ドメイン @ajiado.co.jp 全員自動アクセス許可 ＆ 登録メンバー検証) */
   isAllowedEmail(email: string): boolean {
-    const clean = email.trim().toLowerCase();
-    const members = this.testMembers();
-    // admin や開発用IDは常に許可、それ以外のGoogleメールはテストメンバーリストで検証
+    const clean = (email || '').trim().toLowerCase();
+    if (!clean) return false;
+
+    // アジアド社内ドメイン @ajiado.co.jp は全端末から無条件アクセス自動許可
+    if (clean.endsWith('@ajiado.co.jp')) return true;
+
+    // デモ・開発用ID
     if (clean === 'admin' || clean === 'animator1' || clean === 'animator2') return true;
+
+    // 登録済み・プリセットテストメンバーリストとの検証
+    const members = this.testMembers();
     return members.some((m) => m.toLowerCase() === clean);
   }
 
