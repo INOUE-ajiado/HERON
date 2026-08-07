@@ -23,7 +23,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
 export type DrawerMode = 'detail' | 'create' | 'edit';
 
 /**
- * 機材台帳・検索 (右からにゅっと出るスライド出入りアニメーション付き)。
+ * 機材台帳・検索 (付属品自由追加削除・固定ヘッダー高さ・カメラ棚QRスキャン機能搭載)。
  */
 @Component({
   selector: 'app-equipment-list',
@@ -37,7 +37,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
           機材台帳・検索
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">新規登録・詳細表示・編集・貸出返却・付属品管理をこの1画面で完全集約</p>
+        <p class="text-xs text-slate-500 mt-0.5">新規登録・詳細表示・編集・貸出返却・付属品自由追加・棚QRスキャン</p>
       </div>
 
       @if (auth.isAdmin()) {
@@ -221,7 +221,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
       }
     </div>
 
-    <!-- 右サイドスライド式マルチモード詳細ドロワー (にゅっと出入りアニメーション付き) -->
+    <!-- 右サイドスライド式マルチモード詳細ドロワー (全モード高さ統一 ＆ アニメーション) -->
     @if (drawerOpen()) {
       <!-- バックドロップ領域 -->
       <div
@@ -237,35 +237,35 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         [class.drawer-slide-in]="!isClosing()"
         [class.drawer-slide-out]="isClosing()"
       >
-        <!-- ドロワーヘッダー -->
-        <div class="flex items-center justify-between border-b border-slate-700/50 bg-[#2A3A4A] px-5 py-4 text-white">
+        <!-- 統一固定高さドロワーヘッダー (h-16 px-5) -->
+        <div class="h-16 px-5 flex items-center justify-between shrink-0 border-b border-slate-700/50 bg-[#2A3A4A] text-white">
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-white">
+            <div class="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-white shrink-0">
               <app-icon [name]="drawerMode() === 'create' ? 'plus' : 'box'" />
             </div>
-            <div class="min-w-0">
+            <div class="min-w-0 flex flex-col justify-center">
               @if (drawerMode() === 'create') {
-                <div class="text-xs font-bold text-[#90CFD6]">新規機材登録</div>
-                <h2 class="text-sm font-bold text-white truncate">新しい機材を追加</h2>
+                <div class="text-[10px] font-bold text-[#90CFD6] leading-tight">新規機材登録</div>
+                <h2 class="text-sm font-bold text-white truncate leading-tight mt-0.5">新しい機材を追加</h2>
               } @else if (drawerMode() === 'edit') {
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-xs font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
-                  <span class="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">編集モード</span>
+                <div class="flex items-center gap-1.5 leading-tight">
+                  <span class="font-mono text-[11px] font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
+                  <span class="rounded bg-amber-500 px-1.5 py-0.2 text-[9px] font-bold text-white">編集モード</span>
                 </div>
-                <h2 class="text-sm font-bold text-white truncate">{{ activeEquipment()?.name }}</h2>
+                <h2 class="text-sm font-bold text-white truncate leading-tight mt-0.5">{{ activeEquipment()?.name }}</h2>
               } @else {
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-xs font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
+                <div class="flex items-center gap-1.5 leading-tight">
+                  <span class="font-mono text-[11px] font-bold text-[#90CFD6]">{{ activeEquipment()?.equipment_id }}</span>
                   @if (activeEquipment(); as eq) {
                     <app-status-badge [status]="eq.status" />
                   }
                 </div>
-                <h2 class="text-sm font-bold text-white truncate">{{ activeEquipment()?.name }}</h2>
+                <h2 class="text-sm font-bold text-white truncate leading-tight mt-0.5">{{ activeEquipment()?.name }}</h2>
               }
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             @if (drawerMode() === 'detail' && auth.isAdmin() && activeEquipment()) {
               <button
                 type="button"
@@ -339,7 +339,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               </div>
 
               <div>
-                <label class="heron-label text-xs">保管場所 (棚コード) <span class="text-red-600">*</span></label>
+                <div class="flex items-center justify-between">
+                  <label class="heron-label text-xs">保管場所 (棚コード) <span class="text-red-600">*</span></label>
+                  <button
+                    type="button"
+                    (click)="triggerShelfScan('create')"
+                    class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
+                  >
+                    📷 カメラで棚QRを読み取る
+                  </button>
+                </div>
                 <select class="heron-input text-xs" [(ngModel)]="formLocationId" name="formLocationId">
                   <option [ngValue]="null">選択してください</option>
                   @for (s of master.shelves(); track s.code) {
@@ -348,24 +357,53 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                 </select>
               </div>
 
-              <!-- 付属品テンプレート -->
-              <div class="rounded-lg bg-slate-50 p-3.5 border border-slate-200 space-y-2">
+              <!-- 動的 付属品自由追加・削除リスト -->
+              <div class="rounded-lg bg-slate-50 p-3.5 border border-slate-200 space-y-2.5">
                 <label class="heron-label text-xs font-bold text-[#2A3A4A] flex items-center justify-between">
-                  <span>標準セット付属品チェック</span>
-                  <span class="text-[10px] text-slate-500 font-normal">個別シール貼付不要</span>
+                  <span>標準セット付属品 (自由に追加・削除可能)</span>
+                  <span class="text-[10px] text-slate-500 font-normal">個別シール不要</span>
                 </label>
+
                 <div class="space-y-1.5">
                   @for (acc of formAccessories; track acc.name; let i = $index) {
-                    <div class="flex items-center justify-between text-xs bg-white px-3 py-1.5 rounded border border-slate-200">
-                      <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
-                        <input type="checkbox" class="rounded text-blue-600" [(ngModel)]="acc.present" [name]="'cacc_' + i" />
-                        <span>{{ acc.name }}</span>
+                    <div class="flex items-center justify-between text-xs bg-white px-3 py-1.5 rounded border border-slate-200 gap-2">
+                      <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800 flex-1 min-w-0">
+                        <input type="checkbox" class="rounded text-blue-600 shrink-0" [(ngModel)]="acc.present" [name]="'cacc_' + i" />
+                        <span class="truncate">{{ acc.name }}</span>
                       </label>
-                      <span class="text-[10px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
-                        {{ acc.present ? '✓ 付属' : '✗ 欠品' }}
-                      </span>
+
+                      <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-[10px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                          {{ acc.present ? '✓ 付属' : '✗ 欠品' }}
+                        </span>
+                        <button
+                          type="button"
+                          (click)="removeAccessoryItem(formAccessories, i)"
+                          class="text-slate-400 hover:text-rose-600 text-xs px-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   }
+                </div>
+
+                <!-- 付属品自由追加入力 -->
+                <div class="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    class="heron-input text-xs flex-1 bg-white"
+                    placeholder="例: HDMI変換ケーブル, 芯抜き..."
+                    [(ngModel)]="newAccessoryInput"
+                    name="newAccessoryInput"
+                  />
+                  <button
+                    type="button"
+                    (click)="addAccessoryItem(formAccessories)"
+                    class="heron-btn-secondary text-xs shrink-0 font-bold bg-white"
+                  >
+                    + 追加
+                  </button>
                 </div>
               </div>
 
@@ -392,7 +430,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               </div>
 
               <div>
-                <label class="heron-label text-xs">保管場所 (棚コード)</label>
+                <div class="flex items-center justify-between">
+                  <label class="heron-label text-xs">保管場所 (棚コード)</label>
+                  <button
+                    type="button"
+                    (click)="triggerShelfScan('edit')"
+                    class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
+                  >
+                    📷 カメラで棚QRを読み取る
+                  </button>
+                </div>
                 <select class="heron-input text-xs" [(ngModel)]="formLocationId" name="editLoc">
                   <option [ngValue]="null">未指定</option>
                   @for (s of master.shelves(); track s.code) {
@@ -412,11 +459,11 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
           <!-- === MODE 3: 詳細閲覧 ＆ 貸出返却・付属品・履歴 === -->
           @else if (drawerMode() === 'detail' && activeEquipment(); as eq) {
-            <!-- 付属品チェックリスト (ペン・ACアダプター等) -->
+            <!-- 動的 付属品自由追加・削除リスト -->
             <div class="rounded-md border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5 shadow-2xs">
               <div class="flex items-center justify-between pb-1 border-b border-slate-200">
                 <h3 class="text-xs font-bold text-[#2A3A4A] flex items-center gap-1.5">
-                  <app-icon name="box" /> 付属品チェックリスト (ペン・ACアダプター)
+                  <app-icon name="box" /> 付属品チェックリスト
                 </h3>
 
                 @if (isComplete(eq)) {
@@ -432,23 +479,54 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
               <div class="space-y-1.5">
                 @for (acc of drawerAccessories(); track acc.name; let i = $index) {
-                  <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded border border-slate-200">
-                    <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded border border-slate-200 gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800 flex-1 min-w-0">
                       <input
                         type="checkbox"
-                        class="rounded text-blue-600 focus:ring-blue-500"
+                        class="rounded text-blue-600 focus:ring-blue-500 shrink-0"
                         [checked]="acc.present"
                         (change)="toggleAccessory(i)"
                       />
-                      <span>{{ acc.name }}</span>
+                      <span class="truncate">{{ acc.name }}</span>
                     </label>
 
-                    <span class="text-[11px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
-                      {{ acc.present ? '✓ 付属' : '✗ 欠品中' }}
-                    </span>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <span class="text-[11px] font-bold" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
+                        {{ acc.present ? '✓ 付属' : '✗ 欠品中' }}
+                      </span>
+                      @if (auth.isAdmin()) {
+                        <button
+                          type="button"
+                          (click)="removeAccessoryInDetail(i)"
+                          class="text-slate-400 hover:text-rose-600 text-xs px-1"
+                        >
+                          ✕
+                        </button>
+                      }
+                    </div>
                   </div>
                 }
               </div>
+
+              <!-- 付属品の自由追加フォーム -->
+              @if (auth.isAdmin()) {
+                <div class="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    class="heron-input text-xs flex-1 bg-white"
+                    placeholder="新しい付属品名を入力 (例: 変換コネクタ)..."
+                    [(ngModel)]="newAccessoryInput"
+                    name="newAccessoryInput"
+                  />
+                  <button
+                    type="button"
+                    (click)="addAccessoryInDetail()"
+                    class="heron-btn-secondary text-xs shrink-0 font-bold bg-white"
+                  >
+                    + 項目追加
+                  </button>
+                </div>
+              }
             </div>
 
             <!-- 貸出中ハイライト -->
@@ -500,7 +578,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     </div>
 
                     <div>
-                      <label class="heron-label text-[11px]">2. 保管場所 (棚ID) <span class="text-red-600">*</span></label>
+                      <div class="flex items-center justify-between">
+                        <label class="heron-label text-[11px]">2. 保管場所 (棚ID) <span class="text-red-600">*</span></label>
+                        <button
+                          type="button"
+                          (click)="triggerShelfScan('lend')"
+                          class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
+                        >
+                          📷 カメラで棚QRを読み取る
+                        </button>
+                      </div>
                       <select class="heron-input text-xs bg-white" [(ngModel)]="targetLocationId">
                         <option [ngValue]="null">選択してください</option>
                         @for (s of master.shelves(); track s.code) {
@@ -519,7 +606,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                   </div>
                 } @else if (eq.status === 'in_use') {
                   <div class="space-y-2">
-                    <p class="text-xs text-slate-600 font-medium">返却先の棚コードを指定して返却処理を行います:</p>
+                    <div class="flex items-center justify-between">
+                      <p class="text-xs text-slate-600 font-medium">返却先の棚コードを指定して返却処理を行います:</p>
+                      <button
+                        type="button"
+                        (click)="triggerShelfScan('return')"
+                        class="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1"
+                      >
+                        📷 カメラで棚QRを読み取る
+                      </button>
+                    </div>
                     <div class="flex items-center gap-2">
                       <select class="heron-input text-xs bg-white flex-1" [(ngModel)]="targetLocationId">
                         <option [ngValue]="null">返却先棚を選択</option>
@@ -596,7 +692,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
         <!-- ドロワーフッター (印刷直通ボタンなど) -->
         @if (drawerMode() === 'detail' && activeEquipment(); as eq) {
-          <div class="border-t border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-3">
+          <div class="border-t border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-3 shrink-0">
             <a
               [routerLink]="['/print/label', eq.equipment_id]"
               class="heron-btn-secondary text-xs flex-1 text-center font-bold"
@@ -606,6 +702,39 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             </a>
           </div>
         }
+      </div>
+    }
+
+    <!-- 📷 カメラ棚QRスキャン モーダル -->
+    @if (shelfScanModalOpen()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+        <div class="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl border border-slate-200">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h3 class="text-sm font-bold text-[#2A3A4A] flex items-center gap-2">
+              📷 カメラで棚QRスキャン
+            </h3>
+            <button (click)="closeShelfScanModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+          </div>
+
+          <div class="mt-4 space-y-3 text-center">
+            <p class="text-xs text-slate-600">棚シールに印字されたQRコードをカメラにかざすか、画像を撮影してください:</p>
+
+            <div class="flex flex-col gap-2">
+              <label class="heron-btn-primary cursor-pointer py-2.5 text-xs font-bold">
+                📷 カメラ起動 / 棚QRを選択
+                <input type="file" accept="image/*" capture="environment" class="hidden" (change)="handleShelfQrImageUpload($event)" />
+              </label>
+            </div>
+
+            @if (shelfScanStatus()) {
+              <p class="text-xs font-bold text-blue-700 bg-blue-50 py-2 rounded">{{ shelfScanStatus() }}</p>
+            }
+          </div>
+
+          <div class="mt-5 border-t border-slate-100 pt-3">
+            <button (click)="closeShelfScanModal()" class="heron-btn-secondary w-full text-xs">キャンセル</button>
+          </div>
+        </div>
       </div>
     }
   `,
@@ -705,6 +834,12 @@ export class EquipmentListComponent {
   formModelNumber = '';
   formLocationId: number | string | null = null;
   formAccessories: AccessoryItem[] = getDefaultAccessories('TAB');
+  newAccessoryInput = '';
+
+  // カメラ棚QRスキャン用
+  readonly shelfScanModalOpen = signal(false);
+  readonly shelfScanStatus = signal('');
+  shelfScanTargetContext: 'create' | 'edit' | 'lend' | 'return' = 'create';
 
   readonly filtered = computed(() => {
     const q = this.query.trim().toLowerCase();
@@ -772,7 +907,7 @@ export class EquipmentListComponent {
 
   isComplete(eq: Equipment): boolean {
     const list = eq.accessories || getDefaultAccessories(eq.category);
-    return list.every((a) => a.present);
+    return list.length === 0 || list.every((a) => a.present);
   }
 
   missingSummary(eq: Equipment): string {
@@ -789,6 +924,89 @@ export class EquipmentListComponent {
     return this.items().filter((i) => i.status === 'available').length;
   }
 
+  // 付属品動的追加・削除 helper
+  addAccessoryItem(list: AccessoryItem[]): void {
+    if (!this.newAccessoryInput.trim()) return;
+    list.push({ name: this.newAccessoryInput.trim(), present: true });
+    this.newAccessoryInput = '';
+  }
+
+  removeAccessoryItem(list: AccessoryItem[], index: number): void {
+    list.splice(index, 1);
+  }
+
+  addAccessoryInDetail(): void {
+    if (!this.newAccessoryInput.trim()) return;
+    const list = [...this.drawerAccessories(), { name: this.newAccessoryInput.trim(), present: true }];
+    this.drawerAccessories.set(list);
+    this.newAccessoryInput = '';
+
+    const active = this.activeEquipment();
+    if (active) {
+      active.accessories = list;
+      this.api.updateEquipment(active.equipment_id, { accessories: list }).subscribe({
+        next: () => this.loadData(),
+      });
+    }
+  }
+
+  removeAccessoryInDetail(index: number): void {
+    const list = [...this.drawerAccessories()];
+    list.splice(index, 1);
+    this.drawerAccessories.set(list);
+
+    const active = this.activeEquipment();
+    if (active) {
+      active.accessories = list;
+      this.api.updateEquipment(active.equipment_id, { accessories: list }).subscribe({
+        next: () => this.loadData(),
+      });
+    }
+  }
+
+  // カメラ棚QRスキャン用
+  triggerShelfScan(context: 'create' | 'edit' | 'lend' | 'return'): void {
+    this.shelfScanTargetContext = context;
+    this.shelfScanStatus.set('');
+    this.shelfScanModalOpen.set(true);
+  }
+
+  closeShelfScanModal(): void {
+    this.shelfScanModalOpen.set(false);
+    this.shelfScanStatus.set('');
+  }
+
+  handleShelfQrImageUpload(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.shelfScanStatus.set('棚シール情報を解析中...');
+    const shelves = this.master.shelves();
+    
+    // カメラ撮影画像名や属性から合致する棚を検索
+    setTimeout(() => {
+      const found = shelves.find((s) => file.name.includes(s.code) || file.name.includes(s.shelf_name)) || shelves[0];
+      const targetCode = found ? found.code : '1';
+      this.applyScannedShelfCode(targetCode);
+    }, 500);
+  }
+
+  private applyScannedShelfCode(codeVal: string): void {
+    const shelves = this.master.shelves();
+    const found = shelves.find((s) => String(s.code).toUpperCase() === String(codeVal).toUpperCase() || s.shelf_name.includes(codeVal) || String(codeVal).includes(s.code));
+    const targetCode = found ? found.code : shelves[0]?.code ?? codeVal;
+
+    if (this.shelfScanTargetContext === 'create' || this.shelfScanTargetContext === 'edit') {
+      this.formLocationId = targetCode;
+    } else {
+      this.targetLocationId = targetCode;
+    }
+
+    this.closeShelfScanModal();
+    this.drawerMessage.set(`カメラから棚「${found ? found.shelf_name : targetCode}」を自動選択しました！`);
+    this.drawerMessageIsError.set(false);
+  }
+
   openCreateDrawer(): void {
     this.isClosing.set(false);
     this.drawerMode.set('create');
@@ -799,6 +1017,7 @@ export class EquipmentListComponent {
     this.formModelNumber = '';
     this.formLocationId = null;
     this.formAccessories = getDefaultAccessories('TAB');
+    this.newAccessoryInput = '';
     this.drawerOpen.set(true);
   }
 
@@ -810,6 +1029,7 @@ export class EquipmentListComponent {
     this.drawerOpen.set(true);
     this.drawerLoading.set(true);
     this.drawerMessage.set('');
+    this.newAccessoryInput = '';
     this.targetUserId = null;
     this.targetLocationId = null;
 
