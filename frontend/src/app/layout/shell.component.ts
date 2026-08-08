@@ -13,7 +13,7 @@ interface NavItem {
 }
 
 /**
- * 共通シェル (「機材台帳・検索」一本化ナビゲーション ＆ サイドバー下部仕様書・テスト設定表示対応).
+ * 共通シェル (「機材台帳・検索」一本化ナビゲーション ＆ サイドバー下部 基本設計書・テスト設定表示対応).
  */
 @Component({
   selector: 'app-shell',
@@ -55,16 +55,16 @@ interface NavItem {
           }
         </nav>
 
-        <!-- サイドバー下部 (仕様書 ＆ テスト設定 ＆ ログインユーザー表示) -->
+        <!-- サイドバー下部 (基本設計書 ＆ システム仕様書 ＆ テスト設定 ＆ ログインユーザー表示) -->
         <div class="border-t border-slate-800 p-3 space-y-1.5">
-          <!-- 仕様書リンク (マイメンバーのすぐ上に配置) -->
+          <!-- 基本設計書リンク (PDF) -->
           <a
             routerLink="/spec"
             routerLinkActive="bg-blue-600 text-white font-bold"
             class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
             <app-icon name="box" class="text-base text-[#90CFD6]" />
-            <span>仕様書</span>
+            <span>基本設計書</span>
           </a>
 
           <!-- システム仕様書 (仕様書のすぐ下) -->
@@ -157,7 +157,7 @@ interface NavItem {
           class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-slate-500"
         >
           <app-icon name="box" class="text-base" />
-          <span>仕様書</span>
+          <span>基本設計書</span>
         </a>
         <a
           routerLink="/system-spec"

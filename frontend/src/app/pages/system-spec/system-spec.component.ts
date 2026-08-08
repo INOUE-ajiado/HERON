@@ -640,7 +640,7 @@ interface TocItem {
 
                 <rect x="574" y="88" width="112" height="72" rx="6" fill="#f8fafc" stroke="#cbd5e1" />
                 <text x="630" y="110" text-anchor="middle" font-size="9.5" font-weight="700" fill="#334155">資料・設定</text>
-                <text x="630" y="128" text-anchor="middle" font-size="8.5" fill="#64748b">仕様書（PDF）</text>
+                <text x="630" y="128" text-anchor="middle" font-size="8.5" fill="#64748b">基本設計書（PDF）</text>
                 <text x="630" y="142" text-anchor="middle" font-size="8.5" fill="#64748b">システム仕様書</text>
                 <text x="630" y="156" text-anchor="middle" font-size="8.5" fill="#64748b">テスト設定</text>
 
@@ -917,7 +917,7 @@ export class SystemSpecComponent {
     ['マスタ設定', '部署コード・カテゴリコードの追加と削除', '管理者'],
     ['履歴', '全機材の操作ログの閲覧', '管理者'],
     ['ラベル印刷', '機材のQRコードラベルを印刷', '管理者'],
-    ['仕様書', '基本設計仕様書（PDF）の閲覧とダウンロード', '全員'],
+    ['基本設計書', '基本設計書（PDF）の閲覧とダウンロード', '全員'],
     ['システム仕様書', '本資料。構成図・手順書・運用マニュアル', '全員'],
     ['テスト設定', 'アクセス許可メンバーの管理と Ver情報の記録', '管理者'],
   ];

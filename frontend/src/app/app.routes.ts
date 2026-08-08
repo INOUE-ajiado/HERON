@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard } from './core/guards';
 
 /**
- * 画面構成 (仕様書 PDF 閲覧機能追加).
+ * 画面構成 (基本設計書 PDF ＆ システム仕様書 閲覧機能を含む).
  */
 export const routes: Routes = [
   {

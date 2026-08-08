@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { IconComponent } from '../../shared/icon.component';
 
 /**
- * HERON 基本設計仕様書 (HERON_System_Design-v2.pdf) 閲覧コンポーネント。
+ * HERON 基本設計書 (HERON_System_Design-v2.pdf) 閲覧コンポーネント。
  */
 @Component({
   selector: 'app-spec',
@@ -14,9 +14,9 @@ import { IconComponent } from '../../shared/icon.component';
       <div>
         <h1 class="text-lg font-bold text-[#2A3A4A] flex items-center gap-2">
           <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
-          HERON 基本設計仕様書 (v2.0)
+          HERON 基本設計書 (v2.0)
         </h1>
-        <p class="text-xs text-slate-500 mt-0.5">システムアーキテクチャ、データモデル、QRコード運用規定および各種仕様書</p>
+        <p class="text-xs text-slate-500 mt-0.5">システムアーキテクチャ、データモデル、QRコード運用規定を定めた基本設計書 (PDF)</p>
       </div>
 
       <div class="flex items-center gap-2">
@@ -37,7 +37,7 @@ import { IconComponent } from '../../shared/icon.component';
       <iframe
         src="HERON_System_Design-v2.pdf#toolbar=1"
         class="w-full h-[calc(100vh-180px)] min-h-[500px] border-none"
-        title="HERON 基本設計仕様書 (v2.0)"
+        title="HERON 基本設計書 (v2.0)"
       ></iframe>
     </div>
   `,
