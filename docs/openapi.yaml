@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: HERON API
+  description: アニメーションスタジオ向け機材管理システム HERON REST API 仕様書
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: ローカル開発 / Docker環境
+
+paths:
+  /auth/login:
+    post:
+      summary: ログイン (JWT発行)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [login_id, password]
+              properties:
+                login_id:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /auth/me:
+    get:
+      summary: 自身のユーザー情報取得
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /equipments:
+    get:
+      summary: 機材一覧・検索
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: location_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Equipment'
+    post:
+      summary: 機材新規登録 (管理者専用)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentCreatePayload'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+
+  /transactions/lend:
+    post:
+      summary: 機材の貸出 (管理者専用)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [equipment_id, target_user_id]
+              properties:
+                equipment_id:
+                  type: string
+                target_user_id:
+                  type: string
+      responses:
+        '200':
+          description: 貸出完了
+
+  /transactions/return:
+    post:
+      summary: 機材の返却 (管理者専用)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [equipment_id, location_id]
+              properties:
+                equipment_id:
+                  type: string
+                location_id:
+                  type: string
+      responses:
+        '200':
+          description: 返却完了
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        login_id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, general]
+
+    Equipment:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        model_number:
+          type: string
+        category_code:
+          type: string
+        status:
+          type: string
+          enum: [available, in_use, maintenance, discarded]
+        location_id:
+          type: string
+        current_user_id:
+          type: string
+
+    EquipmentCreatePayload:
+      type: object
+      required: [name, category_code, location_id]
+      properties:
+        name:
+          type: string
+        model_number:
+          type: string
+        category_code:
+          type: string
+        location_id:
+          type: string
