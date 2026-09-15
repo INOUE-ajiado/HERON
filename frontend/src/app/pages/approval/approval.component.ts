@@ -262,7 +262,7 @@ import { IconComponent } from '../../shared/icon.component';
                     @if (req.target_user) {
                       <div class="flex items-center text-xs">
                         <span class="w-24 font-bold text-slate-700">主な使用者</span>
-                        <span class="font-bold text-slate-950 bg-blue-100 px-2 py-0.5 rounded border border-blue-300 text-xs">{{ req.target_user }}</span>
+                        <span class="target-user-badge font-bold px-2 py-0.5 rounded border border-blue-300 text-xs" style="color: #0f172a !important; background-color: #dbeafe !important; border-color: #93c5fd !important;">{{ req.target_user }}</span>
                       </div>
                     }
                     @if (req.estimated_amount) {
@@ -362,9 +362,9 @@ import { IconComponent } from '../../shared/icon.component';
                                   </div>
 
                                   @if (item.target_user) {
-                                    <div class="text-[10.5px] text-slate-950 bg-blue-100 px-2 py-0.5 rounded border border-blue-300 inline-flex items-center gap-1.5 font-bold mt-1">
-                                      <span class="font-bold text-blue-950">👤 使用者・対象者:</span>
-                                      <span class="font-bold text-slate-950">{{ item.target_user }}</span>
+                                    <div class="target-user-badge text-[10.5px] px-2 py-0.5 rounded border border-blue-300 inline-block font-bold mt-1" style="color: #0f172a !important; background-color: #dbeafe !important; border-color: #93c5fd !important;">
+                                      <span style="color: #1e3a8a !important; font-weight: bold !important;">👤 使用者・対象者: </span>
+                                      <span style="color: #0f172a !important; font-weight: bold !important;">{{ item.target_user }}</span>
                                     </div>
                                   }
 
@@ -412,7 +412,7 @@ import { IconComponent } from '../../shared/icon.component';
                     @if (req.target_user) {
                       <div class="flex p-2 bg-blue-100/60 border-t border-slate-200">
                         <span class="w-24 font-bold text-blue-950 shrink-0">【使用者・対象者】</span>
-                        <span class="font-bold text-slate-950">{{ req.target_user }}</span>
+                        <span class="font-bold text-slate-950" style="color: #0f172a !important;">{{ req.target_user }}</span>
                       </div>
                     }
                     <div class="flex p-2 bg-slate-50/50">
@@ -1272,14 +1272,15 @@ export class ApprovalComponent {
       clone.style.margin = '0';
       clone.style.borderRadius = '0';
 
-      // PDF出力時、使用者・対象者バッジやテキストが薄くなる現象を防止するため、全不透明スタイルと高コントラスト文字色を直接適用
-      const targetUserBadges = clone.querySelectorAll('.bg-blue-100, .bg-blue-100\\/60');
-      targetUserBadges.forEach((el) => {
+      // PDF出力時、使用者・対象者バッジおよび内部テキストがhtml2canvasのCSS変数不具合で消えるのを完全防止
+      const targetUserElements = clone.querySelectorAll('.target-user-badge, .target-user-badge *');
+      targetUserElements.forEach((el) => {
         const htmlEl = el as HTMLElement;
-        htmlEl.style.backgroundColor = '#dbeafe'; // 完全不透明なライトブルー (#dbeafe)
-        htmlEl.style.color = '#020617';           // 完全不透明な濃いブラックネイビー (#020617)
-        htmlEl.style.borderColor = '#93c5fd';     // 視認性の高いボーダー (#93c5fd)
-        htmlEl.style.opacity = '1';
+        htmlEl.style.setProperty('color', '#0f172a', 'important');
+        htmlEl.style.setProperty('background-color', '#dbeafe', 'important');
+        htmlEl.style.setProperty('border-color', '#93c5fd', 'important');
+        htmlEl.style.setProperty('opacity', '1', 'important');
+        htmlEl.style.setProperty('visibility', 'visible', 'important');
       });
 
       // 外部プロキシ併用型Base64自動エンコード ＆ PDF用画像object-fit: contain強制適用
