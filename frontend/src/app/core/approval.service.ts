@@ -195,6 +195,7 @@ export class ApprovalService {
         quantity: 2,
         purchase_url: 'https://antigravity.google/enterprise',
         image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
+        target_user: '山田 惇斗（開発推進課）',
       },
       {
         name: 'コードセキュリティ ＆ 自動監査アドオン',
@@ -202,6 +203,7 @@ export class ApprovalService {
         quantity: 2,
         purchase_url: 'https://antigravity.google/security',
         image_url: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&w=600&q=80',
+        target_user: '鈴木 拓磨（デプロイ担当）',
       },
     ];
     return {
@@ -211,6 +213,7 @@ export class ApprovalService {
       applicant_department: '総務部 デジタル推進課',
       created_at: '2026/03/13',
       desired_date: '2026-03-19',
+      target_user: 'デジタル推進課 開発担当（山田・鈴木）',
       new_item_name: 'Google Antigravity Enterprise 外1点',
       items: items,
       cancel_item_name: 'ChatGPT (既存契約の解除)',
@@ -243,6 +246,7 @@ export class ApprovalService {
         quantity: 1,
         purchase_url: 'https://www.amazon.co.jp/dp/B0BGD5Z49H',
         image_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80',
+        target_user: '新規採用UIデザイナー（佐藤健太）',
       },
       {
         name: 'Wacom Cintiq Pro 27 Stand（専用スタンド）',
@@ -250,6 +254,7 @@ export class ApprovalService {
         quantity: 1,
         purchase_url: 'https://www.amazon.co.jp/dp/B0BGDBF82M',
         image_url: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=600&q=80',
+        target_user: '新規採用UIデザイナー（佐藤健太）',
       },
       {
         name: 'エルゴノミクス プロペン3 ツールセット',
@@ -257,6 +262,7 @@ export class ApprovalService {
         quantity: 1,
         purchase_url: 'https://www.amazon.co.jp/dp/B0BGDD987N',
         image_url: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=600&q=80',
+        target_user: '新規採用UIデザイナー（佐藤健太）',
       },
     ];
     return {
@@ -266,6 +272,7 @@ export class ApprovalService {
       applicant_department: 'クリエイティブ開発課',
       created_at: '2026/02/01',
       desired_date: '2026-02-10',
+      target_user: 'クリエイティブ開発課（新規UIデザイナー用）',
       new_item_name: 'Wacom Cintiq Pro 27 外2点',
       items: items,
       cancel_item_name: '古いペンタブレット (型番: DTK-2200)',

@@ -252,16 +252,22 @@ import { IconComponent } from '../../shared/icon.component';
                 <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                   <div class="w-full md:w-1/2 space-y-1.5 pt-0.5">
                     <div class="flex items-center text-xs">
-                      <span class="w-20 font-bold text-slate-500">所属部門</span>
+                      <span class="w-24 font-bold text-slate-500">所属部門</span>
                       <span class="font-medium text-slate-900">{{ req.applicant_department }}</span>
                     </div>
                     <div class="flex items-center text-xs">
-                      <span class="w-20 font-bold text-slate-500">起案者名</span>
+                      <span class="w-24 font-bold text-slate-500">起案者名</span>
                       <span class="font-medium text-slate-900 text-sm">{{ req.applicant_name }}</span>
                     </div>
+                    @if (req.target_user) {
+                      <div class="flex items-center text-xs">
+                        <span class="w-24 font-bold text-blue-700">主な使用者</span>
+                        <span class="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/80 text-xs">{{ req.target_user }}</span>
+                      </div>
+                    }
                     @if (req.estimated_amount) {
                       <div class="flex items-center text-xs">
-                        <span class="w-20 font-bold text-slate-500">購入合計金額</span>
+                        <span class="w-24 font-bold text-slate-500">購入合計金額</span>
                         <span class="font-bold text-blue-700 text-sm">{{ req.estimated_amount }}</span>
                       </div>
                     }
@@ -316,7 +322,7 @@ import { IconComponent } from '../../shared/icon.component';
                     <div class="p-2.5 bg-white space-y-2">
                       <div class="font-bold text-slate-800 text-[11px] flex items-center justify-between">
                         <span>【新規導入・購入品目明細】</span>
-                        <span class="text-[9.5px] text-slate-400 font-normal">品目リストごとに商品画像と購入先URLを表示</span>
+                        <span class="text-[9.5px] text-slate-400 font-normal">品目リストごとに使用者・商品画像・購入先URLを表示</span>
                       </div>
                       
                       @if (req.items && req.items.length > 0) {
@@ -345,7 +351,7 @@ import { IconComponent } from '../../shared/icon.component';
                                 }
 
                                 <div class="space-y-0.5 min-w-0 flex-1">
-                                  <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                  <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5 flex-wrap">
                                     <span class="px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 text-[9.5px] font-mono">#{{ idx + 1 }}</span>
                                     <span class="truncate">{{ item.name }}</span>
                                   </div>
@@ -354,6 +360,13 @@ import { IconComponent } from '../../shared/icon.component';
                                     <span>単価: <strong class="font-mono text-slate-800">{{ formatCurrency(item.price) }}</strong></span>
                                     <span>数量: <strong class="font-mono text-slate-800">{{ item.quantity }}</strong></span>
                                   </div>
+
+                                  @if (item.target_user) {
+                                    <div class="text-[10px] text-blue-900 bg-blue-50/90 px-2 py-0.5 rounded border border-blue-200/80 inline-flex items-center gap-1 font-medium mt-0.5">
+                                      <span class="font-bold text-blue-700">👤 使用者・対象者:</span>
+                                      <span class="font-bold">{{ item.target_user }}</span>
+                                    </div>
+                                  }
 
                                   @if (item.purchase_url) {
                                     <div class="text-[10px] flex items-center gap-1 pt-0.2">
@@ -396,6 +409,12 @@ import { IconComponent } from '../../shared/icon.component';
                       }
                     </div>
 
+                    @if (req.target_user) {
+                      <div class="flex p-2 bg-blue-50/30 border-t border-slate-200">
+                        <span class="w-24 font-bold text-blue-700 shrink-0">【使用者・対象者】</span>
+                        <span class="font-bold text-slate-900">{{ req.target_user }}</span>
+                      </div>
+                    }
                     <div class="flex p-2 bg-slate-50/50">
                       <span class="w-24 font-bold text-slate-500 shrink-0">【契約終了】</span>
                       <span class="font-medium text-slate-900">{{ req.cancel_item_name || 'なし' }}</span>
@@ -503,24 +522,40 @@ import { IconComponent } from '../../shared/icon.component';
                 </div>
               </div>
 
-              <div>
-                <label class="block font-bold text-slate-700 mb-1">件名 (Subject) *</label>
-                <input
-                  type="text"
-                  [(ngModel)]="formData.title"
-                  name="title"
-                  required
-                  placeholder="例: 開発用液晶タブレットの新規購入申請"
-                  class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">件名 (Subject) *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.title"
+                    name="title"
+                    required
+                    placeholder="例: 開発用液晶タブレットの新規購入申請"
+                    class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label class="block font-bold text-blue-800 mb-1 flex items-center gap-1">
+                    <span>主な使用者・利用対象者</span>
+                    <span class="text-[10px] text-slate-500 font-normal">(誰が必要としているか)</span>
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="formData.target_user"
+                    name="target_user"
+                    placeholder="例: 山田 惇斗（開発推進課）, UIデザインチーム全員"
+                    class="w-full bg-white border border-blue-300 rounded-xl px-3 py-2 text-slate-800 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
               </div>
 
-              <!-- 動的計算対応【新規導入・購入品目】エリア (アイテムごとの個別画像 ＆ URL登録) -->
+              <!-- 動的計算対応【新規導入・購入品目】エリア (アイテムごとの個別画像 ＆ URL ＆ 使用者登録) -->
               <div class="space-y-3 bg-slate-50/90 p-4 border border-slate-200 rounded-xl">
                 <div class="flex justify-between items-center border-b border-slate-200 pb-2">
                   <label class="block font-bold text-slate-800">
                     【新規導入・購入品目リスト】 *
-                    <span class="text-[10px] text-slate-500 font-normal ml-1">(品目ごとに商品名・金額・個数・購入先URL・商品画像を登録できます)</span>
+                    <span class="text-[10px] text-slate-500 font-normal ml-1">(品目ごとに商品名・使用者・金額・個数・購入先URL・画像を登録できます)</span>
                   </label>
                   <button
                     type="button"
@@ -594,8 +629,19 @@ import { IconComponent } from '../../shared/icon.component';
                       }
                     </div>
 
-                    <!-- アイテムごとの購入先URL ＆ 画像URL設定 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100 pl-7">
+                    <!-- アイテムごとの使用者・対象者 / 購入先URL / 画像URL設定 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-100 pl-7">
+                      <div>
+                        <label class="block text-[10px] font-bold text-blue-800 mb-0.5">👤 この品目の使用者・対象者</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="item.target_user"
+                          [name]="'item_target_user_' + idx"
+                          placeholder="例: 山田 惇斗（開発推進課）"
+                          class="w-full bg-blue-50/50 border border-blue-200 rounded-lg px-2.5 py-1 text-[11px] text-slate-800 font-medium focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                        />
+                      </div>
+
                       <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-0.5">購入先URL (Amazon等)</label>
                         <input
@@ -869,7 +915,8 @@ export class ApprovalComponent {
     applicant_department: string;
     created_at: string;
     desired_date: string;
-    items: { name: string; price: number; quantity: number; purchase_url?: string; image_url?: string }[];
+    target_user: string;
+    items: { name: string; price: number; quantity: number; purchase_url?: string; image_url?: string; target_user?: string }[];
     cancel_item_name: string;
     usage_purpose: string;
     reason_detail: string;
@@ -879,7 +926,8 @@ export class ApprovalComponent {
     applicant_department: '総務部 デジタル推進課',
     created_at: new Date().toLocaleDateString('ja-JP'),
     desired_date: this.defaultDesiredDate,
-    items: [{ name: '', price: 0, quantity: 1, purchase_url: '', image_url: '' }],
+    target_user: '',
+    items: [{ name: '', price: 0, quantity: 1, purchase_url: '', image_url: '', target_user: '' }],
     cancel_item_name: '',
     usage_purpose: '',
     reason_detail: '',
@@ -921,7 +969,7 @@ export class ApprovalComponent {
   }
 
   addNewItemField() {
-    this.formData.items.push({ name: '', price: 0, quantity: 1, purchase_url: '', image_url: '' });
+    this.formData.items.push({ name: '', price: 0, quantity: 1, purchase_url: '', image_url: '', target_user: '' });
   }
 
   removeNewItemField(index: number) {
@@ -973,7 +1021,8 @@ export class ApprovalComponent {
     this.formData.desired_date = this.defaultDesiredDate;
     this.formData.title = '';
     this.formData.applicant_department = '総務部 デジタル推進課';
-    this.formData.items = [{ name: '', price: 0, quantity: 1, purchase_url: '', image_url: '' }];
+    this.formData.target_user = '';
+    this.formData.items = [{ name: '', price: 0, quantity: 1, purchase_url: '', image_url: '', target_user: '' }];
     this.formData.cancel_item_name = '';
     this.formData.usage_purpose = '';
     this.formData.reason_detail = '';
@@ -991,6 +1040,7 @@ export class ApprovalComponent {
     this.formData.applicant_department = req.applicant_department;
     this.formData.created_at = req.created_at;
     this.formData.desired_date = req.desired_date || this.defaultDesiredDate;
+    this.formData.target_user = req.target_user || '';
     this.formData.cancel_item_name = req.cancel_item_name || '';
     this.formData.usage_purpose = req.usage_purpose || '';
     this.formData.reason_detail = req.reason_detail || '';
@@ -1006,6 +1056,7 @@ export class ApprovalComponent {
           quantity: 1,
           purchase_url: '',
           image_url: '',
+          target_user: req.target_user || '',
         },
       ];
     }
@@ -1038,11 +1089,13 @@ export class ApprovalComponent {
         quantity: Number(i.quantity) || 1,
         purchase_url: i.purchase_url ? i.purchase_url.trim() : undefined,
         image_url: i.image_url ? i.image_url.trim() : undefined,
+        target_user: i.target_user ? i.target_user.trim() : undefined,
       }));
 
     const primaryItemName =
       validItems.length > 0 ? validItems[0].name : '購入品目未入力';
     const totalAmountStr = this.formatCurrency(this.calculateTotalAmount());
+    const mainTargetUser = this.formData.target_user.trim() || (validItems.length > 0 ? validItems[0].target_user : undefined);
 
     if (this.isEditMode() && this.editingRequestId) {
       // 編集更新
@@ -1050,6 +1103,7 @@ export class ApprovalComponent {
         title: this.formData.title,
         applicant_department: this.formData.applicant_department,
         desired_date: this.formData.desired_date,
+        target_user: mainTargetUser,
         new_item_name: primaryItemName,
         items: validItems,
         new_items: validItems.map((i) => i.name),
@@ -1071,6 +1125,7 @@ export class ApprovalComponent {
         applicant_department: this.formData.applicant_department,
         created_at: this.formData.created_at,
         desired_date: this.formData.desired_date,
+        target_user: mainTargetUser,
         new_item_name: primaryItemName,
         items: validItems,
         new_items: validItems.map((i) => i.name),

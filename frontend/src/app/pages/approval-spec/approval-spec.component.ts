@@ -121,6 +121,11 @@ import { IconComponent } from '../../shared/icon.component';
                 <td class="border border-slate-200 p-2.5"><code class="bg-slate-100 px-1 py-0.5 rounded text-blue-700">&lt;input type="date"&gt;</code> による直感的な日付選択。デフォルト値は本日+7日。</td>
               </tr>
               <tr>
+                <td class="border border-slate-200 p-2.5 font-bold">使用者・対象者</td>
+                <td class="border border-slate-200 p-2.5">テキスト</td>
+                <td class="border border-slate-200 p-2.5">「このアイテム/ツールは誰が必要としているのか」を明確化する登録項目（全体・品目個別ともに設定可能）。</td>
+              </tr>
+              <tr>
                 <td class="border border-slate-200 p-2.5 font-bold">購入先URL</td>
                 <td class="border border-slate-200 p-2.5">URLテキスト</td>
                 <td class="border border-slate-200 p-2.5">Amazon等の販売ページリンクを入力・プレビュー表示に対応。</td>
@@ -188,17 +193,28 @@ import { IconComponent } from '../../shared/icon.component';
       <section id="section-6" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
         <h2 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3 flex items-center gap-2">
           <span class="w-2.5 h-2.5 bg-blue-600 rounded-full"></span>
-          <span>6. データモデル定義 (ApprovalRequest)</span>
+          <span>6. データモデル定義 (ApprovalRequest & PurchaseItem)</span>
         </h2>
         <div class="text-xs text-slate-700 leading-relaxed">
-          <pre class="p-4 bg-slate-900 text-slate-100 rounded-xl overflow-x-auto font-mono text-[11px] leading-normal"><code>export interface ApprovalRequest &#123;
+          <pre class="p-4 bg-slate-900 text-slate-100 rounded-xl overflow-x-auto font-mono text-[11px] leading-normal"><code>export interface PurchaseItem &#123;
+  name: string;                  // 商品名・品目名
+  price: number;                 // 単価 (円)
+  quantity: number;              // 数量
+  purchase_url?: string;         // 購入先URL
+  image_url?: string;            // 商品画像URL
+  target_user?: string;          // 使用者・対象者 (誰が必要としているか)
+&#125;
+
+export interface ApprovalRequest &#123;
   id: string;                    // 識別ID (例: APR-20260313)
   title: string;                 // 件名
   applicant_name: string;        // 起案者氏名
   applicant_department: string;  // 所属部門
   created_at: string;            // 起案日 (YYYY/MM/DD)
   desired_date: string;          // 決済希望日 (YYYY-MM-DD)
+  target_user?: string;          // 主な使用者・利用対象者
   new_item_name: string;         // 【新規導入】
+  items?: PurchaseItem[];        // 【新規導入・購入品目明細】
   cancel_item_name: string;      // 【契約終了】
   usage_purpose: string;         // 【主な用途】
   reason_detail: string;         // 申請理由・目的

@@ -26,13 +26,14 @@ export interface StampInfo {
   completed: boolean;
 }
 
-/** 購入品目（商品名・単価・個数・個別購入先URL・個別画像URL） */
+/** 購入品目（商品名・単価・個数・個別購入先URL・個別画像URL・使用者/対象者） */
 export interface PurchaseItem {
   name: string;
   price: number;
   quantity: number;
   purchase_url?: string;
   image_url?: string;
+  target_user?: string;           // 使用者・対象者 (誰が必要としているか)
 }
 
 export interface ApprovalRequest {
@@ -42,11 +43,12 @@ export interface ApprovalRequest {
   applicant_department: string;  // 所属部門
   created_at: string;            // 起案日
   desired_date: string;          // 決済希望日
+  target_user?: string;          // 主な使用者・対象者 (誰が必要としているか)
   
   // 詳細・概要
   new_item_name: string;         // 【新規導入】（単一または代表品目名）
   new_items?: string[];          // 後方互換用
-  items?: PurchaseItem[];        // 【新規導入・購入品目】明細（商品名・金額・個数・URL・画像）
+  items?: PurchaseItem[];        // 【新規導入・購入品目】明細（商品名・金額・個数・URL・画像・使用者）
   cancel_item_name: string;      // 【契約終了】
   usage_purpose: string;         // 【主な用途】
   reason_detail: string;         // 申請理由・目的詳細
