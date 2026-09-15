@@ -23,10 +23,10 @@ interface NavItem {
     <div class="flex min-h-screen flex-col md:flex-row bg-white">
       <!-- サイドバー（md 以上） -->
       <aside
-        class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-heron-navy md:flex"
+        class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-heron-navy md:flex sticky top-0 h-screen z-20"
       >
         <!-- ロゴ ＆ タイトルヘッダー -->
-        <div class="px-4 py-4 border-b border-slate-800 flex items-center gap-3">
+        <div class="px-4 py-4 border-b border-slate-800 flex items-center gap-3 shrink-0">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden">
             <img src="icon.png" alt="HERON Logo" class="h-full w-full object-contain scale-110" />
           </div>
@@ -39,8 +39,8 @@ interface NavItem {
           </div>
         </div>
 
-        <!-- ナビゲーション -->
-        <nav class="flex-1 space-y-0.5 p-3">
+        <!-- ナビゲーション (スクロールエリア) -->
+        <nav class="flex-1 overflow-y-auto space-y-0.5 p-3">
           @for (item of visibleNav(); track item.path) {
             <a
               [routerLink]="item.path"
@@ -55,8 +55,8 @@ interface NavItem {
           }
         </nav>
 
-        <!-- サイドバー下部 (基本設計書 ＆ システム仕様書 ＆ テスト設定 ＆ ログインユーザー表示) -->
-        <div class="border-t border-slate-800 p-3 space-y-1.5">
+        <!-- サイドバー下部 (常時最下部固定: 基本設計書 ＆ システム仕様書 ＆ テスト設定 ＆ ログインユーザー表示) -->
+        <div class="shrink-0 border-t border-slate-800 p-3 space-y-1.5 bg-heron-navy">
           <!-- 基本設計書リンク (PDF) -->
           <a
             routerLink="/spec"
@@ -75,6 +75,16 @@ interface NavItem {
           >
             <app-icon name="doc" class="text-base text-[#90CFD6]" />
             <span>システム仕様書</span>
+          </a>
+
+          <!-- 稟議システム仕様書 -->
+          <a
+            routerLink="/approval-spec"
+            routerLinkActive="bg-blue-600 text-white font-bold"
+            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+          >
+            <app-icon name="doc" class="text-base text-[#90CFD6]" />
+            <span>稟議システム仕様書</span>
           </a>
 
           @if (auth.isAdmin()) {
@@ -177,6 +187,7 @@ export class ShellComponent {
 
   private readonly nav = signal<NavItem[]>([
     { path: '/equipments', label: '機材台帳・検索', icon: 'box', adminOnly: false, exact: false },
+    { path: '/approval', label: '稟議申請', icon: 'doc', adminOnly: false, exact: false },
     { path: '/inventory', label: '棚卸し', icon: 'shelf', adminOnly: true, exact: false },
     { path: '/locations', label: '保管場所', icon: 'pin', adminOnly: true, exact: false },
     { path: '/settings', label: 'マスタ設定', icon: 'pin', adminOnly: true, exact: false },

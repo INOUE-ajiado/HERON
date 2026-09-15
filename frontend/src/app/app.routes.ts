@@ -77,6 +77,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'approval',
+        loadComponent: () =>
+          import('./pages/approval/approval.component').then(
+            (m) => m.ApprovalComponent,
+          ),
+      },
+      {
+        path: 'approval-spec',
+        loadComponent: () =>
+          import('./pages/approval-spec/approval-spec.component').then(
+            (m) => m.ApprovalSpecComponent,
+          ),
+      },
+      {
         path: 'spec',
         loadComponent: () =>
           import('./pages/spec/spec.component').then((m) => m.SpecComponent),

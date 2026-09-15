@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><style>html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: auto; box-sizing: border-box; } img, video, canvas { max-width: 100%; height: auto; }</style><script>(function(){function s(l,a){try{const sa=a.map(x=>{if(typeof x==='undefined')return'undefined';if(x===null)return'null';if(typeof x==='object'){try{return JSON.stringify(x,null,2)}catch(e){return x.toString()}}return x.toString()});window.parent.postMessage({source:'iframe-console',level:l,messages:sa},'*')}catch(e){}}const o={l:console.log,w:console.warn,e:console.error,i:console.info};console.log=function(...a){s('log',a);o.l.apply(console,a)};console.warn=function(...a){s('warn',a);o.w.apply(console,a)};console.error=function(...a){s('error',a);o.e.apply(console,a)};console.info=function(...a){s('info',a);o.i.apply(console,a)};window.onerror=function(m){s('error',[m])}})()</script>
+    <script>
+      (function() {
+        document.addEventListener('click', function(e) {
+          const a = e.target.closest('a');
+          if (a && a.getAttribute('href') && !a.getAttribute('href').startsWith('http') && !a.getAttribute('href').startsWith('#')) {
+            e.preventDefault();
+            window.parent.postMessage({
+              source: 'iframe-navigation',
+              url: a.getAttribute('href')
+            }, '*');
+          }
+        });
+      })();
+    </script>
+  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>デジタル印鑑（電子印鑑）デザインカタログ</title>
+<style>
+    :root {
+        --bg-main: #f8f9fa;
+        --text-main: #333333;
+        --card-bg: #ffffff;
+        
+        /* Stamp Colors */
+        --c-vermilion: #e60012; /* 朱色 */
+        --c-darkred: #8b0000;
+        --c-blue: #0052cc;
+        --c-green: #218c74;
+        --c-black: #2d3436;
+        --c-orange: #d35400;
+        --c-purple: #8e44ad;
+    }
+
+    body {
+        margin: 0;
+        padding: 40px 20px;
+        font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        /* 判子を押す紙のテクスチャを意識した和紙風・方眼風の背景 */
+        background-image: 
+            linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .header h1 {
+        font-size: 2.2rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .category-title {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        border-bottom: 2px solid #ccc;
+        padding-bottom: 10px;
+        margin: 40px 0 20px;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #eaeaea;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .stamp-container {
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        width: 100%;
+        /* Blend mode to make it look like ink on paper */
+        mix-blend-mode: multiply;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+
+    .card-desc {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        text-align: center;
+        margin: 0;
+    }
+
+    /* =========================================
+       Stamp Base Styles (Shared)
+       ========================================= */
+    .stamp {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        line-height: 1.2;
+    }
+    
+    .font-serif { font-family: 'Times New Roman', 'MS Mincho', 'Hiragino Mincho ProN', serif; }
+    .font-sans { font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif; font-weight: bold; }
+    .font-mono { font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+
+    /* =========================================
+       Category 1: Standard (伝統的・日付印)
+       ========================================= */
+    
+    /* 1. スタンダード日付印（丸） */
+    .s-1 {
+        width: 70px; height: 70px;
+        border: 2px solid var(--c-vermilion);
+        border-radius: 50%;
+        color: var(--c-vermilion);
+    }
+    .s-1 .top { font-size: 12px; margin-bottom: 2px; }
+    .s-1 .mid { font-size: 10px; border-top: 1px solid var(--c-vermilion); border-bottom: 1px solid var(--c-vermilion); padding: 2px 0; width: 100%; text-align: center; letter-spacing: -0.5px;}
+    .s-1 .bot { font-size: 12px; margin-top: 2px; }
+
+    /* 2. 二重丸（部署名入り） */
+    .s-2 {
+        width: 76px; height: 76px;
+        border: 3px double var(--c-vermilion);
+        border-radius: 50%;
+        color: var(--c-vermilion);
+        position: relative;
+    }
+    .s-2 .inner {
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .s-2 .dept { font-size: 9px; margin-bottom: 1px; letter-spacing: 1px; }
+    .s-2 .date { font-size: 10px; border-top: 1px solid var(--c-vermilion); border-bottom: 1px solid var(--c-vermilion); width: 80%; text-align: center; padding: 2px 0;}
+    .s-2 .name { font-size: 12px; margin-top: 1px; }
+
+    /* 3. オーバル（楕円） */
+    .s-3 {
+        width: 90px; height: 60px;
+        border: 2px solid var(--c-darkred);
+        border-radius: 50%;
+        color: var(--c-darkred);
+    }
+    .s-3 .top { font-size: 12px; }
+    .s-3 .mid { font-size: 12px; border-top: 1px solid var(--c-darkred); border-bottom: 1px solid var(--c-darkred); width: 100%; text-align: center; margin: 2px 0; padding: 1px 0;}
+    .s-3 .bot { font-size: 12px; }
+
+    /* 4. 極太フレーム */
+    .s-4 {
+        width: 70px; height: 70px;
+        border: 5px solid var(--c-vermilion);
+        border-radius: 50%;
+        color: var(--c-vermilion);
+    }
+    .s-4 .top { font-size: 12px; margin-bottom: 2px; }
+    .s-4 .mid { font-size: 10px; width: 100%; text-align: center; border-top: 2px solid var(--c-vermilion); border-bottom: 2px solid var(--c-vermilion); padding: 1px 0;}
+    .s-4 .bot { font-size: 12px; margin-top: 2px; }
+
+    /* 5. 破線フレーム（少しカジュアル） */
+    .s-5 {
+        width: 70px; height: 70px;
+        border: 2px dashed var(--c-vermilion);
+        border-radius: 50%;
+        color: var(--c-vermilion);
+    }
+    .s-5 .mid { font-size: 11px; width: 100%; text-align: center; padding: 3px 0; border-top: 1px dashed var(--c-vermilion); border-bottom: 1px dashed var(--c-vermilion); margin: 3px 0;}
+    .s-5 .name { font-size: 14px; }
+
+
+    /* =========================================
+       Category 2: Modern & Minimal (角型・モダン)
+       ========================================= */
+
+    /* 6. 角丸レクタングル（横長） */
+    .s-6 {
+        width: 100px; height: 50px;
+        border: 2px solid var(--c-vermilion);
+        border-radius: 8px;
+        color: var(--c-vermilion);
+        flex-direction: row;
+        justify-content: space-evenly;
+    }
+    .s-6 .date { font-size: 11px; display: flex; flex-direction: column; align-items: center;}
+    .s-6 .line { width: 1px; height: 80%; background-color: var(--c-vermilion); }
+    .s-6 .name { font-size: 18px; letter-spacing: 2px;}
+
+    /* 7. シャープスクエア */
+    .s-7 {
+        width: 70px; height: 70px;
+        border: 2px solid var(--c-black);
+        color: var(--c-black);
+    }
+    .s-7 .date { font-size: 10px; padding: 4px; border-bottom: 2px solid var(--c-black); width: 100%; text-align: center;}
+    .s-7 .name { font-size: 20px; padding: 8px; letter-spacing: 4px;}
+
+    /* 8. ブラケットスタイル（左右線のみ） */
+    .s-8 {
+        width: 80px; height: 60px;
+        border-left: 3px solid var(--c-blue);
+        border-right: 3px solid var(--c-blue);
+        color: var(--c-blue);
+        justify-content: space-between;
+        padding: 5px 0;
+    }
+    .s-8 .dept { font-size: 10px; color: #666; }
+    .s-8 .name { font-size: 16px; }
+    .s-8 .date { font-size: 11px; }
+
+    /* 9. アシンメトリー（左線太） */
+    .s-9 {
+        width: 100px; height: 50px;
+        border: 1px solid var(--c-vermilion);
+        border-left: 8px solid var(--c-vermilion);
+        color: var(--c-vermilion);
+        flex-direction: row;
+        padding: 0 10px;
+        justify-content: space-between;
+    }
+    .s-9 .info { display: flex; flex-direction: column; }
+    .s-9 .date { font-size: 10px; }
+    .s-9 .name { font-size: 16px; margin-top: 2px; }
+
+    /* 10. ボーダーレス（線のみ） */
+    .s-10 {
+        width: 90px; height: 50px;
+        color: var(--c-vermilion);
+    }
+    .s-10 .date { font-size: 12px; }
+    .s-10 .line { width: 100%; height: 2px; background: var(--c-vermilion); margin: 4px 0; }
+    .s-10 .name { font-size: 16px; letter-spacing: 4px; padding-left: 4px; }
+
+
+    /* =========================================
+       Category 3: Workflow & Status (承認・ステータス)
+       ========================================= */
+
+    /* 11. 承認済 (斜め) */
+    .s-11 {
+        width: 100px; height: 60px;
+        border: 3px solid var(--c-vermilion);
+        border-radius: 4px;
+        color: var(--c-vermilion);
+        transform: rotate(-10deg);
+    }
+    .s-11 .status { font-size: 14px; font-weight: 900; letter-spacing: 2px; border-bottom: 1px solid var(--c-vermilion); width: 100%; text-align: center; padding-bottom: 2px;}
+    .s-11 .bottom { display: flex; width: 100%; justify-content: space-evenly; padding-top: 4px; align-items: center; }
+    .s-11 .date { font-size: 10px; }
+    .s-11 .name { font-size: 14px; }
+
+    /* 12. 確認済 (青色・丸角) */
+    .s-12 {
+        width: 90px; height: 50px;
+        border: 2px solid var(--c-blue);
+        border-radius: 25px;
+        color: var(--c-blue);
+        flex-direction: row;
+        padding: 0 15px;
+        justify-content: space-between;
+    }
+    .s-12 .left { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--c-blue); padding-right: 10px;}
+    .s-12 .right { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-left: 5px;}
+    .s-12 .status { font-size: 12px; font-weight: bold; }
+    .s-12 .date { font-size: 9px; }
+    .s-12 .name { font-size: 14px; }
+
+    /* 13. チェックマーク入り (緑) */
+    .s-13 {
+        width: 110px; height: 45px;
+        border: 2px solid var(--c-green);
+        border-radius: 6px;
+        color: var(--c-green);
+        flex-direction: row;
+        padding: 0 10px;
+    }
+    .s-13 .icon { font-size: 20px; margin-right: 10px; }
+    .s-13 .details { display: flex; flex-direction: column; }
+    .s-13 .date { font-size: 10px; }
+    .s-13 .name { font-size: 14px; }
+
+    /* 14. 受領印 (紫・ドット) */
+    .s-14 {
+        width: 70px; height: 70px;
+        border: 4px dotted var(--c-purple);
+        border-radius: 50%;
+        color: var(--c-purple);
+    }
+    .s-14 .status { font-size: 12px; margin-bottom: 2px; }
+    .s-14 .date { font-size: 10px; border-top: 1px solid var(--c-purple); border-bottom: 1px solid var(--c-purple); width: 100%; text-align: center; padding: 2px 0;}
+    .s-14 .name { font-size: 14px; margin-top: 2px; }
+
+    /* 15. 保留 (オレンジ・点線角) */
+    .s-15 {
+        width: 90px; height: 50px;
+        border: 2px dashed var(--c-orange);
+        color: var(--c-orange);
+    }
+    .s-15 .status { font-size: 12px; letter-spacing: 4px; padding-left: 4px;}
+    .s-15 .date { font-size: 10px; }
+
+
+    /* =========================================
+       Category 4: Creative & Custom (ユニーク・カスタム)
+       ========================================= */
+
+    /* 16. ヘキサゴン (IT・Tech系) */
+    .s-16 {
+        width: 80px; height: 70px;
+        background-color: var(--c-black);
+        color: white;
+        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+    .s-16 .name { font-size: 16px; margin-bottom: 2px;}
+    .s-16 .date { font-size: 10px; color: #a4b0be; }
+
+    /* 17. チケットスタイル (切り欠き) */
+    .s-17 {
+        width: 100px; height: 50px;
+        border: 2px solid var(--c-vermilion);
+        color: var(--c-vermilion);
+        /* 簡易的なチケット風切り欠き表現（疑似要素） */
+        position: relative;
+        overflow: hidden;
+    }
+    .s-17::before, .s-17::after {
+        content: ""; position: absolute; top: 50%; width: 12px; height: 12px;
+        background: var(--card-bg); border: 2px solid var(--c-vermilion); border-radius: 50%;
+        transform: translateY(-50%);
+    }
+    .s-17::before { left: -8px; }
+    .s-17::after { right: -8px; }
+    .s-17 .wrapper { display: flex; justify-content: space-between; width: 100%; padding: 0 15px; align-items: center;}
+    .s-17 .date { font-size: 10px; }
+    .s-17 .name { font-size: 16px; }
+
+    /* 18. グラデーションボーダー (Webモダン) */
+    .s-18 {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        padding: 4px;
+        background: linear-gradient(45deg, #ff9a9e, #fecfef);
+        color: #333;
+    }
+    .s-18 .inner {
+        width: 100%; height: 100%; background: white; border-radius: 50%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .s-18 .name { font-size: 16px; }
+    .s-18 .date { font-size: 10px; color: #666;}
+
+    /* 19. レシート印字風 (モノスペース・ドット) */
+    .s-19 {
+        width: 120px; height: 50px;
+        border: 2px dotted #555;
+        color: #555;
+        padding: 5px;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    .s-19 .row { display: flex; justify-content: space-between; width: 100%; font-size: 12px; }
+
+    /* 20. 3Dエンボス風 (シャドウ活用) */
+    .s-20 {
+        width: 70px; height: 70px;
+        border-radius: 50%;
+        background: #f0f0f0;
+        color: var(--c-vermilion);
+        box-shadow: 4px 4px 8px #d1d1d1, -4px -4px 8px #ffffff;
+        border: 1px solid #e0e0e0;
+    }
+    .s-20 .top { font-size: 12px; margin-bottom: 2px;}
+    .s-20 .mid { font-size: 9px; width: 80%; border-top: 1px solid var(--c-vermilion); border-bottom: 1px solid var(--c-vermilion); text-align:center; padding: 2px 0;}
+    .s-20 .bot { font-size: 12px; margin-top: 2px;}
+
+</style>
+<style data-filename="style.css">/* style.css */
+</style></head>
+<body>
+
+<div class="header">
+    <h1>デジタル印鑑 デザインカタログ</h1>
+    <p>氏名と日付（2026.09.03）を組み合わせた、20種類の電子印鑑UIパターン</p>
+</div>
+
+<!-- ==================================================
+     Category 1: Standard (伝統的・日付印)
+     ================================================== -->
+<h2 class="category-title">1. Standard 伝統的・日付印スタイル</h2>
+<div class="catalog-grid">
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-1 font-serif">
+                <div class="top">山田</div>
+                <div class="mid">'26.09.03</div>
+                <div class="bot">太郎</div>
+            </div>
+        </div>
+        <div class="card-title">1. シンプル丸印</div>
+        <div class="card-desc">日本のビジネスで最も一般的な3段構成の日付印スタイル。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-2 font-serif">
+                <div class="inner">
+                    <div class="dept">営業部</div>
+                    <div class="date">26.09.03</div>
+                    <div class="name">佐藤</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-title">2. 二重丸印（部署名入）</div>
+        <div class="card-desc">外枠を二重線にし、部署名や役職を配置できるフォーマルなデザイン。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-3 font-serif">
+                <div class="top">鈴木</div>
+                <div class="mid">2026.09.03</div>
+                <div class="bot">経理課</div>
+            </div>
+        </div>
+        <div class="card-title">3. オーバル（楕円）</div>
+        <div class="card-desc">少し暗めの赤（ダークレッド）を使用した、クラシックな楕円形印。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-4 font-serif">
+                <div class="top">田中</div>
+                <div class="mid">26.09.03</div>
+                <div class="bot">決済</div>
+            </div>
+        </div>
+        <div class="card-title">4. 極太フレーム</div>
+        <div class="card-desc">枠線と区切り線を太くし、力強さと重要性を示すデザイン。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-5 font-serif">
+                <div class="mid">2026.09.03</div>
+                <div class="name">伊藤</div>
+            </div>
+        </div>
+        <div class="card-title">5. 破線フレーム</div>
+        <div class="card-desc">破線を使用し、社内用の回覧など少しカジュアルな用途に適したデザイン。</div>
+    </div>
+</div>
+
+<!-- ==================================================
+     Category 2: Modern & Minimal (角型・モダン)
+     ================================================== -->
+<h2 class="category-title">2. Modern & Minimal 角型・モダンスタイル</h2>
+<div class="catalog-grid">
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-6 font-sans">
+                <div class="date"><span>2026</span><span>09.03</span></div>
+                <div class="line"></div>
+                <div class="name">渡辺</div>
+            </div>
+        </div>
+        <div class="card-title">6. 角丸レクタングル</div>
+        <div class="card-desc">横長の角丸枠。左に日付、右に名前を配置したモダンなレイアウト。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-7 font-serif">
+                <div class="date">2026.09.03</div>
+                <div class="name">中村</div>
+            </div>
+        </div>
+        <div class="card-title">7. シャープスクエア</div>
+        <div class="card-desc">黒を使用したソリッドな四角形。契約書やデジタル署名に合う硬派な印象。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-8 font-sans">
+                <div class="dept">DESIGN</div>
+                <div class="name">小林</div>
+                <div class="date">2026.09.03</div>
+            </div>
+        </div>
+        <div class="card-title">8. ブラケットスタイル</div>
+        <div class="card-desc">上下の枠を無くし、左右の青い太線のみで領域を区切るスマートな表現。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-9 font-sans">
+                <div class="info">
+                    <div class="date">2026.09.03</div>
+                    <div class="name">加藤</div>
+                </div>
+                <div class="info" style="justify-content:center; font-size:20px;">印</div>
+            </div>
+        </div>
+        <div class="card-title">9. アシンメトリー</div>
+        <div class="card-desc">左側の枠線を極太にし、右側に「印」の文字を配置した現代的なデザイン。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-10 font-serif">
+                <div class="date">2026.09.03</div>
+                <div class="line"></div>
+                <div class="name">吉田</div>
+            </div>
+        </div>
+        <div class="card-title">10. ボーダーレス</div>
+        <div class="card-desc">外枠を完全に無くし、1本の線だけで日付と名前を区切るミニマルデザイン。</div>
+    </div>
+</div>
+
+<!-- ==================================================
+     Category 3: Workflow & Status (承認・ステータス)
+     ================================================== -->
+<h2 class="category-title">3. Workflow & Status 承認・ワークフロー用</h2>
+<div class="catalog-grid">
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-11 font-sans">
+                <div class="status">APPROVED</div>
+                <div class="bottom">
+                    <div class="date">26.09.03</div>
+                    <div class="name">山田</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-title">11. 承認済（スラント）</div>
+        <div class="card-desc">あえて斜めに角度をつけることで、実際に「スタンプを押した」ような躍動感を演出。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-12 font-sans">
+                <div class="left">
+                    <div class="status">確認済</div>
+                    <div class="date">2026.09.03</div>
+                </div>
+                <div class="right">
+                    <div class="name">佐藤</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-title">12. 確認済（ピル形状）</div>
+        <div class="card-desc">青色ベース。左にステータスと日付、右に担当者名を分離した見やすい構成。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-13 font-sans">
+                <div class="icon">✔</div>
+                <div class="details">
+                    <div class="name">鈴木 (QA)</div>
+                    <div class="date">2026.09.03</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-title">13. チェックマーク入り</div>
+        <div class="card-desc">グリーンの枠とチェックアイコンを使用し、テスト合格や完了を一目で伝える。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-14 font-serif">
+                <div class="status">受領</div>
+                <div class="date">26.09.03</div>
+                <div class="name">田中</div>
+            </div>
+        </div>
+        <div class="card-title">14. 受領印（ドット枠）</div>
+        <div class="card-desc">紫色のドット（点線）枠を使用。郵便物や書類の受け取り確認に。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-15 font-sans">
+                <div class="status">PENDING</div>
+                <div class="date">2026.09.03 / 伊藤</div>
+            </div>
+        </div>
+        <div class="card-title">15. 保留（ダッシュ枠）</div>
+        <div class="card-desc">オレンジ色の破線を使用し、まだ処理が完了していない「注意喚起」を表す。</div>
+    </div>
+</div>
+
+<!-- ==================================================
+     Category 4: Creative & Custom (ユニーク・カスタム)
+     ================================================== -->
+<h2 class="category-title">4. Creative & Custom ユニーク・カスタム</h2>
+<div class="catalog-grid">
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-16 font-sans">
+                <div class="name">WATANABE</div>
+                <div class="date">2026.09.03</div>
+            </div>
+        </div>
+        <div class="card-title">16. ヘキサゴン（六角形）</div>
+        <div class="card-desc">黒塗りの六角形。IT企業やテック系サービスのデジタル署名に合うモダンデザイン。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-17 font-mono">
+                <div class="wrapper">
+                    <div class="date">26.09.03</div>
+                    <div class="name">NAKAMURA</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-title">17. チケットスタイル</div>
+        <div class="card-desc">両端に切り欠きを入れたチケット風のデザイン。イベントの受付や入場証明に。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-18 font-sans">
+                <div class="inner">
+                    <div class="name">小林</div>
+                    <div class="date">09/03</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-title">18. グラデーションリング</div>
+        <div class="card-desc">枠線に鮮やかなグラデーションを採用。Webメディアやクリエイティブツール向け。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-19 font-mono">
+                <div class="row"><span>DATE:</span><span>2026.09.03</span></div>
+                <div class="row"><span>SIGN:</span><span>KATO</span></div>
+            </div>
+        </div>
+        <div class="card-title">19. レシート印字風</div>
+        <div class="card-desc">等幅フォントとドット枠を使用し、端末から印字されたようなデジタル感を演出。</div>
+    </div>
+
+    <div class="card">
+        <div class="stamp-container">
+            <div class="stamp s-20 font-serif">
+                <div class="top">吉田</div>
+                <div class="mid">'26.09.03</div>
+                <div class="bot">総務</div>
+            </div>
+        </div>
+        <div class="card-title">20. 3Dエンボス（ニューモーフィズム）</div>
+        <div class="card-desc">影（box-shadow）を使って、紙から浮き出たような立体感を持たせた次世代風の印。</div>
+    </div>
+</div>
+
+<script data-filename="main.js">(function(){try{/* main.js */
+}catch(e){console.error(e)}})()</script></body>
+</html>
