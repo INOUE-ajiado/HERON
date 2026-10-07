@@ -84,10 +84,24 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'work-request',
+        loadComponent: () =>
+          import('./pages/work-request/work-request.component').then(
+            (m) => m.WorkRequestComponent,
+          ),
+      },
+      {
         path: 'approval-spec',
         loadComponent: () =>
           import('./pages/approval-spec/approval-spec.component').then(
             (m) => m.ApprovalSpecComponent,
+          ),
+      },
+      {
+        path: 'work-request-spec',
+        loadComponent: () =>
+          import('./pages/work-request-spec/work-request-spec.component').then(
+            (m) => m.WorkRequestSpecComponent,
           ),
       },
       {
