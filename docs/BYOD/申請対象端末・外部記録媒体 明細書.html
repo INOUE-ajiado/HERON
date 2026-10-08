@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><style>html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: auto; box-sizing: border-box; } img, video, canvas { max-width: 100%; height: auto; } .container { margin-left: auto; margin-right: auto; }</style><script>(function(){function s(l,a){try{const sa=a.map(x=>{if(typeof x==='undefined')return'undefined';if(x===null)return'null';if(typeof x==='object'){try{return JSON.stringify(x,null,2)}catch(e){return x.toString()}}return x.toString()});window.parent.postMessage({source:'iframe-console',level:l,messages:sa},'*')}catch(e){}}const o={l:console.log,w:console.warn,e:console.error,i:console.info};console.log=function(...a){s('log',a);o.l.apply(console,a)};console.warn=function(...a){s('warn',a);o.w.apply(console,a)};console.error=function(...a){s('error',a);o.e.apply(console,a)};console.info=function(...a){s('info',a);o.i.apply(console,a)};window.onerror=function(m){s('error',[m])}})()</script>
+    <script>
+      (function() {
+        document.addEventListener('click', function(e) {
+          const a = e.target.closest('a');
+          if (a && a.getAttribute('href') && !a.getAttribute('href').startsWith('http') && !a.getAttribute('href').startsWith('#')) {
+            e.preventDefault();
+            window.parent.postMessage({
+              source: 'iframe-navigation',
+              url: a.getAttribute('href')
+            }, '*');
+          }
+        });
+      })();
+    </script>
+  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>申請対象端末・外部記録媒体 明細書 - 株式会社亜細亜堂</title>
+<style>
+  :root {
+    --primary-color: #1e3a8a;
+    --border-color: #475569;
+    --light-bg: #f8fafc;
+    --text-color: #1e293b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: var(--text-color);
+    background-color: #f1f5f9;
+    line-height: 1.55;
+    margin: 0;
+    padding: 24px;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 44px 48px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border-radius: 4px;
+  }
+  @media print {
+    body { background-color: #ffffff; padding: 0; }
+    .container { max-width: 100%; padding: 15px 20px; box-shadow: none; }
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    margin: 0 0 8px 0;
+    color: #0f172a;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 6px;
+  }
+  .doc-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    margin-bottom: 14px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+  }
+  th, td {
+    border: 1px solid #64748b;
+    padding: 7px 9px;
+    vertical-align: middle;
+  }
+  th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+    text-align: left;
+    width: 22%;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #0f172a;
+    border-left: 4px solid var(--primary-color);
+    padding-left: 8px;
+    margin: 18px 0 10px 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: 10.5px;
+    font-weight: bold;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .badge-req {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+  }
+  .device-card {
+    border: 1px solid #64748b;
+    margin-bottom: 16px;
+    background: #ffffff;
+  }
+  .device-card-header {
+    background: #e2e8f0;
+    padding: 6px 12px;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #64748b;
+  }
+</style>
+<style data-filename="style.css">/* style.css */
+</style></head>
+<body>
+
+<div class="container">
+  <div class="doc-meta">
+    <div><b>機材明細書（兼 管理台帳）</b> / 株式会社亜細亜堂</div>
+    <div>所属：<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;&nbsp;氏名：<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>（全&nbsp;&nbsp;&nbsp;&nbsp;枚中&nbsp;&nbsp;&nbsp;&nbsp;枚目）</div>
+  </div>
+
+  <h1>申請対象端末・外部記録媒体 明細書</h1>
+  <p style="font-size:12px; margin-bottom:14px; color:#475569;">
+    ※申請する機器・外部記録媒体ごとに枠を分けて記入してください（台数が多い場合は本別紙を複数枚印刷・複写して提出してください）。<br>
+    ※USBメモリ等の外部記憶媒体については、承認後に交付される「管理登録ステッカー」を現品に必ず貼付してください。
+  </p>
+
+  <!-- 機材記入カード 1 -->
+  <div class="device-card">
+    <div class="device-card-header">
+      <div>機材番号［ 1 ］（ ☐ PC / タブレット &nbsp;☐ USB等の外部記録媒体 &nbsp;☐ その他 ）</div>
+      <div style="font-size:11.5px; color:#334155;">ステッカー番号：<b>【&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;】</b></div>
+    </div>
+    <table style="margin-bottom:0; border:none;">
+      <tr>
+        <th style="width:18%;">メーカー / 機種名</th>
+        <td style="width:32%;">&nbsp;</td>
+        <th style="width:18%;">型番 / シリアルNo.</th>
+        <td style="width:32%;">&nbsp;</td>
+      </tr>
+      <tr>
+        <th>OS / バージョン</th>
+        <td>&nbsp;</td>
+        <th>MACアドレス<br><span style="font-size:10px; font-weight:normal;">(Wi-Fi / LAN)</span></th>
+        <td style="font-family:monospace; font-size:11.5px;">&nbsp;</td>
+      </tr>
+      <tr>
+        <th>暗号化設定<br><span class="badge badge-req">必須</span></th>
+        <td colspan="3">
+          ☐ BitLocker &nbsp;&nbsp;☐ FileVault &nbsp;&nbsp;☐ iOSパスコード保護 &nbsp;&nbsp;☐ ハードウェア暗号化 &nbsp;&nbsp;☐ その他（&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;）
+        </td>
+      </tr>
+      <tr>
+        <th>セキュリティソフト</th>
+        <td>ソフト名：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（自動更新: ☐有）</td>
+        <th>業務上の利用理由</th>
+        <td>&nbsp;</td>
+      </tr>
+      <tr style="background-color:#fafaf9;">
+        <th>管理部門確認欄<br><span style="font-size:10px; font-weight:normal; color:#64748b;">(※記入不要)</span></th>
+        <td colspan="3" style="font-size:11px;">
+          ☐ 暗号化目視確認済 &nbsp;&nbsp;&nbsp;&nbsp;☐ セキュリティ対策ソフト確認済 &nbsp;&nbsp;&nbsp;&nbsp;☐ 管理ステッカー貼付完了 &nbsp;&nbsp;&nbsp;&nbsp;
+          ［ 確認印：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;］
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 機材記入カード 2 -->
+  <div class="device-card">
+    <div class="device-card-header">
+      <div>機材番号［ 2 ］（ ☐ PC / タブレット &nbsp;☐ USB等の外部記録媒体 &nbsp;☐ その他 ）</div>
+      <div style="font-size:11.5px; color:#334155;">ステッカー番号：<b>【&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;】</b></div>
+    </div>
+    <table style="margin-bottom:0; border:none;">
+      <tr>
+        <th style="width:18%;">メーカー / 機種名</th>
+        <td style="width:32%;">&nbsp;</td>
+        <th style="width:18%;">型番 / シリアルNo.</th>
+        <td style="width:32%;">&nbsp;</td>
+      </tr>
+      <tr>
+        <th>OS / バージョン</th>
+        <td>&nbsp;</td>
+        <th>MACアドレス<br><span style="font-size:10px; font-weight:normal;">(Wi-Fi / LAN)</span></th>
+        <td style="font-family:monospace; font-size:11.5px;">&nbsp;</td>
+      </tr>
+      <tr>
+        <th>暗号化設定<br><span class="badge badge-req">必須</span></th>
+        <td colspan="3">
+          ☐ BitLocker &nbsp;&nbsp;☐ FileVault &nbsp;&nbsp;☐ iOSパスコード保護 &nbsp;&nbsp;☐ ハードウェア暗号化 &nbsp;&nbsp;☐ その他（&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;）
+        </td>
+      </tr>
+      <tr>
+        <th>セキュリティソフト</th>
+        <td>ソフト名：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（自動更新: ☐有）</td>
+        <th>業務上の利用理由</th>
+        <td>&nbsp;</td>
+      </tr>
+      <tr style="background-color:#fafaf9;">
+        <th>管理部門確認欄<br><span style="font-size:10px; font-weight:normal; color:#64748b;">(※記入不要)</span></th>
+        <td colspan="3" style="font-size:11px;">
+          ☐ 暗号化目視確認済 &nbsp;&nbsp;&nbsp;&nbsp;☐ セキュリティ対策ソフト確認済 &nbsp;&nbsp;&nbsp;&nbsp;☐ 管理ステッカー貼付完了 &nbsp;&nbsp;&nbsp;&nbsp;
+          ［ 確認印：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;］
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 外部記録媒体向け一括記載欄 -->
+  <div class="section-title">外部記録媒体（USBメモリ・SDカード・外付けSSD/HDD等）一括記載欄</div>
+  <table>
+    <tr style="background-color:#e2e8f0; font-size:11.5px;">
+      <th style="text-align:center; width:6%;">No</th>
+      <th style="text-align:center; width:22%;">種別・メーカー・容量</th>
+      <th style="text-align:center; width:22%;">シリアル番号 / 識別名</th>
+      <th style="text-align:center; width:25%;">暗号化機能の有無</th>
+      <th style="text-align:center; width:25%;">ステッカー番号 / 管理印</th>
+    </tr>
+    <tr>
+      <td style="text-align:center; font-weight:bold;">3</td>
+      <td>☐ USB &nbsp;☐ SSD &nbsp;☐ HDD<br>（&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GB）</td>
+      <td>&nbsp;</td>
+      <td>☐ 暗号化あり（方式：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;）<br>☐ なし（会社承認要）</td>
+      <td style="font-size:11px;">
+        ステッカー：【&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;】<br>
+        確認印：［&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;］
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center; font-weight:bold;">4</td>
+      <td>☐ USB &nbsp;☐ SSD &nbsp;☐ HDD<br>（&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GB）</td>
+      <td>&nbsp;</td>
+      <td>☐ 暗号化あり（方式：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;）<br>☐ なし（会社承認要）</td>
+      <td style="font-size:11px;">
+        ステッカー：【&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;】<br>
+        確認印：［&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;］
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center; font-weight:bold;">5</td>
+      <td>☐ USB &nbsp;☐ SSD &nbsp;☐ HDD<br>（&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GB）</td>
+      <td>&nbsp;</td>
+      <td>☐ 暗号化あり（方式：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;）<br>☐ なし（会社承認要）</td>
+      <td style="font-size:11px;">
+        ステッカー：【&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;】<br>
+        確認印：［&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;］
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:center; font-weight:bold;">6</td>
+      <td>☐ USB &nbsp;☐ SSD &nbsp;☐ HDD<br>（&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GB）</td>
+      <td>&nbsp;</td>
+      <td>☐ 暗号化あり（方式：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;）<br>☐ なし（会社承認要）</td>
+      <td style="font-size:11px;">
+        ステッカー：【&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;】<br>
+        確認印：［&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;］
+      </td>
+    </tr>
+  </table>
+</div>
+
+<script data-filename="main.js">(function(){try{/* main.js */
+}catch(e){console.error(e)}})()</script></body>
+</html>

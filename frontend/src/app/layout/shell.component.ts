@@ -97,6 +97,16 @@ interface NavItem {
             <span>業務申請仕様書</span>
           </a>
 
+          <!-- BYOD仕様書 -->
+          <a
+            routerLink="/byod-spec"
+            routerLinkActive="bg-blue-600 text-white font-bold"
+            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+          >
+            <app-icon name="box" class="text-base text-[#90CFD6]" />
+            <span>BYOD仕様書</span>
+          </a>
+
           @if (auth.isAdmin()) {
             <a
               routerLink="/test-members"
@@ -199,6 +209,7 @@ export class ShellComponent {
     { path: '/equipments', label: '機材台帳・検索', icon: 'box', adminOnly: false, exact: false },
     { path: '/approval', label: '稟議申請', icon: 'doc', adminOnly: false, exact: false },
     { path: '/work-request', label: '業務申請', icon: 'clock', adminOnly: false, exact: false },
+    { path: '/byod', label: 'BYOD申請', icon: 'box', adminOnly: false, exact: false },
     { path: '/inventory', label: '棚卸し', icon: 'shelf', adminOnly: true, exact: false },
     { path: '/locations', label: '保管場所', icon: 'pin', adminOnly: true, exact: false },
     { path: '/settings', label: 'マスタ設定', icon: 'pin', adminOnly: true, exact: false },

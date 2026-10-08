@@ -91,6 +91,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'byod',
+        loadComponent: () =>
+          import('./pages/byod/byod.component').then((m) => m.ByodComponent),
+      },
+      {
         path: 'approval-spec',
         loadComponent: () =>
           import('./pages/approval-spec/approval-spec.component').then(
@@ -102,6 +107,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/work-request-spec/work-request-spec.component').then(
             (m) => m.WorkRequestSpecComponent,
+          ),
+      },
+      {
+        path: 'byod-spec',
+        loadComponent: () =>
+          import('./pages/byod-spec/byod-spec.component').then(
+            (m) => m.ByodSpecComponent,
           ),
       },
       {
