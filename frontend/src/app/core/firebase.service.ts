@@ -7,6 +7,7 @@ import {
   Auth,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
   User as FirebaseUser,
   UserCredential,
 } from 'firebase/auth';
@@ -66,5 +67,9 @@ export class FirebaseService {
 
   loginWithGoogle(): Promise<UserCredential> {
     return signInWithPopup(this.auth, this.googleProvider);
+  }
+
+  logoutFromFirebase(): Promise<void> {
+    return signOut(this.auth);
   }
 }

@@ -7,55 +7,73 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // テストメンバー (ホワイトリスト)
+    // 許可された社内メンバー (@ajiado.co.jp または test_members ホワイトリスト登録済み) かどうか
+    function isAllowedUser() {
+      return signedIn() && request.auth.token.email != null && (
+        request.auth.token.email.lower().matches('.*@ajiado[.]co[.]jp$') ||
+        request.auth.token.email.lower() in [
+          'inoue@ajiado.co.jp',
+          'admin@heron.app',
+          'nakamura@ajiado.co.jp',
+          'matsuyama@ajiado.co.jp',
+          'inoue.cq.jwl@gmail.com',
+          'a_yamada@ajiado.co.jp',
+          'shimako@ajiado.co.jp'
+        ] ||
+        exists(/databases/$(database)/documents/test_members/$(request.auth.token.email.lower())) ||
+        exists(/databases/$(database)/documents/test_members/$(request.auth.token.email))
+      );
+    }
+
+    // テストメンバー (ホワイトリスト) — 認可済みメンバーのみ閲覧・管理可
     match /test_members/{email} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // 機材
     match /equipments/{equipmentId} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // 操作ログ (監査履歴)。改ざん防止のため追記のみ許可し、更新・削除は禁止。
     match /logs/{logId} {
-      allow read: if signedIn();
-      allow create: if signedIn();
+      allow read: if isAllowedUser();
+      allow create: if isAllowedUser();
       allow update, delete: if false;
     }
 
     // 保管場所
     match /locations/{locationId} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // 利用者
     match /users/{userId} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // マスタ (部署・カテゴリ・棚)
     match /departments/{code} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
     match /categories/{code} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
     match /shelves/{code} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // バージョン履歴（リリース内容の記録）
     match /versions/{version} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // 採番カウンタ・初期化フラグ
     match /counters/{name} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
     match /system/{docId} {
-      allow read, write: if signedIn();
+      allow read, write: if isAllowedUser();
     }
 
     // 上記以外はすべて遮断

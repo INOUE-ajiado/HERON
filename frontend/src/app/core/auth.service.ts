@@ -83,6 +83,17 @@ export class AuthService {
       return;
     }
 
+    const fbEmail = (fbUser.email ?? '').trim().toLowerCase();
+    await this.loadTestMembersFromFirestore();
+    if (!this.isAllowedEmail(fbEmail)) {
+      console.warn('[HERON] 許可されていない Google アカウントのためセッションを破棄します:', fbEmail);
+      await this.firebase.logoutFromFirebase().catch(() => undefined);
+      if (this._token()) {
+        this.logout();
+      }
+      return;
+    }
+
     const stored = this._user();
     const actual: User = {
       user_id: fbUser.uid,
@@ -212,8 +223,12 @@ export class AuthService {
     // テストメンバーを取り込んでから検証する。
     await this.loadTestMembersFromFirestore();
 
-    // ホワイトリスト検証
+    // ホワイトリスト検証 (非許可アカウントの場合は Firebase Auth セッションも即座にサインアウトする)
     if (!this.isAllowedEmail(userEmail)) {
+      await this.firebase.logoutFromFirebase().catch(() => undefined);
+      clearStoredSession();
+      this._token.set(null);
+      this._user.set(null);
       throw new Error(`アクセス権限がありません (ユーザー: ${userEmail})。HERON管理者に「テストメンバー」としての追加を依頼してください。`);
     }
 
@@ -229,6 +244,7 @@ export class AuthService {
   }
 
   logout(): void {
+    void this.firebase.logoutFromFirebase().catch(() => undefined);
     clearStoredSession();
     this._token.set(null);
     this._user.set(null);

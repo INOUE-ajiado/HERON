@@ -17,7 +17,7 @@ import (
 // New はミドルウェアと全ルートを設定した *gin.Engine を返す。
 func New(cfg *config.Config, gdb *gorm.DB, am *auth.Manager) *gin.Engine {
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Logger(), gin.Recovery(), auth.SecurityHeaders())
 
 	corsCfg := cors.Config{
 		AllowOrigins:     cfg.CORSOrigins,
@@ -36,7 +36,8 @@ func New(cfg *config.Config, gdb *gorm.DB, am *auth.Manager) *gin.Engine {
 
 	api := r.Group("/api")
 	{
-		api.POST("/auth/login", h.Login)
+		// ブルートフォース対策: 同一IPから1分間に10回までのログイン試行に制限
+		api.POST("/auth/login", auth.LoginRateLimiter(10, time.Minute), h.Login)
 
 		// ---- 認証必須（一般ユーザーも可） ----
 		authed := api.Group("")

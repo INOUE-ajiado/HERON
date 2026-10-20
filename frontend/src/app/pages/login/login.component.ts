@@ -106,8 +106,10 @@ export class LoginComponent {
 
       await this.api.loginWithFirebaseUser(heronUser, idToken);
 
-      const redirect = this.route.snapshot.queryParamMap.get('redirect') ?? '/';
-      void this.router.navigateByUrl(redirect);
+      const rawRedirect = this.route.snapshot.queryParamMap.get('redirect') ?? '/';
+      const safeRedirect =
+        rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/';
+      void this.router.navigateByUrl(safeRedirect);
     } catch (err: any) {
       this.loading.set(false);
       this.error.set(

@@ -1534,7 +1534,8 @@ export class ByodComponent {
     try {
       if (!(window as any).html2pdf) {
         await this.loadScript(
-          'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+          'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+          'sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=='
         );
       }
 
@@ -1572,10 +1573,15 @@ export class ByodComponent {
     }
   }
 
-  private loadScript(src: string): Promise<void> {
+  private loadScript(src: string, integrity?: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = src;
+      script.crossOrigin = 'anonymous';
+      script.referrerPolicy = 'no-referrer';
+      if (integrity) {
+        script.integrity = integrity;
+      }
       script.onload = () => resolve();
       script.onerror = () => reject();
       document.body.appendChild(script);

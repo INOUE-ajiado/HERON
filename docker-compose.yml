@@ -22,11 +22,11 @@ services:
     volumes:
       - heron-db-data:/var/lib/postgresql/data
     ports:
-      # ホストの DB クライアントから覗くための公開。
+      # ホストの DB クライアントから覗くための公開（外部LANからの直接接続を防ぐため 127.0.0.1 に限定）。
       # ホスト側で別の PostgreSQL が 5432 を使っていても衝突しないよう
       # 既定では 55432 に割り当てる（backend はコンテナ間ネットワークで
       # db:5432 に直接つなぐため、この公開は無くても動作する）。
-      - "${DB_HOST_PORT:-55432}:5432"
+      - "127.0.0.1:${DB_HOST_PORT:-55432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-heron} -d ${DB_NAME:-heron}"]
       interval: 5s
