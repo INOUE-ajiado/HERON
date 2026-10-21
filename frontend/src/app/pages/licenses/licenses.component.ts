@@ -505,19 +505,28 @@ interface UserGroupSummary {
                         スタッフに紐付けると、そのままHTML案内メールを作成・送信できます
                       </p>
                     </div>
-                    <div class="flex gap-1.5">
+                    <div class="flex flex-wrap gap-1.5">
                       <button
                         type="button"
                         (click)="openAssignModal(lic)"
-                        class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition flex items-center justify-center gap-1.5"
+                        class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5"
                       >
                         <app-icon name="user" />
                         <span>スタッフに紐付ける</span>
                       </button>
                       <button
                         type="button"
+                        (click)="openEmailPreviewModal(lic)"
+                        class="py-2 px-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition flex items-center gap-1"
+                        title="案内メールのプレビューを確認"
+                      >
+                        <app-icon name="eye" />
+                        <span>メール確認</span>
+                      </button>
+                      <button
+                        type="button"
                         (click)="openEditModal(lic)"
-                        class="py-2 px-3 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition"
+                        class="py-2 px-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition"
                       >
                         編集
                       </button>
@@ -541,7 +550,7 @@ interface UserGroupSummary {
       @if (viewMode() === 'users') {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           @for (group of userGroups(); track group.userName + group.userEmail) {
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
               <div class="flex items-start justify-between border-b border-slate-100 pb-3">
                 <div>
                   <div class="flex items-center gap-2">
@@ -603,8 +612,14 @@ interface UserGroupSummary {
          モーダル1: HTML案内メール 作成・送信前プレビュー確認モーダル
          ========================================================================= -->
     @if (showEmailModal() && emailTargetLicense(); as targetLic) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 backdrop-blur-xs p-3 sm:p-5 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 backdrop-blur-sm p-2 sm:p-4"
+        (click)="showEmailModal.set(false)"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]"
+          (click)="$event.stopPropagation()"
+        >
           <!-- モーダルヘッダー -->
           <div class="px-5 py-3.5 bg-[#2A3A4A] text-white flex items-center justify-between shrink-0">
             <div>
@@ -629,11 +644,24 @@ interface UserGroupSummary {
             </button>
           </div>
 
+          <!-- インラインエラー通知（メールアドレス未入力時など） -->
+          @if (emailValidationError()) {
+            <div class="bg-rose-50 border-b border-rose-200 px-5 py-2.5 text-xs font-bold text-rose-800 flex items-center justify-between shrink-0">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-white text-[10px]">!</span>
+                <span>{{ emailValidationError() }}</span>
+              </div>
+              <button type="button" (click)="emailValidationError.set('')" class="text-rose-500 hover:text-rose-800">
+                <app-icon name="close" />
+              </button>
+            </div>
+          }
+
           <!-- モーダルボディ (左: 送信設定・文面調整 / 右: リアルタイムHTMLメール表示プレビュー) -->
-          <div class="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+          <div class="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
             <!-- 左ペイン: 宛先・セキュリティマスク設定・補足メッセージ (5カラム) -->
-            <div class="lg:col-span-5 p-5 space-y-4 bg-slate-50/70">
-              <div class="rounded-xl bg-white p-3.5 border border-slate-200 space-y-3">
+            <div class="lg:col-span-5 p-4 sm:p-5 space-y-4 bg-slate-50/70 lg:overflow-y-auto">
+              <div class="rounded-xl bg-white p-3.5 border border-slate-200 space-y-3 shadow-sm">
                 <div class="text-xs font-bold text-[#2A3A4A] border-b border-slate-100 pb-1.5">
                   1. 宛先・件名の確認
                 </div>
@@ -642,8 +670,10 @@ interface UserGroupSummary {
                   <label class="block text-[11px] font-bold text-slate-600 mb-1">宛先スタッフ氏名</label>
                   <input
                     type="text"
-                    [(ngModel)]="emailOptions.recipientName"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold"
+                    [ngModel]="emailOptions().recipientName"
+                    (ngModelChange)="updateEmailOption({ recipientName: $event })"
+                    placeholder="例: 桜井 裕介"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]"
                   />
                 </div>
 
@@ -651,9 +681,11 @@ interface UserGroupSummary {
                   <label class="block text-[11px] font-bold text-slate-600 mb-1">送信先メールアドレス <span class="text-rose-500">*</span></label>
                   <input
                     type="email"
-                    [(ngModel)]="emailOptions.recipientEmail"
+                    [ngModel]="emailOptions().recipientEmail"
+                    (ngModelChange)="updateEmailOption({ recipientEmail: $event })"
                     placeholder="example@ajiado.co.jp"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono"
+                    class="w-full rounded-lg border bg-white px-3 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]"
+                    [class]="emailValidationError() && !emailOptions().recipientEmail.trim() ? 'border-rose-500 bg-rose-50/30' : 'border-slate-300'"
                   />
                 </div>
 
@@ -661,14 +693,15 @@ interface UserGroupSummary {
                   <label class="block text-[11px] font-bold text-slate-600 mb-1">メール件名</label>
                   <input
                     type="text"
-                    [(ngModel)]="emailOptions.subject"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs"
+                    [ngModel]="emailOptions().subject"
+                    (ngModelChange)="updateEmailOption({ subject: $event })"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]"
                   />
                 </div>
               </div>
 
               <!-- セキュリティ表示切替（プレビューに即時反映） -->
-              <div class="rounded-xl bg-white p-3.5 border border-slate-200 space-y-2.5">
+              <div class="rounded-xl bg-white p-3.5 border border-slate-200 space-y-2.5 shadow-sm">
                 <div class="text-xs font-bold text-[#2A3A4A] border-b border-slate-100 pb-1.5">
                   2. 機密情報（PW・シリアル）の本文表示設定
                 </div>
@@ -676,7 +709,8 @@ interface UserGroupSummary {
                 <label class="flex items-start gap-2 cursor-pointer text-xs">
                   <input
                     type="checkbox"
-                    [(ngModel)]="emailOptions.includeSerial"
+                    [ngModel]="emailOptions().includeSerial"
+                    (ngModelChange)="updateEmailOption({ includeSerial: $event })"
                     class="mt-0.5 h-4 w-4 rounded text-[#2A3A4A]"
                   />
                   <span>
@@ -688,7 +722,8 @@ interface UserGroupSummary {
                 <label class="flex items-start gap-2 cursor-pointer text-xs">
                   <input
                     type="checkbox"
-                    [(ngModel)]="emailOptions.includePassword"
+                    [ngModel]="emailOptions().includePassword"
+                    (ngModelChange)="updateEmailOption({ includePassword: $event })"
                     class="mt-0.5 h-4 w-4 rounded text-[#2A3A4A]"
                   />
                   <span>
@@ -699,15 +734,16 @@ interface UserGroupSummary {
               </div>
 
               <!-- 個別補足メッセージ -->
-              <div class="rounded-xl bg-white p-3.5 border border-slate-200 space-y-2">
+              <div class="rounded-xl bg-white p-3.5 border border-slate-200 space-y-2 shadow-sm">
                 <div class="text-xs font-bold text-[#2A3A4A]">
                   3. 管理者からの補足・個別メッセージ（任意）
                 </div>
                 <textarea
                   rows="3"
-                  [(ngModel)]="emailOptions.customMessage"
+                  [ngModel]="emailOptions().customMessage"
+                  (ngModelChange)="updateEmailOption({ customMessage: $event })"
                   placeholder="例: 第1作画室の液タブPC（DEV-TAB-00001）に導入してください。不明点があれば内線204までご連絡ください。"
-                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs leading-relaxed"
+                  class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]"
                 ></textarea>
                 <p class="text-[10px] text-slate-400">
                   ※ 入力すると右側のHTMLプレビュー内の「管理者からの補足・個別連絡事項」枠にリアルタイム反映されます。
@@ -731,9 +767,9 @@ interface UserGroupSummary {
             </div>
 
             <!-- 右ペイン: 送信前プレビュー確認エリア (7カラム) -->
-            <div class="lg:col-span-7 p-5 flex flex-col bg-slate-100">
+            <div class="lg:col-span-7 p-4 sm:p-5 flex flex-col min-h-0 bg-slate-100">
               <!-- プレビューモード切替バー -->
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3 shrink-0">
                 <div class="flex items-center gap-1.5">
                   <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
                   <span class="text-xs font-extrabold text-slate-700">送信時の表示プレビュー（リアルタイム更新）</span>
@@ -744,7 +780,7 @@ interface UserGroupSummary {
                     type="button"
                     (click)="emailPreviewTab.set('visual')"
                     class="px-2.5 py-1 rounded-md transition flex items-center gap-1"
-                    [class]="emailPreviewTab() === 'visual' ? 'bg-white text-[#2A3A4A] shadow-2xs' : 'text-slate-600'"
+                    [class]="emailPreviewTab() === 'visual' ? 'bg-white text-[#2A3A4A] shadow-sm' : 'text-slate-600 hover:text-slate-900'"
                   >
                     <app-icon name="eye" />
                     <span>HTMLメール表示</span>
@@ -753,7 +789,7 @@ interface UserGroupSummary {
                     type="button"
                     (click)="emailPreviewTab.set('html')"
                     class="px-2.5 py-1 rounded-md transition flex items-center gap-1"
-                    [class]="emailPreviewTab() === 'html' ? 'bg-white text-[#2A3A4A] shadow-2xs' : 'text-slate-600'"
+                    [class]="emailPreviewTab() === 'html' ? 'bg-white text-[#2A3A4A] shadow-sm' : 'text-slate-600 hover:text-slate-900'"
                   >
                     <app-icon name="doc" />
                     <span>HTMLソース</span>
@@ -762,7 +798,7 @@ interface UserGroupSummary {
                     type="button"
                     (click)="emailPreviewTab.set('text')"
                     class="px-2.5 py-1 rounded-md transition flex items-center gap-1"
-                    [class]="emailPreviewTab() === 'text' ? 'bg-white text-[#2A3A4A] shadow-2xs' : 'text-slate-600'"
+                    [class]="emailPreviewTab() === 'text' ? 'bg-white text-[#2A3A4A] shadow-sm' : 'text-slate-600 hover:text-slate-900'"
                   >
                     <app-icon name="doc" />
                     <span>テキスト版</span>
@@ -771,25 +807,25 @@ interface UserGroupSummary {
               </div>
 
               <!-- メーラー風ヘッダーバー -->
-              <div class="rounded-t-xl bg-white border border-b-0 border-slate-300 px-4 py-2.5 text-xs space-y-1">
+              <div class="rounded-t-xl bg-white border border-b-0 border-slate-300 px-4 py-2.5 text-xs space-y-1 shrink-0">
                 <div class="flex items-center gap-2">
-                  <span class="text-slate-400 font-bold w-12">宛先:</span>
-                  <span class="font-bold text-slate-800">{{ emailOptions.recipientName }} &lt;{{ emailOptions.recipientEmail || '未入力' }}&gt;</span>
+                  <span class="text-slate-400 font-bold w-12 shrink-0">宛先:</span>
+                  <span class="font-bold text-slate-800 truncate">{{ emailOptions().recipientName || '（氏名未入力）' }} &lt;{{ emailOptions().recipientEmail || 'メールアドレス未入力' }}&gt;</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-slate-400 font-bold w-12">件名:</span>
-                  <span class="font-bold text-[#2A3A4A]">{{ emailOptions.subject }}</span>
+                  <span class="text-slate-400 font-bold w-12 shrink-0">件名:</span>
+                  <span class="font-bold text-[#2A3A4A] truncate">{{ emailOptions().subject }}</span>
                 </div>
               </div>
 
               <!-- プレビュー本体 -->
-              <div class="flex-1 rounded-b-xl border border-slate-300 bg-slate-100 overflow-y-auto max-h-[54vh]">
+              <div class="flex-1 min-h-[320px] rounded-b-xl border border-slate-300 bg-slate-100 overflow-y-auto">
                 @if (emailPreviewTab() === 'visual') {
                   <div [innerHTML]="safeHtmlPreview()"></div>
                 } @else if (emailPreviewTab() === 'html') {
-                  <pre class="p-4 text-[11px] font-mono text-slate-800 bg-slate-900 text-slate-100 overflow-x-auto whitespace-pre-wrap leading-relaxed">{{ rawHtmlPreview() }}</pre>
+                  <pre class="p-4 text-[11px] font-mono bg-slate-900 text-slate-100 overflow-x-auto whitespace-pre-wrap leading-relaxed m-0 min-h-full">{{ rawHtmlPreview() }}</pre>
                 } @else {
-                  <pre class="p-4 text-xs font-mono text-slate-800 bg-white whitespace-pre-wrap leading-relaxed">{{ plainTextPreview() }}</pre>
+                  <pre class="p-4 text-xs font-mono text-slate-800 bg-white whitespace-pre-wrap leading-relaxed m-0 min-h-full">{{ plainTextPreview() }}</pre>
                 }
               </div>
             </div>
@@ -810,6 +846,14 @@ interface UserGroupSummary {
               >
                 <app-icon name="download" />
                 <span>HTML保存 (.html)</span>
+              </button>
+              <button
+                type="button"
+                (click)="openInMailer()"
+                class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5"
+              >
+                <app-icon name="mail" />
+                <span>メーラーで開く</span>
               </button>
               <button
                 type="button"
@@ -837,7 +881,7 @@ interface UserGroupSummary {
          モーダル2: スタッフ紐付け（割当）モーダル
          ========================================================================= -->
     @if (showAssignModal() && assignTargetLicense(); as assignLic) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden">
           <div class="px-5 py-4 bg-[#2A3A4A] text-white flex items-center justify-between">
             <div>
@@ -1240,8 +1284,9 @@ export class LicensesComponent {
   readonly showEmailModal = signal<boolean>(false);
   readonly emailTargetLicense = signal<SoftwareLicense | null>(null);
   readonly emailPreviewTab = signal<'visual' | 'html' | 'text'>('visual');
+  readonly emailValidationError = signal<string>('');
 
-  emailOptions: EmailBuildOptions = {
+  readonly emailOptions = signal<EmailBuildOptions>({
     recipientName: '',
     recipientEmail: '',
     subject: '',
@@ -1249,7 +1294,7 @@ export class LicensesComponent {
     includeSerial: true,
     customMessage: '',
     senderName: '情報システム担当',
-  };
+  });
 
   readonly showAssignModal = signal<boolean>(false);
   readonly assignTargetLicense = signal<SoftwareLicense | null>(null);
@@ -1280,6 +1325,29 @@ export class LicensesComponent {
         (l) => l.status === 'assigned' && Boolean(l.last_mail_sent_at)
       ).length
   );
+
+  // プレビュー用のメモ化 Computed シグナル（入力変更時のみ再計算し、DOM再生成によるスクロール飛びを防止）
+  readonly rawHtmlPreview = computed<string>(() => {
+    const lic = this.emailTargetLicense();
+    if (!lic) return '';
+    return this.licenseService.buildHtmlEmail(lic, this.emailOptions());
+  });
+
+  readonly rawBodyHtmlPreview = computed<string>(() => {
+    const lic = this.emailTargetLicense();
+    if (!lic) return '';
+    return this.licenseService.buildHtmlEmailBody(lic, this.emailOptions());
+  });
+
+  readonly plainTextPreview = computed<string>(() => {
+    const lic = this.emailTargetLicense();
+    if (!lic) return '';
+    return this.licenseService.buildPlainTextEmail(lic, this.emailOptions());
+  });
+
+  readonly safeHtmlPreview = computed<SafeHtml>(() => {
+    return this.sanitizer.bypassSecurityTrustHtml(this.rawBodyHtmlPreview());
+  });
 
   filteredLicenses(): SoftwareLicense[] {
     const q = this.searchQuery.trim().toLowerCase();
@@ -1409,11 +1477,19 @@ export class LicensesComponent {
 
   // --- HTML案内メール プレビュー ＆ 送信 ---
 
+  updateEmailOption(patch: Partial<EmailBuildOptions>): void {
+    this.emailOptions.update((prev) => ({ ...prev, ...patch }));
+    if (patch.recipientEmail !== undefined && patch.recipientEmail.trim()) {
+      this.emailValidationError.set('');
+    }
+  }
+
   openEmailPreviewModal(lic: SoftwareLicense): void {
     this.emailTargetLicense.set(lic);
     this.emailPreviewTab.set('visual');
+    this.emailValidationError.set('');
     const currentUser = this.auth.user();
-    this.emailOptions = {
+    this.emailOptions.set({
       recipientName: lic.assigned_user_name || '',
       recipientEmail: lic.assigned_user_email || '',
       subject: `【HERON】${lic.software_name} ライセンス・アカウント割当のご案内 (${lic.management_code})`,
@@ -1423,33 +1499,18 @@ export class LicensesComponent {
         ? `対象端末「${lic.assigned_device}」にてセットアップを行ってください。`
         : '',
       senderName: currentUser?.name || '情報システム・機材管理担当',
-    };
+    });
     this.showEmailModal.set(true);
   }
 
-  rawHtmlPreview(): string {
-    const lic = this.emailTargetLicense();
-    if (!lic) return '';
-    return this.licenseService.buildHtmlEmail(lic, this.emailOptions);
-  }
-
-  plainTextPreview(): string {
-    const lic = this.emailTargetLicense();
-    if (!lic) return '';
-    return this.licenseService.buildPlainTextEmail(lic, this.emailOptions);
-  }
-
-  safeHtmlPreview(): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(this.rawHtmlPreview());
-  }
-
   async copyRichHtmlEmail(): Promise<void> {
-    const html = this.rawHtmlPreview();
+    const bodyHtml = this.rawBodyHtmlPreview();
+    const fullHtml = this.rawHtmlPreview();
     const text = this.plainTextPreview();
     try {
       if (typeof ClipboardItem !== 'undefined') {
         const item = new ClipboardItem({
-          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/html': new Blob([bodyHtml], { type: 'text/html' }),
           'text/plain': new Blob([text], { type: 'text/plain' }),
         });
         await navigator.clipboard.write([item]);
@@ -1461,7 +1522,7 @@ export class LicensesComponent {
     } catch {
       // fallback
     }
-    await navigator.clipboard.writeText(html);
+    await navigator.clipboard.writeText(fullHtml);
     this.showToast('HTMLソースをクリップボードにコピーしました');
   }
 
@@ -1469,31 +1530,58 @@ export class LicensesComponent {
     const lic = this.emailTargetLicense();
     if (!lic) return;
     const html = this.rawHtmlPreview();
+    const opts = this.emailOptions();
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ライセンス案内_${lic.management_code}_${this.emailOptions.recipientName || 'user'}.html`;
+    a.download = `ライセンス案内_${lic.management_code}_${opts.recipientName || 'user'}.html`;
     a.click();
     URL.revokeObjectURL(url);
     this.showToast('HTMLメールファイルをダウンロードしました');
   }
 
+  openInMailer(): void {
+    const opts = this.emailOptions();
+    const mailto = `mailto:${encodeURIComponent(opts.recipientEmail.trim())}?subject=${encodeURIComponent(
+      opts.subject
+    )}&body=${encodeURIComponent(this.plainTextPreview())}`;
+    window.open(mailto, '_blank');
+  }
+
   confirmAndSendEmail(): void {
     const lic = this.emailTargetLicense();
     if (!lic) return;
-    if (!this.emailOptions.recipientEmail.trim()) {
-      alert('送信先メールアドレスを入力してください。');
+    const opts = this.emailOptions();
+    if (!opts.recipientEmail.trim()) {
+      this.emailValidationError.set(
+        '送信先メールアドレスが未入力です。左側の「1. 宛先・件名の確認」にメールアドレスを入力してください。'
+      );
       return;
     }
 
+    // 未割当ライセンスや氏名・メール変更時はライセンス台帳の紐付け情報も同期更新
+    if (
+      opts.recipientName.trim() &&
+      (lic.status !== 'assigned' ||
+        lic.assigned_user_name !== opts.recipientName.trim() ||
+        lic.assigned_user_email !== opts.recipientEmail.trim())
+    ) {
+      this.licenseService.updateLicense(lic.id, {
+        status: 'assigned',
+        assigned_user_name: opts.recipientName.trim(),
+        assigned_user_email: opts.recipientEmail.trim(),
+        assigned_date:
+          lic.assigned_date || new Date().toISOString().slice(0, 10),
+      });
+    }
+
     const updated = this.licenseService.recordMailSent(lic.id, {
-      sent_by: this.emailOptions.senderName,
-      recipient_name: this.emailOptions.recipientName,
-      recipient_email: this.emailOptions.recipientEmail,
-      subject: this.emailOptions.subject,
-      included_credentials:
-        this.emailOptions.includePassword || this.emailOptions.includeSerial,
+      sent_by: opts.senderName,
+      recipient_name: opts.recipientName.trim() || 'ご担当者',
+      recipient_email: opts.recipientEmail.trim(),
+      subject: opts.subject,
+      included_credentials: opts.includePassword || opts.includeSerial,
     });
 
     if (updated) {
@@ -1504,7 +1592,7 @@ export class LicensesComponent {
     void this.copyRichHtmlEmail();
     this.showEmailModal.set(false);
     this.showToast(
-      `${this.emailOptions.recipientName} 様 (${this.emailOptions.recipientEmail}) へのHTML案内メール送信を記録しました（クリップボードにもHTML本文をコピー済）`
+      `${opts.recipientName || 'ご担当者'} 様 (${opts.recipientEmail}) へのHTML案内メール送信を記録しました（クリップボードにHTML本文をコピー済）`
     );
   }
 

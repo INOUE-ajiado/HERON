@@ -276,9 +276,10 @@ export class LicenseService {
   }
 
   /**
-   * 送信前確認（プレビュー）および送信用の HTML メール文字列を生成
+   * プレビュー表示およびリッチHTMLコピー用のメールボディHTMLを生成
+   * （Tailwind Preflight の border-collapse: collapse 等の影響を受けない完全インラインスタイル）
    */
-  buildHtmlEmail(lic: SoftwareLicense, opts: EmailBuildOptions): string {
+  buildHtmlEmailBody(lic: SoftwareLicense, opts: EmailBuildOptions): string {
     const esc = (str?: string) =>
       (str || '')
         .replace(/&/g, '&amp;')
@@ -288,8 +289,7 @@ export class LicenseService {
 
     const categoryLabel = SOFTWARE_CATEGORY_LABELS[lic.category] || 'ソフトウェア';
     const steps = this.getActivationSteps(lic.category);
-    const portalUrl =
-      lic.portal_url || 'https://heron-dcd38.web.app';
+    const portalUrl = lic.portal_url || 'https://heron-dcd38.web.app';
 
     const displayPassword = lic.account_password
       ? opts.includePassword
@@ -305,7 +305,7 @@ export class LicenseService {
 
     const customNoteHtml = opts.customMessage.trim()
       ? `
-      <div style="margin-top: 20px; padding: 14px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;">
+      <div style="margin-top: 20px; padding: 14px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; text-align: left;">
         <div style="font-size: 12px; font-weight: bold; color: #92400e; margin-bottom: 4px;">■ 管理者からの補足・個別連絡事項</div>
         <div style="font-size: 13px; color: #78350f; line-height: 1.6; white-space: pre-wrap;">${esc(opts.customMessage)}</div>
       </div>`
@@ -315,38 +315,32 @@ export class LicenseService {
       .map(
         (s, i) => `
         <tr>
-          <td style="vertical-align: top; padding: 6px 10px 6px 0; width: 24px;">
+          <td style="vertical-align: top; padding: 6px 10px 6px 0; width: 28px; text-align: left;">
             <span style="display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 50%; background-color: #2A3A4A; color: #ffffff; font-size: 11px; font-weight: bold;">${i + 1}</span>
           </td>
-          <td style="vertical-align: top; padding: 6px 0; font-size: 13px; color: #334155; line-height: 1.55;">
+          <td style="vertical-align: top; padding: 6px 0; font-size: 13px; color: #334155; line-height: 1.55; text-align: left;">
             ${esc(s)}
           </td>
         </tr>`
       )
       .join('');
 
-    return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <title>${esc(opts.subject)}</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 24px 12px;">
+    return `<div style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; text-align: left;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #f1f5f9; padding: 20px 12px;">
     <tr>
-      <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);">
+      <td align="center" style="text-align: center;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 640px; margin: 0 auto; border-collapse: separate; border-spacing: 0; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06); text-align: left;">
           
           <!-- ヘッダーバナー -->
           <tr>
-            <td style="background-color: #2A3A4A; padding: 20px 28px; border-bottom: 3px solid #90CFD6;">
-              <table width="100%" cellpadding="0" cellspacing="0">
+            <td style="background-color: #2A3A4A; padding: 20px 24px; border-bottom: 3px solid #90CFD6; text-align: left;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
                 <tr>
-                  <td>
+                  <td style="text-align: left; vertical-align: middle;">
                     <div style="font-size: 11px; color: #90CFD6; font-weight: bold; letter-spacing: 0.08em;">++ HERON SOFTWARE LICENSE PORTAL</div>
-                    <div style="font-size: 18px; color: #ffffff; font-weight: bold; margin-top: 4px;">ソフトウェア・ライセンス割当のご案内</div>
+                    <div style="font-size: 17px; color: #ffffff; font-weight: bold; margin-top: 4px;">ソフトウェア・ライセンス割当のご案内</div>
                   </td>
-                  <td align="right" style="vertical-align: middle;">
+                  <td align="right" style="text-align: right; vertical-align: middle; white-space: nowrap; padding-left: 8px;">
                     <span style="display: inline-block; background-color: rgba(144, 207, 214, 0.18); border: 1px solid #90CFD6; color: #90CFD6; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 999px;">
                       管理番号: ${esc(lic.management_code)}
                     </span>
@@ -358,7 +352,7 @@ export class LicenseService {
 
           <!-- 本文エリア -->
           <tr>
-            <td style="padding: 28px;">
+            <td style="padding: 24px; text-align: left;">
               <!-- 宛名・挨拶 -->
               <p style="margin: 0 0 12px 0; font-size: 15px; font-weight: bold; color: #0f172a;">
                 ${esc(lic.assigned_department ? lic.assigned_department + ' ' : '')}${esc(opts.recipientName || 'ご担当者')} 様
@@ -369,31 +363,31 @@ export class LicenseService {
               </p>
 
               <!-- 割当ソフトウェア概要カード -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
                 <tr>
-                  <td style="padding: 12px 18px; border-bottom: 1px solid #e2e8f0; background-color: #f1f5f9;">
+                  <td style="padding: 10px 16px; border-bottom: 1px solid #e2e8f0; background-color: #f1f5f9; text-align: left;">
                     <span style="display: inline-block; width: 4px; height: 12px; background-color: #2A3A4A; border-radius: 2px; vertical-align: -1px; margin-right: 6px;"></span>
                     <span style="font-size: 12px; font-weight: bold; color: #2A3A4A;">割当ソフトウェア情報</span>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 16px 18px;">
-                    <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px;">
+                  <td style="padding: 14px 16px; text-align: left;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px;">
                       <tr>
-                        <td style="padding: 5px 0; color: #64748b; width: 130px; font-weight: bold;">ソフトウェア名</td>
-                        <td style="padding: 5px 0; color: #0f172a; font-weight: bold; font-size: 14px;">${esc(lic.software_name)}</td>
+                        <td style="padding: 5px 0; color: #64748b; width: 130px; font-weight: bold; vertical-align: top; text-align: left;">ソフトウェア名</td>
+                        <td style="padding: 5px 0; color: #0f172a; font-weight: bold; font-size: 14px; text-align: left;">${esc(lic.software_name)}</td>
                       </tr>
                       <tr>
-                        <td style="padding: 5px 0; color: #64748b; font-weight: bold;">カテゴリ / プラン</td>
-                        <td style="padding: 5px 0; color: #334155;">${esc(categoryLabel)} ／ ${esc(lic.edition_plan)}</td>
+                        <td style="padding: 5px 0; color: #64748b; font-weight: bold; vertical-align: top; text-align: left;">カテゴリ / プラン</td>
+                        <td style="padding: 5px 0; color: #334155; text-align: left;">${esc(categoryLabel)} ／ ${esc(lic.edition_plan)}</td>
                       </tr>
                       <tr>
-                        <td style="padding: 5px 0; color: #64748b; font-weight: bold;">割当対象端末</td>
-                        <td style="padding: 5px 0; color: #334155;">${esc(lic.assigned_device || '指定業務用PC端末')}</td>
+                        <td style="padding: 5px 0; color: #64748b; font-weight: bold; vertical-align: top; text-align: left;">割当対象端末</td>
+                        <td style="padding: 5px 0; color: #334155; text-align: left;">${esc(lic.assigned_device || '指定業務用PC端末')}</td>
                       </tr>
                       <tr>
-                        <td style="padding: 5px 0; color: #64748b; font-weight: bold;">割当日 / 有効期限</td>
-                        <td style="padding: 5px 0; color: #334155;">${esc(lic.assigned_date || '本日')} 〜 ${esc(lic.expiration_date || '継続契約')}</td>
+                        <td style="padding: 5px 0; color: #64748b; font-weight: bold; vertical-align: top; text-align: left;">割当日 / 有効期限</td>
+                        <td style="padding: 5px 0; color: #334155; text-align: left;">${esc(lic.assigned_date || '本日')} 〜 ${esc(lic.expiration_date || '継続契約')}</td>
                       </tr>
                     </table>
                   </td>
@@ -401,38 +395,38 @@ export class LicenseService {
               </table>
 
               <!-- 認証・シリアルコード情報カード -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
                 <tr>
-                  <td style="padding: 12px 18px; border-bottom: 1px solid #bfdbfe; background-color: #dbeafe;">
+                  <td style="padding: 10px 16px; border-bottom: 1px solid #bfdbfe; background-color: #dbeafe; text-align: left;">
                     <span style="display: inline-block; width: 4px; height: 12px; background-color: #1e3a8a; border-radius: 2px; vertical-align: -1px; margin-right: 6px;"></span>
                     <span style="font-size: 12px; font-weight: bold; color: #1e3a8a;">アカウント ＆ シリアルコード情報（社外秘・取扱注意）</span>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 16px 18px;">
-                    <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px;">
+                  <td style="padding: 14px 16px; text-align: left;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px;">
                       <tr>
-                        <td style="padding: 6px 0; color: #1e40af; width: 130px; font-weight: bold;">アカウントID</td>
-                        <td style="padding: 6px 0;">
-                          <code style="background-color: #ffffff; padding: 4px 8px; border-radius: 4px; border: 1px solid #93c5fd; font-family: Consolas, Monaco, monospace; font-size: 13px; font-weight: bold; color: #0f172a;">${esc(lic.account_id || '（シリアルコード単体認証）')}</code>
+                        <td style="padding: 6px 0; color: #1e40af; width: 130px; font-weight: bold; vertical-align: middle; text-align: left;">アカウントID</td>
+                        <td style="padding: 6px 0; text-align: left;">
+                          <code style="display: inline-block; background-color: #ffffff; padding: 4px 8px; border-radius: 4px; border: 1px solid #93c5fd; font-family: Consolas, Monaco, monospace; font-size: 13px; font-weight: bold; color: #0f172a;">${esc(lic.account_id || '（シリアルコード単体認証）')}</code>
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding: 6px 0; color: #1e40af; font-weight: bold;">初期パスワード</td>
-                        <td style="padding: 6px 0;">
-                          <code style="background-color: #ffffff; padding: 4px 8px; border-radius: 4px; border: 1px solid #93c5fd; font-family: Consolas, Monaco, monospace; font-size: 13px; color: #0f172a;">${displayPassword}</code>
+                        <td style="padding: 6px 0; color: #1e40af; font-weight: bold; vertical-align: middle; text-align: left;">初期パスワード</td>
+                        <td style="padding: 6px 0; text-align: left;">
+                          <code style="display: inline-block; background-color: #ffffff; padding: 4px 8px; border-radius: 4px; border: 1px solid #93c5fd; font-family: Consolas, Monaco, monospace; font-size: 13px; color: #0f172a;">${displayPassword}</code>
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding: 6px 0; color: #1e40af; font-weight: bold;">シリアルコード</td>
-                        <td style="padding: 6px 0;">
-                          <code style="display: inline-block; background-color: #ffffff; padding: 6px 10px; border-radius: 4px; border: 1px solid #93c5fd; font-family: Consolas, Monaco, monospace; font-size: 13px; font-weight: bold; color: #b91c1c; letter-spacing: 0.04em;">${displaySerial}</code>
+                        <td style="padding: 6px 0; color: #1e40af; font-weight: bold; vertical-align: middle; text-align: left;">シリアルコード</td>
+                        <td style="padding: 6px 0; text-align: left;">
+                          <code style="display: inline-block; background-color: #ffffff; padding: 6px 10px; border-radius: 4px; border: 1px solid #93c5fd; font-family: Consolas, Monaco, monospace; font-size: 13px; font-weight: bold; color: #b91c1c; letter-spacing: 0.04em; word-break: break-all;">${displaySerial}</code>
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding: 6px 0; color: #1e40af; font-weight: bold;">ポータル / DL先</td>
-                        <td style="padding: 6px 0;">
-                          <a href="${esc(portalUrl)}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; font-weight: bold; text-decoration: underline;">${esc(portalUrl)}</a>
+                        <td style="padding: 6px 0; color: #1e40af; font-weight: bold; vertical-align: middle; text-align: left;">ポータル / DL先</td>
+                        <td style="padding: 6px 0; text-align: left;">
+                          <a href="${esc(portalUrl)}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; font-weight: bold; text-decoration: underline; word-break: break-all;">${esc(portalUrl)}</a>
                         </td>
                       </tr>
                     </table>
@@ -443,17 +437,17 @@ export class LicenseService {
               ${customNoteHtml}
 
               <!-- セットアップ・利用開始手順 -->
-              <div style="margin-top: 22px;">
+              <div style="margin-top: 22px; text-align: left;">
                 <div style="font-size: 13px; font-weight: bold; color: #2A3A4A; border-bottom: 2px solid #2A3A4A; padding-bottom: 6px; margin-bottom: 12px;">
                   インストール・ライセンス認証手順
                 </div>
-                <table width="100%" cellpadding="0" cellspacing="0">
+                <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
                   ${stepsHtml}
                 </table>
               </div>
 
               <!-- 注意事項 -->
-              <div style="margin-top: 24px; padding: 14px 16px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11.5px; color: #64748b; line-height: 1.65;">
+              <div style="margin-top: 24px; padding: 14px 16px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11.5px; color: #64748b; line-height: 1.65; text-align: left;">
                 <strong style="color: #334155;">【ライセンス利用上の遵守事項】</strong><br />
                 ・本ライセンスおよびシリアルコードは、割当を受けたご本人および指定端末でのみご使用ください。<br />
                 ・個人所有PCへの無断導入は禁止されています（私物端末で利用する場合は事前に「BYOD申請」の決裁が必要です）。<br />
@@ -464,7 +458,7 @@ export class LicenseService {
 
           <!-- フッター -->
           <tr>
-            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 28px; text-align: center; font-size: 11px; color: #64748b;">
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px; text-align: center; font-size: 11px; color: #64748b;">
               株式会社亜細亜堂 ／ HERON 社内機材・ライセンス統合管理システム<br />
               ご不明な点がございましたら、総務部・情報システム担当までお問い合わせください。
             </td>
@@ -473,6 +467,29 @@ export class LicenseService {
       </td>
     </tr>
   </table>
+</div>`;
+  }
+
+  /**
+   * 送信前確認（HTMLソース表示・ファイル保存）および送信用の完全な HTML ドキュメント文字列を生成
+   */
+  buildHtmlEmail(lic: SoftwareLicense, opts: EmailBuildOptions): string {
+    const esc = (str?: string) =>
+      (str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+    return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${esc(opts.subject)}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9;">
+${this.buildHtmlEmailBody(lic, opts)}
 </body>
 </html>`;
   }
