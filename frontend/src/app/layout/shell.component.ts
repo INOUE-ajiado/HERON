@@ -1,6 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import {
+  ACCESS_ROLE_META,
+  AccessControlService,
+  AppPageKey,
+} from '../core/access-control.service';
 import { AuthService } from '../core/auth.service';
 import { IconComponent, IconName } from '../shared/icon.component';
 
@@ -8,12 +13,12 @@ interface NavItem {
   path: string;
   label: string;
   icon: IconName;
-  adminOnly: boolean;
+  pageKey: AppPageKey;
   exact: boolean;
 }
 
 /**
- * 共通シェル (「機材台帳・検索」一本化ナビゲーション ＆ サイドバー下部 基本設計書・テスト設定表示対応).
+ * 共通シェル (ロール＆個人別ページアクセス権限連動ナビゲーション ＆ 権限プレビューバナー対応).
  */
 @Component({
   selector: 'app-shell',
@@ -55,82 +60,94 @@ interface NavItem {
           }
         </nav>
 
-        <!-- サイドバー下部 (常時最下部固定: 基本設計書 ＆ システム仕様書 ＆ テスト設定 ＆ ログインユーザー表示) -->
+        <!-- サイドバー下部 (常時最下部固定: 仕様書リンク ＆ 管理設定 ＆ ログインユーザー表示) -->
         <div class="shrink-0 border-t border-slate-800 p-2.5 space-y-1 bg-heron-navy">
-          <!-- 基本設計書リンク (PDF) -->
-          <a
-            routerLink="/spec"
-            routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-          >
-            <app-icon name="box" class="text-sm text-[#90CFD6]" />
-            <span>基本設計書</span>
-          </a>
+          @if (access.canAccessPage('specs')) {
+            <!-- 基本設計書リンク (PDF) -->
+            <a
+              routerLink="/spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="box" class="text-sm text-[#90CFD6]" />
+              <span>基本設計書</span>
+            </a>
 
-          <!-- システム仕様書 (仕様書のすぐ下) -->
-          <a
-            routerLink="/system-spec"
-            routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-          >
-            <app-icon name="doc" class="text-sm text-[#90CFD6]" />
-            <span>システム仕様書</span>
-          </a>
+            <!-- システム仕様書 -->
+            <a
+              routerLink="/system-spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="doc" class="text-sm text-[#90CFD6]" />
+              <span>システム仕様書</span>
+            </a>
 
-          <!-- 稟議システム仕様書 -->
-          <a
-            routerLink="/approval-spec"
-            routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-          >
-            <app-icon name="doc" class="text-sm text-[#90CFD6]" />
-            <span>稟議システム仕様書</span>
-          </a>
+            <!-- 稟議システム仕様書 -->
+            <a
+              routerLink="/approval-spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="doc" class="text-sm text-[#90CFD6]" />
+              <span>稟議システム仕様書</span>
+            </a>
 
-          <!-- 業務申請仕様書 -->
-          <a
-            routerLink="/work-request-spec"
-            routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-          >
-            <app-icon name="clock" class="text-sm text-[#90CFD6]" />
-            <span>業務申請仕様書</span>
-          </a>
+            <!-- 業務申請仕様書 -->
+            <a
+              routerLink="/work-request-spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="clock" class="text-sm text-[#90CFD6]" />
+              <span>業務申請仕様書</span>
+            </a>
 
-          <!-- BYOD仕様書 -->
-          <a
-            routerLink="/byod-spec"
-            routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-          >
-            <app-icon name="box" class="text-sm text-[#90CFD6]" />
-            <span>BYOD仕様書</span>
-          </a>
+            <!-- BYOD仕様書 -->
+            <a
+              routerLink="/byod-spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="box" class="text-sm text-[#90CFD6]" />
+              <span>BYOD仕様書</span>
+            </a>
 
-          <!-- ライセンス仕様書 -->
-          <a
-            routerLink="/license-spec"
-            routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-          >
-            <app-icon name="key" class="text-sm text-[#90CFD6]" />
-            <span>ライセンス仕様書</span>
-          </a>
+            <!-- ライセンス仕様書 -->
+            <a
+              routerLink="/license-spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="key" class="text-sm text-[#90CFD6]" />
+              <span>ライセンス仕様書</span>
+            </a>
 
-          @if (auth.isAdmin()) {
+            <!-- 権限管理仕様書 -->
+            <a
+              routerLink="/admin-spec"
+              routerLinkActive="bg-blue-600 text-white font-bold"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            >
+              <app-icon name="shield" class="text-sm text-[#90CFD6]" />
+              <span>権限管理仕様書</span>
+            </a>
+          }
+
+          @if (access.canAccessPage('test-members')) {
             <a
               routerLink="/test-members"
               routerLinkActive="bg-blue-600 text-white font-bold"
               class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-[#90CFD6] hover:bg-slate-800 hover:text-white transition border border-slate-700/60 bg-slate-900/40"
             >
               <app-icon name="user" class="text-sm" />
-              <span>テスト設定</span>
+              <span>テスト設定・Ver情報</span>
             </a>
           }
 
           <div class="pt-1.5 px-1 border-t border-slate-800/80">
             <div class="text-xs font-bold text-white truncate">{{ user()?.name }}</div>
-            <div class="text-[10px] text-slate-400">{{ roleLabel() }}</div>
+            <div class="text-[10px] text-[#90CFD6] font-semibold">{{ roleLabel() }}</div>
             <button
               type="button"
               (click)="auth.logout()"
@@ -170,6 +187,33 @@ interface NavItem {
 
       <!-- 本文 (クリーンフルキャンバス) -->
       <main class="flex-1 min-w-0 overflow-x-hidden pb-20 md:pb-0 print:pb-0 bg-white">
+        <!-- 権限シミュレーター動作中バナー -->
+        @if (access.previewRole(); as simRole) {
+          <div class="bg-amber-400 text-slate-950 px-4 py-2 text-xs font-bold flex flex-wrap items-center justify-between gap-2 border-b border-amber-500 print:hidden">
+            <div class="flex items-center gap-2">
+              <app-icon name="eye" />
+              <span>
+                【権限プレビュー表示中】現在「{{ getRoleShortLabel(simRole) }}」の権限視点でサイドバーとアクセス制限をシミュレートしています
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <a
+                routerLink="/admin"
+                class="px-2.5 py-1 rounded bg-slate-900/15 hover:bg-slate-900/25 text-slate-950 text-[11px] font-bold transition"
+              >
+                管理ページを開く
+              </a>
+              <button
+                type="button"
+                (click)="access.previewRole.set(null)"
+                class="px-3 py-1 rounded bg-[#2A3A4A] text-white hover:bg-slate-800 text-[11px] font-bold transition shadow-sm"
+              >
+                通常表示 (管理者) に戻す
+              </button>
+            </div>
+          </div>
+        }
+
         <div class="w-full max-w-full px-4 py-4 md:px-6 md:py-5 print:p-0">
           <router-outlet />
         </div>
@@ -191,47 +235,57 @@ interface NavItem {
             <span>{{ item.label }}</span>
           </a>
         }
-        <a
-          routerLink="/spec"
-          routerLinkActive="text-blue-700 font-bold"
-          class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
-        >
-          <app-icon name="box" class="text-base" />
-          <span>基本設計書</span>
-        </a>
-        <a
-          routerLink="/system-spec"
-          routerLinkActive="text-blue-700 font-bold"
-          class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
-        >
-          <app-icon name="doc" class="text-base" />
-          <span>システム仕様</span>
-        </a>
+        @if (access.canAccessPage('specs')) {
+          <a
+            routerLink="/spec"
+            routerLinkActive="text-blue-700 font-bold"
+            class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
+          >
+            <app-icon name="box" class="text-base" />
+            <span>基本設計書</span>
+          </a>
+          <a
+            routerLink="/system-spec"
+            routerLinkActive="text-blue-700 font-bold"
+            class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
+          >
+            <app-icon name="doc" class="text-base" />
+            <span>システム仕様</span>
+          </a>
+        }
       </nav>
     </div>
   `,
 })
 export class ShellComponent {
   readonly auth = inject(AuthService);
+  readonly access = inject(AccessControlService);
   readonly user = this.auth.user;
 
   private readonly nav = signal<NavItem[]>([
-    { path: '/equipments', label: '機材台帳・検索', icon: 'box', adminOnly: false, exact: false },
-    { path: '/licenses', label: 'ライセンス管理', icon: 'key', adminOnly: false, exact: false },
-    { path: '/approval', label: '稟議申請', icon: 'doc', adminOnly: false, exact: false },
-    { path: '/work-request', label: '業務申請', icon: 'clock', adminOnly: false, exact: false },
-    { path: '/byod', label: 'BYOD申請', icon: 'box', adminOnly: false, exact: false },
-    { path: '/inventory', label: '棚卸し', icon: 'shelf', adminOnly: true, exact: false },
-    { path: '/locations', label: '保管場所', icon: 'pin', adminOnly: true, exact: false },
-    { path: '/settings', label: 'マスタ設定', icon: 'pin', adminOnly: true, exact: false },
-    { path: '/logs', label: '履歴', icon: 'clock', adminOnly: true, exact: false },
+    { path: '/equipments', label: '機材台帳・検索', icon: 'box', pageKey: 'equipments', exact: false },
+    { path: '/licenses', label: 'ライセンス管理', icon: 'key', pageKey: 'licenses', exact: false },
+    { path: '/approval', label: '稟議申請', icon: 'doc', pageKey: 'approval', exact: false },
+    { path: '/work-request', label: '業務申請', icon: 'clock', pageKey: 'work-request', exact: false },
+    { path: '/byod', label: 'BYOD申請', icon: 'box', pageKey: 'byod', exact: false },
+    { path: '/inventory', label: '棚卸し', icon: 'shelf', pageKey: 'inventory', exact: false },
+    { path: '/locations', label: '保管場所', icon: 'pin', pageKey: 'locations', exact: false },
+    { path: '/settings', label: 'マスタ設定', icon: 'pin', pageKey: 'settings', exact: false },
+    { path: '/logs', label: '履歴', icon: 'clock', pageKey: 'logs', exact: false },
+    { path: '/admin', label: '管理ページ (権限)', icon: 'shield', pageKey: 'admin', exact: false },
   ]);
 
   readonly visibleNav = computed(() =>
-    this.nav().filter((item) => !item.adminOnly || this.auth.isAdmin()),
+    this.nav().filter((item) => this.access.canAccessPage(item.pageKey)),
   );
 
-  readonly roleLabel = computed(() =>
-    this.auth.isAdmin() ? '管理者 (Admin)' : '一般 (General)',
-  );
+  readonly roleLabel = computed(() => {
+    const role = this.access.effectiveRole();
+    const meta = ACCESS_ROLE_META[role];
+    return meta ? meta.label : '一般ユーザー (Lv.1)';
+  });
+
+  getRoleShortLabel(role: keyof typeof ACCESS_ROLE_META): string {
+    return ACCESS_ROLE_META[role]?.label || role;
+  }
 }

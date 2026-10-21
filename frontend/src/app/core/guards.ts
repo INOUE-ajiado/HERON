@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
+import { AccessControlService, AppPageKey } from './access-control.service';
 import { AuthService } from './auth.service';
 
 /** 未ログインならログイン画面へ誘導する。 */
@@ -20,7 +21,25 @@ export const authGuard: CanActivateFn = (_route, state) => {
  */
 export const adminGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
+  const access = inject(AccessControlService);
   const router = inject(Router);
-  if (auth.isAdmin()) return true;
-  return router.createUrlTree(['/']);
+  if (access.isActualAdmin() || auth.isAdmin()) return true;
+  return router.createUrlTree([access.getDefaultLandingRoute()]);
 };
+
+/**
+ * ページ単位の詳細アクセス権限ガード。
+ * 管理ページ (/admin) で設定されたロール別マトリクスおよび個人別オーバーライドに基づき、
+ * 許可されていないページへのアクセスを遮断して利用可能な最初のページ（稟議申請など）へ誘導する。
+ */
+export function pageAccessGuard(pageKey: AppPageKey): CanActivateFn {
+  return () => {
+    const access = inject(AccessControlService);
+    const router = inject(Router);
+    if (access.canAccessPage(pageKey)) {
+      return true;
+    }
+    const fallback = access.getDefaultLandingRoute();
+    return router.createUrlTree([fallback]);
+  };
+}

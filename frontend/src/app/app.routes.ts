@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 
-import { adminGuard, authGuard } from './core/guards';
+import { adminGuard, authGuard, pageAccessGuard } from './core/guards';
 
 /**
- * 画面構成 (基本設計書 PDF ＆ システム仕様書 閲覧機能を含む).
+ * 画面構成 (基本設計書 PDF ＆ システム仕様書 ＆ ユーザー・ページ権限管理を含む).
  */
 export const routes: Routes = [
   {
@@ -13,7 +13,7 @@ export const routes: Routes = [
   },
   {
     path: 'print/label/:id',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, pageAccessGuard('equipments')],
     loadComponent: () =>
       import('./pages/label-print/label-print.component').then(
         (m) => m.LabelPrintComponent,
@@ -21,7 +21,7 @@ export const routes: Routes = [
   },
   {
     path: 'print/shelf-label/:code',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, pageAccessGuard('locations')],
     loadComponent: () =>
       import('./pages/shelf-label-print/shelf-label-print.component').then(
         (m) => m.ShelfLabelPrintComponent,
@@ -40,6 +40,7 @@ export const routes: Routes = [
       },
       {
         path: 'equipments',
+        canActivate: [pageAccessGuard('equipments')],
         loadComponent: () =>
           import('./pages/equipment-list/equipment-list.component').then(
             (m) => m.EquipmentListComponent,
@@ -62,7 +63,7 @@ export const routes: Routes = [
       },
       {
         path: 'inventory',
-        canActivate: [adminGuard],
+        canActivate: [pageAccessGuard('inventory')],
         loadComponent: () =>
           import('./pages/inventory/inventory.component').then(
             (m) => m.InventoryComponent,
@@ -70,7 +71,7 @@ export const routes: Routes = [
       },
       {
         path: 'locations',
-        canActivate: [adminGuard],
+        canActivate: [pageAccessGuard('locations')],
         loadComponent: () =>
           import('./pages/locations/locations.component').then(
             (m) => m.LocationsComponent,
@@ -78,6 +79,7 @@ export const routes: Routes = [
       },
       {
         path: 'approval',
+        canActivate: [pageAccessGuard('approval')],
         loadComponent: () =>
           import('./pages/approval/approval.component').then(
             (m) => m.ApprovalComponent,
@@ -85,6 +87,7 @@ export const routes: Routes = [
       },
       {
         path: 'work-request',
+        canActivate: [pageAccessGuard('work-request')],
         loadComponent: () =>
           import('./pages/work-request/work-request.component').then(
             (m) => m.WorkRequestComponent,
@@ -92,18 +95,29 @@ export const routes: Routes = [
       },
       {
         path: 'byod',
+        canActivate: [pageAccessGuard('byod')],
         loadComponent: () =>
           import('./pages/byod/byod.component').then((m) => m.ByodComponent),
       },
       {
         path: 'licenses',
+        canActivate: [pageAccessGuard('licenses')],
         loadComponent: () =>
           import('./pages/licenses/licenses.component').then(
             (m) => m.LicensesComponent,
           ),
       },
       {
+        path: 'admin',
+        canActivate: [pageAccessGuard('admin')],
+        loadComponent: () =>
+          import('./pages/admin/admin.component').then(
+            (m) => m.AdminComponent,
+          ),
+      },
+      {
         path: 'approval-spec',
+        canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
           import('./pages/approval-spec/approval-spec.component').then(
             (m) => m.ApprovalSpecComponent,
@@ -111,6 +125,7 @@ export const routes: Routes = [
       },
       {
         path: 'work-request-spec',
+        canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
           import('./pages/work-request-spec/work-request-spec.component').then(
             (m) => m.WorkRequestSpecComponent,
@@ -118,6 +133,7 @@ export const routes: Routes = [
       },
       {
         path: 'byod-spec',
+        canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
           import('./pages/byod-spec/byod-spec.component').then(
             (m) => m.ByodSpecComponent,
@@ -125,18 +141,29 @@ export const routes: Routes = [
       },
       {
         path: 'license-spec',
+        canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
           import('./pages/license-spec/license-spec.component').then(
             (m) => m.LicenseSpecComponent,
           ),
       },
       {
+        path: 'admin-spec',
+        canActivate: [pageAccessGuard('specs')],
+        loadComponent: () =>
+          import('./pages/admin-spec/admin-spec.component').then(
+            (m) => m.AdminSpecComponent,
+          ),
+      },
+      {
         path: 'spec',
+        canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
           import('./pages/spec/spec.component').then((m) => m.SpecComponent),
       },
       {
         path: 'system-spec',
+        canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
           import('./pages/system-spec/system-spec.component').then(
             (m) => m.SystemSpecComponent,
@@ -144,7 +171,7 @@ export const routes: Routes = [
       },
       {
         path: 'test-members',
-        canActivate: [adminGuard],
+        canActivate: [pageAccessGuard('test-members')],
         loadComponent: () =>
           import('./pages/test-members/test-members.component').then(
             (m) => m.TestMembersComponent,
@@ -152,13 +179,13 @@ export const routes: Routes = [
       },
       {
         path: 'logs',
-        canActivate: [adminGuard],
+        canActivate: [pageAccessGuard('logs')],
         loadComponent: () =>
           import('./pages/logs/logs.component').then((m) => m.LogsComponent),
       },
       {
         path: 'settings',
-        canActivate: [adminGuard],
+        canActivate: [pageAccessGuard('settings')],
         loadComponent: () =>
           import('./pages/settings/settings.component').then(
             (m) => m.SettingsComponent,
