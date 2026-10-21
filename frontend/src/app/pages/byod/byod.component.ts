@@ -75,7 +75,8 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
 
               @if (pendingSecurityCount() > 0) {
                 <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 border border-indigo-300 rounded-full animate-pulse">
-                  <span>🛡️ 責任者決裁待ち</span>
+                  <app-icon name="shield" class="text-[10px]" />
+                  <span>責任者決裁待ち</span>
                   <span>{{ pendingSecurityCount() }}件</span>
                 </span>
               }
@@ -101,9 +102,10 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                 [class.text-white]="activeFilter() === 'pending_manager'"
                 [class.bg-white]="activeFilter() !== 'pending_manager'"
                 [class.text-slate-600]="activeFilter() !== 'pending_manager'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
               >
-                ⏳ 所属長待ち
+                <app-icon name="clock" class="text-[10px]" />
+                <span>所属長待ち</span>
               </button>
               <button
                 type="button"
@@ -112,9 +114,10 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                 [class.text-white]="activeFilter() === 'pending_security'"
                 [class.bg-white]="activeFilter() !== 'pending_security'"
                 [class.text-slate-600]="activeFilter() !== 'pending_security'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
               >
-                🛡️ 責任者待ち
+                <app-icon name="shield" class="text-[10px]" />
+                <span>責任者待ち</span>
               </button>
               <button
                 type="button"
@@ -123,9 +126,10 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                 [class.text-white]="activeFilter() === 'completed'"
                 [class.bg-white]="activeFilter() !== 'completed'"
                 [class.text-slate-600]="activeFilter() !== 'completed'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
               >
-                ✅ 決裁完了
+                <app-icon name="check" class="text-[10px]" />
+                <span>決裁完了</span>
               </button>
             </div>
           </div>
@@ -176,17 +180,20 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
 
                 <!-- 申請機材サマリーバッジ -->
                 <div class="mb-1.5 flex flex-wrap items-center gap-1.5 text-[10px]">
-                  <span class="bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-200 font-bold">
-                    💻 PC: {{ req.count_pc }}台
+                  <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded border border-blue-200 font-bold">
+                    <app-icon name="monitor" class="text-[10px]" />
+                    <span>PC: {{ req.count_pc }}台</span>
                   </span>
                   @if (req.count_tablet > 0) {
-                    <span class="bg-indigo-50 text-indigo-800 px-1.5 py-0.5 rounded border border-indigo-200 font-bold">
-                      📱 タブレット: {{ req.count_tablet }}台
+                    <span class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-800 px-1.5 py-0.5 rounded border border-indigo-200 font-bold">
+                      <app-icon name="monitor" class="text-[10px]" />
+                      <span>タブレット: {{ req.count_tablet }}台</span>
                     </span>
                   }
                   @if (req.count_media > 0) {
-                    <span class="bg-amber-50 text-amber-800 px-1.5 py-0.5 rounded border border-amber-200 font-bold">
-                      💾 記録媒体: {{ req.count_media }}個
+                    <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 px-1.5 py-0.5 rounded border border-amber-200 font-bold">
+                      <app-icon name="box" class="text-[10px]" />
+                      <span>記録媒体: {{ req.count_media }}個</span>
                     </span>
                   }
                 </div>
@@ -246,12 +253,12 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                         (click)="openEditModal(req)"
                         class="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs px-3 py-2 rounded-lg transition active:scale-95 shadow-xs"
                       >
-                        <span>✏️</span>
+                        <app-icon name="edit" class="text-xs" />
                         <span>申請内容を編集</span>
                       </button>
                     } @else {
                       <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-500 border border-slate-200 text-[11px] font-medium px-2.5 py-1.5 rounded-lg">
-                        <span>🔒</span>
+                        <app-icon name="shield" class="text-xs" />
                         <span>{{ req.status === 'security_approved' ? '決裁完了（編集不可）' : '審査中（編集不可）' }}</span>
                       </span>
                     }
@@ -263,7 +270,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                         (click)="approveAsManager(req)"
                         class="inline-flex items-center gap-1.5 bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm shadow-blue-700/20 transition active:scale-95"
                       >
-                        <span>✓</span>
+                        <app-icon name="check" class="text-xs" />
                         <span>所属長として承認する</span>
                       </button>
 
@@ -272,7 +279,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                         (click)="openRejectModal(req)"
                         class="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs px-3 py-2 rounded-lg transition active:scale-95"
                       >
-                        <span>✕</span>
+                        <app-icon name="close" class="text-xs" />
                         <span>差戻し</span>
                       </button>
                     }
@@ -284,7 +291,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                         (click)="approveAsSecurity(req)"
                         class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm shadow-emerald-600/20 transition active:scale-95 animate-pulse"
                       >
-                        <span>🛡️</span>
+                        <app-icon name="shield" class="text-xs" />
                         <span>情報セキュリティ責任者として決裁（ステッカー交付）</span>
                       </button>
 
@@ -293,7 +300,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                         (click)="openRejectModal(req)"
                         class="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs px-3 py-2 rounded-lg transition active:scale-95"
                       >
-                        <span>✕</span>
+                        <app-icon name="close" class="text-xs" />
                         <span>差戻し</span>
                       </button>
                     }
@@ -306,7 +313,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                       class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-xs transition active:scale-95 disabled:opacity-50"
                     >
                       @if (isGeneratingPDF()) {
-                        <span class="animate-spin text-sm">🌀</span>
+                        <app-icon name="clock" class="animate-spin text-sm" />
                         <span>PDF生成中...</span>
                       } @else {
                         <app-icon name="doc" class="text-sm text-white" />
@@ -371,9 +378,10 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                       [class.shadow-xs]="docViewTab() === 'both'"
                       [class.text-blue-800]="docViewTab() === 'both'"
                       [class.font-bold]="docViewTab() === 'both'"
-                      class="px-3 py-1 rounded-md text-slate-600 transition"
+                      class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-slate-600 transition"
                     >
-                      📚 2枚すべて表示
+                      <app-icon name="shelf" class="text-xs" />
+                      <span>2枚すべて表示</span>
                     </button>
                     <button
                       type="button"
@@ -382,9 +390,10 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                       [class.shadow-xs]="docViewTab() === 'pledge'"
                       [class.text-blue-800]="docViewTab() === 'pledge'"
                       [class.font-bold]="docViewTab() === 'pledge'"
-                      class="px-3 py-1 rounded-md text-slate-600 transition"
+                      class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-slate-600 transition"
                     >
-                      📄 1. 利用申請書 兼 誓約書
+                      <app-icon name="doc" class="text-xs" />
+                      <span>1. 利用申請書 兼 誓約書</span>
                     </button>
                     <button
                       type="button"
@@ -393,9 +402,10 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                       [class.shadow-xs]="docViewTab() === 'device_detail'"
                       [class.text-blue-800]="docViewTab() === 'device_detail'"
                       [class.font-bold]="docViewTab() === 'device_detail'"
-                      class="px-3 py-1 rounded-md text-slate-600 transition"
+                      class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-slate-600 transition"
                     >
-                      💻 2. 端末・記録媒体 明細書
+                      <app-icon name="monitor" class="text-xs" />
+                      <span>2. 端末・記録媒体 明細書</span>
                     </button>
                   </div>
                 </div>
@@ -746,7 +756,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
           } @else {
             <div class="h-full flex flex-col items-center justify-center p-8 text-center text-slate-400">
               <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700 text-3xl mb-3">
-                💻
+                <app-icon name="monitor" class="text-3xl" />
               </div>
               <h3 class="text-sm font-bold text-slate-600">申請が選択されていません</h3>
               <p class="text-xs text-slate-400 mt-1">左側の一覧からBYOD申請を選択するか、新規申請を作成してください。</p>
@@ -774,7 +784,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                 (click)="closeFormModal()"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
               >
-                ✕
+                <app-icon name="close" class="text-sm" />
               </button>
             </div>
 
@@ -878,7 +888,8 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
               <div class="space-y-3 pt-2">
                 <div class="flex items-center justify-between border-b border-slate-200 pb-1">
                   <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
-                    <span>💻 申請対象端末（PC / タブレット等）</span>
+                    <app-icon name="monitor" class="text-sm text-blue-700" />
+                    <span>申請対象端末（PC / タブレット等）</span>
                     <span class="text-[10px] text-slate-500 font-normal">({{ formData.devices.length }}台)</span>
                   </h4>
                   <button
@@ -1009,7 +1020,8 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
               <div class="space-y-3 pt-2">
                 <div class="flex items-center justify-between border-b border-slate-200 pb-1">
                   <h4 class="font-bold text-slate-800 flex items-center gap-1.5">
-                    <span>💾 外部記録媒体（USBメモリ・外付けSSD/HDD等）</span>
+                    <app-icon name="box" class="text-sm text-amber-700" />
+                    <span>外部記録媒体（USBメモリ・外付けSSD/HDD等）</span>
                     <span class="text-[10px] text-slate-500 font-normal">({{ formData.external_media.length }}個)</span>
                   </h4>
                   <button
@@ -1127,7 +1139,7 @@ type DocViewTab = 'both' | 'pledge' | 'device_detail';
                 (click)="showRejectModal.set(false)"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400"
               >
-                ✕
+                <app-icon name="close" class="text-sm" />
               </button>
             </div>
             <div class="p-6 space-y-4">

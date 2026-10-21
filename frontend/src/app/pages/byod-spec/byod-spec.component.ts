@@ -76,7 +76,7 @@ import { IconComponent } from '../../shared/icon.component';
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="p-3.5 bg-slate-50 border border-slate-300 rounded-xl space-y-1.5">
               <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                <span>📄</span>
+                <app-icon name="doc" class="text-[#2A3A4A]" />
                 <span>【書類1】私物情報端末等 利用申請書 兼 誓約書</span>
               </div>
               <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px]">
@@ -90,7 +90,7 @@ import { IconComponent } from '../../shared/icon.component';
 
             <div class="p-3.5 bg-slate-50 border border-slate-300 rounded-xl space-y-1.5">
               <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                <span>💻</span>
+                <app-icon name="monitor" class="text-[#2A3A4A]" />
                 <span>【書類2】申請対象端末・外部記録媒体 明細書</span>
               </div>
               <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px]">

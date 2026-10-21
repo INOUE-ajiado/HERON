@@ -78,25 +78,25 @@ export interface WorkRequest {
 
 export const WORK_TYPE_CONFIG: Record<
   WorkRequestType,
-  { label: string; iconEmoji: string; colorClass: string; badgeClass: string; desc: string }
+  { label: string; iconEmoji: 'clock' | 'check' | 'doc'; colorClass: string; badgeClass: string; desc: string }
 > = {
   holiday_work: {
     label: '休日出勤申請',
-    iconEmoji: '🌅',
+    iconEmoji: 'clock',
     colorClass: 'text-amber-700 bg-amber-50 border-amber-300',
     badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
     desc: '土日・祝日の出勤、および振替休日（代休）の指定申請',
   },
   leave: {
     label: '休暇申請',
-    iconEmoji: '🌴',
+    iconEmoji: 'check',
     colorClass: 'text-emerald-700 bg-emerald-50 border-emerald-300',
     badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
     desc: '年次有給休暇、代休、半休、慶弔休暇等の取得申請',
   },
   overtime: {
     label: '残業申請',
-    iconEmoji: '⏱️',
+    iconEmoji: 'clock',
     colorClass: 'text-indigo-700 bg-indigo-50 border-indigo-300',
     badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-300',
     desc: '所定就業時間を超える時間外労働・深夜残業の事前申請',

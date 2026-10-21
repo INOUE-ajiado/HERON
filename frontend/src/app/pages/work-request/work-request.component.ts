@@ -72,7 +72,8 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
               <!-- 総務連携待ちの警告バッジ -->
               @if (pendingAdminCount() > 0) {
                 <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 bg-blue-100 text-blue-700 border border-blue-300 rounded-full animate-pulse">
-                  <span>📢 総務未受領</span>
+                  <app-icon name="mail" />
+                  <span>総務未受領</span>
                   <span>{{ pendingAdminCount() }}件</span>
                 </span>
               }
@@ -98,9 +99,10 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 [class.text-white]="activeFilter() === 'holiday_work'"
                 [class.bg-white]="activeFilter() !== 'holiday_work'"
                 [class.text-slate-600]="activeFilter() !== 'holiday_work'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition inline-flex items-center gap-1"
               >
-                🌅 休日出勤
+                <app-icon name="clock" />
+                <span>休日出勤</span>
               </button>
               <button
                 type="button"
@@ -109,9 +111,10 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 [class.text-white]="activeFilter() === 'leave'"
                 [class.bg-white]="activeFilter() !== 'leave'"
                 [class.text-slate-600]="activeFilter() !== 'leave'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition inline-flex items-center gap-1"
               >
-                🌴 休暇
+                <app-icon name="check" />
+                <span>休暇</span>
               </button>
               <button
                 type="button"
@@ -120,9 +123,10 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 [class.text-white]="activeFilter() === 'overtime'"
                 [class.bg-white]="activeFilter() !== 'overtime'"
                 [class.text-slate-600]="activeFilter() !== 'overtime'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition inline-flex items-center gap-1"
               >
-                ⏱️ 残業
+                <app-icon name="clock" />
+                <span>残業</span>
               </button>
               <button
                 type="button"
@@ -131,9 +135,10 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 [class.text-white]="activeFilter() === 'pending_admin'"
                 [class.bg-white]="activeFilter() !== 'pending_admin'"
                 [class.text-slate-600]="activeFilter() !== 'pending_admin'"
-                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition"
+                class="px-2 py-1 text-[10px] font-bold rounded-lg border border-slate-200 transition inline-flex items-center gap-1"
               >
-                📢 総務受領待ち
+                <app-icon name="mail" />
+                <span>総務受領待ち</span>
               </button>
             </div>
           </div>
@@ -159,10 +164,11 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                   <div class="flex items-center gap-1.5">
                     <!-- 申請種別バッジ -->
                     <span
-                      class="text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                      class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border"
                       [ngClass]="typeConfig(req.request_type).badgeClass"
                     >
-                      {{ typeConfig(req.request_type).iconEmoji }} {{ typeConfig(req.request_type).label }}
+                      <app-icon [name]="typeConfig(req.request_type).iconEmoji" />
+                      <span>{{ typeConfig(req.request_type).label }}</span>
                     </span>
                     <span class="text-[10px] font-mono text-slate-400">{{ req.id }}</span>
                   </div>
@@ -246,12 +252,12 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                         (click)="openEditModal(req)"
                         class="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs px-3 py-2 rounded-lg transition active:scale-95 shadow-xs"
                       >
-                        <span>✏️</span>
+                        <app-icon name="edit" />
                         <span>申請内容を編集</span>
                       </button>
                     } @else {
                       <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-500 border border-slate-200 text-[11px] font-medium px-2.5 py-1.5 rounded-lg">
-                        <span>🔒</span>
+                        <app-icon name="shield" />
                         <span>{{ req.status === 'admin_confirmed' ? '勤怠反映完了（ロック）' : '上長許諾済（ロック）' }}</span>
                       </span>
                     }
@@ -263,7 +269,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                         (click)="approveAsManager(req)"
                         class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm shadow-indigo-600/20 transition active:scale-95"
                       >
-                        <span>✓</span>
+                        <app-icon name="check" />
                         <span>上長として許諾する</span>
                       </button>
 
@@ -272,7 +278,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                         (click)="openRejectModal(req)"
                         class="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs px-3 py-2 rounded-lg transition active:scale-95"
                       >
-                        <span>✕</span>
+                        <app-icon name="close" />
                         <span>差戻し</span>
                       </button>
                     }
@@ -284,7 +290,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                         (click)="openAdminConfirmModal(req)"
                         class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm shadow-emerald-600/20 transition active:scale-95 animate-pulse"
                       >
-                        <span>🏢</span>
+                        <app-icon name="home" />
                         <span>総務受領・勤怠システムへ反映</span>
                       </button>
                     }
@@ -297,7 +303,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                       class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-xs transition active:scale-95 disabled:opacity-50"
                     >
                       @if (isGeneratingPDF()) {
-                        <span class="animate-spin text-sm">🌀</span>
+                        <app-icon name="clock" class="animate-spin text-sm" />
                         <span>PDF生成中...</span>
                       } @else {
                         <app-icon name="doc" class="text-sm text-white" />
@@ -356,7 +362,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                   <div class="p-3.5 rounded-xl bg-blue-50/90 border-2 border-blue-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                     <div class="flex items-start gap-2.5">
                       <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 text-base font-bold">
-                        📢
+                        <app-icon name="mail" />
                       </div>
                       <div>
                         <h4 class="text-xs font-bold text-blue-900">
@@ -378,7 +384,9 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                   </div>
                 } @else if (req.status === 'admin_confirmed') {
                   <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-900">
-                    <div class="text-emerald-600 font-bold text-sm shrink-0">✅</div>
+                    <div class="text-emerald-600 font-bold text-sm shrink-0">
+                      <app-icon name="check" />
+                    </div>
                     <div class="flex-1">
                       <div class="font-bold flex items-center gap-2">
                         <span>総務部 勤怠システム反映完了</span>
@@ -391,7 +399,9 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                   </div>
                 } @else if (req.status === 'rejected') {
                   <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-xs text-rose-900">
-                    <div class="text-rose-600 font-bold text-sm shrink-0">✕</div>
+                    <div class="text-rose-600 font-bold text-sm shrink-0">
+                      <app-icon name="close" />
+                    </div>
                     <div>
                       <div class="font-bold">申請は差戻しされました</div>
                       <p class="text-[11px] text-rose-800 mt-0.5">
@@ -629,7 +639,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
           } @else {
             <div class="h-full flex flex-col items-center justify-center p-8 text-center text-slate-400">
               <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-400 text-3xl mb-3">
-                ⏱️
+                <app-icon name="clock" />
               </div>
               <h3 class="text-sm font-bold text-slate-600">申請が選択されていません</h3>
               <p class="text-xs text-slate-400 mt-1">左側の一覧から業務申請を選択するか、新規申請を作成してください。</p>
@@ -657,7 +667,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 (click)="closeFormModal()"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
               >
-                ✕
+                <app-icon name="close" />
               </button>
             </div>
 
@@ -673,7 +683,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                     [class.bg-amber-50]="formData.request_type === 'holiday_work'"
                     class="p-2.5 rounded-xl border border-slate-200 text-center transition flex flex-col items-center"
                   >
-                    <span class="text-xl">🌅</span>
+                    <app-icon name="clock" class="text-xl text-amber-600" />
                     <span class="text-xs font-bold text-slate-800 mt-1">休日出勤申請</span>
                     <span class="text-[9.5px] text-slate-500 scale-90">土日祝出勤・代休指定</span>
                   </button>
@@ -685,7 +695,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                     [class.bg-emerald-50]="formData.request_type === 'leave'"
                     class="p-2.5 rounded-xl border border-slate-200 text-center transition flex flex-col items-center"
                   >
-                    <span class="text-xl">🌴</span>
+                    <app-icon name="check" class="text-xl text-emerald-600" />
                     <span class="text-xs font-bold text-slate-800 mt-1">休暇申請</span>
                     <span class="text-[9.5px] text-slate-500 scale-90">有休・代休・半休</span>
                   </button>
@@ -697,7 +707,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                     [class.bg-indigo-50]="formData.request_type === 'overtime'"
                     class="p-2.5 rounded-xl border border-slate-200 text-center transition flex flex-col items-center"
                   >
-                    <span class="text-xl">⏱️</span>
+                    <app-icon name="clock" class="text-xl text-indigo-600" />
                     <span class="text-xs font-bold text-slate-800 mt-1">残業申請</span>
                     <span class="text-[9.5px] text-slate-500 scale-90">時間外・深夜残業</span>
                   </button>
@@ -966,7 +976,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
           <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-200 bg-emerald-50 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="text-xl">🏢</span>
+                <app-icon name="home" class="text-xl text-emerald-700" />
                 <h3 class="text-base font-bold text-emerald-950">総務受領・勤怠システム反映</h3>
               </div>
               <button
@@ -974,7 +984,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 (click)="showAdminModal.set(false)"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600"
               >
-                ✕
+                <app-icon name="close" />
               </button>
             </div>
 
@@ -1039,7 +1049,7 @@ type FilterType = 'all' | WorkRequestType | 'pending_manager' | 'pending_admin';
                 (click)="showRejectModal.set(false)"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400"
               >
-                ✕
+                <app-icon name="close" />
               </button>
             </div>
             <div class="p-6 space-y-4">

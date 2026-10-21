@@ -49,15 +49,24 @@ import { IconComponent } from '../../shared/icon.component';
           </p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
             <div class="p-3.5 bg-amber-50/60 border border-amber-200 rounded-xl">
-              <div class="font-bold text-amber-900 mb-1">🌅 休日出勤申請</div>
+              <div class="font-bold text-amber-900 mb-1 flex items-center gap-1.5">
+                <app-icon name="clock" />
+                <span>休日出勤申請</span>
+              </div>
               <div class="text-[11px] text-slate-600">土日・祝日の出勤予定と、振替休日（代休）の指定を一元管理。カッティング出し等の特出し作業に対応。</div>
             </div>
             <div class="p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-xl">
-              <div class="font-bold text-emerald-900 mb-1">🌴 休暇申請</div>
+              <div class="font-bold text-emerald-900 mb-1 flex items-center gap-1.5">
+                <app-icon name="check" />
+                <span>休暇申請</span>
+              </div>
               <div class="text-[11px] text-slate-600">有給休暇、代休取得、午前・午後の半休に対応。原画アップ後や話数納品後のリフレッシュを円滑化。</div>
             </div>
             <div class="p-3.5 bg-indigo-50/60 border border-indigo-200 rounded-xl">
-              <div class="font-bold text-indigo-900 mb-1">⏱️ 残業申請</div>
+              <div class="font-bold text-indigo-900 mb-1 flex items-center gap-1.5">
+                <app-icon name="clock" />
+                <span>残業申請</span>
+              </div>
               <div class="text-[11px] text-slate-600">所定時間外および22:00以降の深夜残業の事前申請。36協定順守とスタッフの健康管理を両立。</div>
             </div>
           </div>
@@ -142,7 +151,10 @@ import { IconComponent } from '../../shared/icon.component';
           </p>
           <div class="space-y-2.5">
             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-              <div class="font-bold text-slate-800 text-xs mb-1">🎬 アニメ制作固有項目</div>
+              <div class="font-bold text-slate-800 text-xs mb-1 flex items-center gap-1.5">
+                <app-icon name="camera" class="text-[#2A3A4A]" />
+                <span>アニメ制作固有項目</span>
+              </div>
               <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px]">
                 <li><strong>担当作品名（anime_project）</strong>: 『HERON: THE ANIMATION 第2期』等のプロジェクト名。作品別工数管理に直結。</li>
                 <li><strong>担当話数・制作工程（episode_or_process）</strong>: 「#07 原画・LO回収」「#04 作監修正・動検」「特報PV 編集立ち会い」等、具体的なパートを記録。</li>
@@ -152,7 +164,10 @@ import { IconComponent } from '../../shared/icon.component';
             </div>
 
             <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-              <div class="font-bold text-slate-800 text-xs mb-1">📋 申請種別固有項目</div>
+              <div class="font-bold text-slate-800 text-xs mb-1 flex items-center gap-1.5">
+                <app-icon name="doc" class="text-[#2A3A4A]" />
+                <span>申請種別固有項目</span>
+              </div>
               <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px]">
                 <li><strong>休日出勤</strong>: 振替休日（代休）予定日を指定可能。未定時は後日申請可能。</li>
                 <li><strong>休暇申請</strong>: 休暇区分（有給休暇、代休、特別休暇、慶弔休暇、欠勤）および取得単位（全日休、午前半休、午後半休）を選択。</li>
@@ -177,17 +192,17 @@ import { IconComponent } from '../../shared/icon.component';
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div class="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl space-y-1.5">
               <div class="font-bold text-blue-900 flex items-center gap-1.5">
-                <span>📢</span>
+                <app-icon name="mail" />
                 <span>自動通知・総務連携フラグ</span>
               </div>
               <p class="text-[11px] text-blue-800">
-                上長が「許諾する」ボタンを押下した瞬間、ステータスが <code class="bg-blue-100 px-1 py-0.5 rounded text-blue-900 font-mono">manager_approved</code> に更新され、左側ナビゲーションに「📢 総務未受領（○件）」のアラートバッジが即時表示されます。
+                上長が「許諾する」ボタンを押下した瞬間、ステータスが <code class="bg-blue-100 px-1 py-0.5 rounded text-blue-900 font-mono">manager_approved</code> に更新され、左側ナビゲーションに「総務未受領（○件）」のアラートバッジが即時表示されます。
               </p>
             </div>
 
             <div class="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5">
               <div class="font-bold text-emerald-900 flex items-center gap-1.5">
-                <span>🏢</span>
+                <app-icon name="home" />
                 <span>総務受領・労務台帳記録</span>
               </div>
               <p class="text-[11px] text-emerald-800">

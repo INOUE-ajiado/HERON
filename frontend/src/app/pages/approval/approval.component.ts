@@ -149,12 +149,12 @@ import { IconComponent } from '../../shared/icon.component';
                         (click)="openEditModal(req)"
                         class="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs px-3 py-2 rounded-lg transition active:scale-95 shadow-xs"
                       >
-                        <span class="text-sm">✏️</span>
+                        <app-icon name="edit" class="text-sm" />
                         <span>申請内容を編集</span>
                       </button>
                     } @else {
                       <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-500 border border-slate-200 text-[11px] font-medium px-2.5 py-1.5 rounded-lg" title="承認手続きが開始されているため変更できません">
-                        <span>🔒</span>
+                        <app-icon name="shield" class="text-xs" />
                         <span>{{ req.status === 'president_approved' ? '決裁完了（編集不可）' : '承認手続中（編集不可）' }}</span>
                       </span>
                     }
@@ -166,7 +166,7 @@ import { IconComponent } from '../../shared/icon.component';
                         (click)="advanceApproval(req)"
                         class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm shadow-emerald-600/20 transition active:scale-95"
                       >
-                        <span class="text-sm">✓</span>
+                        <app-icon name="check" class="text-sm" />
                         <span>{{ getNextApprovalBtnLabel(req.status) }}</span>
                       </button>
                     }
@@ -179,7 +179,7 @@ import { IconComponent } from '../../shared/icon.component';
                       class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-xs transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       @if (isGeneratingPDF()) {
-                        <span class="animate-spin text-sm">🌀</span>
+                        <app-icon name="clock" class="animate-spin text-sm" />
                         <span>PDF生成中...</span>
                       } @else {
                         <app-icon name="doc" class="text-sm text-white" />
@@ -362,22 +362,26 @@ import { IconComponent } from '../../shared/icon.component';
                                   </div>
 
                                   @if (item.target_user) {
-                                    <div class="target-user-badge text-[10.5px] px-2 py-0.5 rounded border border-blue-300 inline-block font-bold mt-1" style="color: #0f172a !important; background-color: #dbeafe !important; border-color: #93c5fd !important;">
-                                      <span style="color: #1e3a8a !important; font-weight: bold !important;">👤 使用者・対象者: </span>
+                                    <div class="target-user-badge text-[10.5px] px-2 py-0.5 rounded border border-blue-300 inline-flex items-center gap-1 font-bold mt-1" style="color: #0f172a !important; background-color: #dbeafe !important; border-color: #93c5fd !important;">
+                                      <app-icon name="user" style="color: #1e3a8a !important;" />
+                                      <span style="color: #1e3a8a !important; font-weight: bold !important;">使用者・対象者: </span>
                                       <span style="color: #0f172a !important; font-weight: bold !important;">{{ item.target_user }}</span>
                                     </div>
                                   }
 
                                   @if (item.purchase_url) {
                                     <div class="text-[10px] flex items-center gap-1 pt-0.2">
-                                      <span class="text-slate-400 shrink-0">🔗 購入先:</span>
+                                      <span class="text-slate-400 shrink-0 inline-flex items-center gap-1">
+                                        <app-icon name="doc" />
+                                        <span>購入先:</span>
+                                      </span>
                                       <a
                                         [href]="item.purchase_url"
                                         target="_blank"
                                         rel="noopener"
                                         class="text-blue-600 underline font-medium hover:text-blue-800 truncate max-w-md"
                                       >
-                                        {{ item.purchase_url }} ↗
+                                        {{ item.purchase_url }}
                                       </a>
                                     </div>
                                   }
@@ -439,7 +443,8 @@ import { IconComponent } from '../../shared/icon.component';
                   <div>
                     <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Attached Files / 備考・添付</div>
                     <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 text-slate-700 text-[11px] rounded-md border border-slate-200 font-mono">
-                      📎 {{ req.attachment_note }}
+                      <app-icon name="doc" />
+                      <span>{{ req.attachment_note }}</span>
                     </div>
                   </div>
                 }
@@ -624,7 +629,7 @@ import { IconComponent } from '../../shared/icon.component';
                           class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
                           title="品目を削除"
                         >
-                          ✕
+                          <app-icon name="close" />
                         </button>
                       }
                     </div>
@@ -632,7 +637,10 @@ import { IconComponent } from '../../shared/icon.component';
                     <!-- アイテムごとの使用者・対象者 / 購入先URL / 画像URL設定 -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-100 pl-7">
                       <div>
-                        <label class="block text-[10px] font-bold text-blue-800 mb-0.5">👤 この品目の使用者・対象者</label>
+                        <label class="flex items-center gap-1 text-[10px] font-bold text-blue-800 mb-0.5">
+                          <app-icon name="user" />
+                          <span>この品目の使用者・対象者</span>
+                        </label>
                         <input
                           type="text"
                           [(ngModel)]="item.target_user"
