@@ -72,10 +72,14 @@ interface UserGroupSummary {
       @if (toastMessage()) {
         <div class="rounded-xl bg-emerald-900 text-white px-4 py-3 text-xs font-bold shadow-lg flex items-center justify-between border border-emerald-700">
           <div class="flex items-center gap-2">
-            <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[11px]">✓</span>
+            <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[11px]">
+              <app-icon name="check" />
+            </span>
             <span>{{ toastMessage() }}</span>
           </div>
-          <button type="button" (click)="toastMessage.set('')" class="text-emerald-200 hover:text-white text-sm">✕</button>
+          <button type="button" (click)="toastMessage.set('')" class="text-emerald-200 hover:text-white text-sm flex items-center justify-center">
+            <app-icon name="close" />
+          </button>
         </div>
       }
 
@@ -83,7 +87,7 @@ interface UserGroupSummary {
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100/80 border border-slate-200/80 shadow-2xs">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2A3A4A] text-[#90CFD6] font-bold text-base shrink-0">
-            🔑
+            <app-icon name="key" />
           </div>
           <div class="min-w-0">
             <div class="text-[10px] font-bold text-slate-500">登録ライセンス総数</div>
@@ -95,7 +99,7 @@ interface UserGroupSummary {
 
         <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 shadow-2xs">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-base shrink-0">
-            👤
+            <app-icon name="user" />
           </div>
           <div class="min-w-0">
             <div class="text-[10px] font-bold text-blue-900">スタッフ割当済 (稼働中)</div>
@@ -107,7 +111,7 @@ interface UserGroupSummary {
 
         <div class="flex items-center gap-3 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 shadow-2xs">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-base shrink-0">
-            📦
+            <app-icon name="box" />
           </div>
           <div class="min-w-0">
             <div class="text-[10px] font-bold text-emerald-900">未割当 (空き在庫)</div>
@@ -119,7 +123,7 @@ interface UserGroupSummary {
 
         <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50/70 border border-amber-200/70 shadow-2xs">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-600 text-white font-bold text-base shrink-0">
-            ✉️
+            <app-icon name="mail" />
           </div>
           <div class="min-w-0">
             <div class="text-[10px] font-bold text-amber-900">案内メール送信済</div>
@@ -145,7 +149,8 @@ interface UserGroupSummary {
                   : 'text-slate-600 hover:text-slate-900'
               "
             >
-              <span>🔑 ライセンス・シリアル一覧 ({{ filteredLicenses().length }})</span>
+              <app-icon name="key" />
+              <span>ライセンス・シリアル一覧 ({{ filteredLicenses().length }})</span>
             </button>
             <button
               type="button"
@@ -157,7 +162,8 @@ interface UserGroupSummary {
                   : 'text-slate-600 hover:text-slate-900'
               "
             >
-              <span>👥 スタッフ別 紐付け一覧 ({{ userGroups().length }}名)</span>
+              <app-icon name="user" />
+              <span>スタッフ別 紐付け一覧 ({{ userGroups().length }}名)</span>
             </button>
           </div>
 
@@ -193,7 +199,8 @@ interface UserGroupSummary {
                   : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
               "
             >
-              <span>{{ showAllSecrets() ? '🙈 シリアル・PWを隠す' : '👁 シリアル・PWを表示' }}</span>
+              <app-icon name="eye" />
+              <span>{{ showAllSecrets() ? 'シリアル・PWを隠す' : 'シリアル・PWを表示' }}</span>
             </button>
           </div>
         </div>
@@ -203,74 +210,79 @@ interface UserGroupSummary {
           <button
             type="button"
             (click)="categoryFilter.set('')"
-            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border"
+            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border flex items-center gap-1.5"
             [class]="
               categoryFilter() === ''
                 ? 'bg-[#2A3A4A] text-white border-[#2A3A4A]'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
             "
           >
-            すべて ({{ licenses().length }})
+            <span>すべて ({{ licenses().length }})</span>
           </button>
           <button
             type="button"
             (click)="categoryFilter.set('microsoft_office')"
-            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border"
+            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border flex items-center gap-1.5"
             [class]="
               categoryFilter() === 'microsoft_office'
                 ? 'bg-blue-700 text-white border-blue-700'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
             "
           >
-            📘 Microsoft Office / 365 ({{ countByCategory('microsoft_office') }})
+            <app-icon name="doc" />
+            <span>Microsoft Office / 365 ({{ countByCategory('microsoft_office') }})</span>
           </button>
           <button
             type="button"
             (click)="categoryFilter.set('clip_studio')"
-            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border"
+            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border flex items-center gap-1.5"
             [class]="
               categoryFilter() === 'clip_studio'
                 ? 'bg-indigo-700 text-white border-indigo-700'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
             "
           >
-            🎨 CLIP STUDIO PAINT ({{ countByCategory('clip_studio') }})
+            <app-icon name="edit" />
+            <span>CLIP STUDIO PAINT ({{ countByCategory('clip_studio') }})</span>
           </button>
           <button
             type="button"
             (click)="categoryFilter.set('adobe_cc')"
-            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border"
+            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border flex items-center gap-1.5"
             [class]="
               categoryFilter() === 'adobe_cc'
                 ? 'bg-rose-700 text-white border-rose-700'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
             "
           >
-            🅰️ Adobe Photoshop / CC ({{ countByCategory('adobe_cc') }})
+            <app-icon name="monitor" />
+            <span>Adobe Photoshop / CC ({{ countByCategory('adobe_cc') }})</span>
           </button>
           <button
             type="button"
             (click)="categoryFilter.set('dcc_3d')"
-            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border"
+            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border flex items-center gap-1.5"
             [class]="
               categoryFilter() === 'dcc_3d'
                 ? 'bg-purple-700 text-white border-purple-700'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
             "
           >
-            🎬 映像・3DCGツール ({{ countByCategory('dcc_3d') }})
+            <app-icon name="camera" />
+            <span>映像・3DCGツール ({{ countByCategory('dcc_3d') }})</span>
           </button>
           <button
             type="button"
             (click)="categoryFilter.set('security_utility')"
-            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border"
+            class="px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition border flex items-center gap-1.5"
             [class]="
               categoryFilter() === 'security_utility'
                 ? 'bg-teal-700 text-white border-teal-700'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
             "
           >
-            🛡 セキュリティ・業務 ({{ countByCategory('security_utility') }})
+            <app-icon name="shield" />
+            <span>セキュリティ・業務 ({{ countByCategory('security_utility') }})</span>
           </button>
         </div>
       </div>
@@ -309,8 +321,9 @@ interface UserGroupSummary {
                       {{ getStatusLabel(lic.status) }}
                     </span>
                     @if (lic.last_mail_sent_at) {
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                        ✉️ 案内送信済 ({{ lic.last_mail_sent_at }})
+                      <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+                        <app-icon name="mail" />
+                        <span>案内送信済 ({{ lic.last_mail_sent_at }})</span>
                       </span>
                     }
                   </div>
@@ -337,10 +350,11 @@ interface UserGroupSummary {
                           <button
                             type="button"
                             (click)="copyText(lic.account_id, 'アカウントID')"
-                            class="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shrink-0"
+                            class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shrink-0"
                             title="コピー"
                           >
-                            コピー
+                            <app-icon name="copy" />
+                            <span>コピー</span>
                           </button>
                         }
                       </div>
@@ -356,16 +370,18 @@ interface UserGroupSummary {
                           <button
                             type="button"
                             (click)="toggleSecret(lic.id)"
-                            class="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
+                            class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
                           >
-                            {{ isSecretVisible(lic.id) ? '隠す' : '表示' }}
+                            <app-icon name="eye" />
+                            <span>{{ isSecretVisible(lic.id) ? '隠す' : '表示' }}</span>
                           </button>
                           <button
                             type="button"
                             (click)="copyText(lic.account_password, 'パスワード')"
-                            class="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
+                            class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
                           >
-                            コピー
+                            <app-icon name="copy" />
+                            <span>コピー</span>
                           </button>
                         } @else {
                           <span class="text-slate-400">―</span>
@@ -383,16 +399,18 @@ interface UserGroupSummary {
                           <button
                             type="button"
                             (click)="toggleSecret(lic.id)"
-                            class="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shrink-0"
+                            class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shrink-0"
                           >
-                            {{ isSecretVisible(lic.id) ? '隠す' : '表示' }}
+                            <app-icon name="eye" />
+                            <span>{{ isSecretVisible(lic.id) ? '隠す' : '表示' }}</span>
                           </button>
                           <button
                             type="button"
                             (click)="copyText(lic.serial_code, 'シリアルコード')"
-                            class="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shrink-0"
+                            class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 shrink-0"
                           >
-                            コピー
+                            <app-icon name="copy" />
+                            <span>コピー</span>
                           </button>
                         } @else {
                           <span class="text-slate-400 font-normal">― (アカウント認証)</span>
@@ -402,8 +420,9 @@ interface UserGroupSummary {
                   </div>
 
                   @if (lic.note) {
-                    <p class="text-[11px] text-slate-500 leading-relaxed">
-                      📝 {{ lic.note }}
+                    <p class="text-[11px] text-slate-500 leading-relaxed flex items-center gap-1.5">
+                      <app-icon name="doc" class="text-slate-400 shrink-0" />
+                      <span>{{ lic.note }}</span>
                     </p>
                   }
                 </div>
@@ -413,7 +432,10 @@ interface UserGroupSummary {
                   @if (lic.status === 'assigned' && lic.assigned_user_name) {
                     <div class="space-y-1">
                       <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">👤 紐付け利用者</span>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-800 uppercase tracking-wider">
+                          <app-icon name="user" />
+                          <span>紐付け利用者</span>
+                        </span>
                         <span class="text-[10px] text-slate-400">割当: {{ lic.assigned_date || '―' }}</span>
                       </div>
                       <div class="text-sm font-extrabold text-[#2A3A4A] flex items-center gap-1.5">
@@ -424,17 +446,20 @@ interface UserGroupSummary {
                           </span>
                         }
                       </div>
-                      <div class="text-xs font-mono text-slate-600 truncate">
-                        ✉️ {{ lic.assigned_user_email || 'メールアドレス未設定' }}
+                      <div class="text-xs font-mono text-slate-600 truncate flex items-center gap-1.5">
+                        <app-icon name="mail" class="text-slate-400 shrink-0" />
+                        <span class="truncate">{{ lic.assigned_user_email || 'メールアドレス未設定' }}</span>
                       </div>
                       @if (lic.assigned_device) {
-                        <div class="text-[11px] text-slate-600 truncate">
-                          💻 {{ lic.assigned_device }}
+                        <div class="text-[11px] text-slate-600 truncate flex items-center gap-1.5">
+                          <app-icon name="monitor" class="text-slate-400 shrink-0" />
+                          <span class="truncate">{{ lic.assigned_device }}</span>
                         </div>
                       }
                       @if (lic.expiration_date) {
-                        <div class="text-[11px] text-slate-500">
-                          📅 更新/期限: <span class="font-semibold text-slate-700">{{ lic.expiration_date }}</span>
+                        <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
+                          <app-icon name="clock" class="text-slate-400 shrink-0" />
+                          <span>更新/期限: <strong class="font-semibold text-slate-700">{{ lic.expiration_date }}</strong></span>
                         </div>
                       }
                     </div>
@@ -445,7 +470,8 @@ interface UserGroupSummary {
                         (click)="openEmailPreviewModal(lic)"
                         class="w-full py-2 px-3 rounded-lg bg-[#2A3A4A] hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition active:scale-[0.99]"
                       >
-                        <span>✉️ HTML案内メールを作成・確認</span>
+                        <app-icon name="mail" />
+                        <span>HTML案内メールを作成・確認</span>
                       </button>
                       <button
                         type="button"
@@ -471,7 +497,10 @@ interface UserGroupSummary {
                     </div>
                   } @else {
                     <div class="py-3 text-center space-y-1">
-                      <div class="text-xs font-bold text-emerald-800">✨ 未割当（空きライセンス在庫）</div>
+                      <div class="text-xs font-bold text-emerald-800 flex items-center justify-center gap-1">
+                        <app-icon name="check" />
+                        <span>未割当（空きライセンス在庫）</span>
+                      </div>
                       <p class="text-[11px] text-slate-500">
                         スタッフに紐付けると、そのままHTML案内メールを作成・送信できます
                       </p>
@@ -480,9 +509,10 @@ interface UserGroupSummary {
                       <button
                         type="button"
                         (click)="openAssignModal(lic)"
-                        class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition"
+                        class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition flex items-center justify-center gap-1.5"
                       >
-                        👤 スタッフに紐付ける
+                        <app-icon name="user" />
+                        <span>スタッフに紐付ける</span>
                       </button>
                       <button
                         type="button"
@@ -525,8 +555,9 @@ interface UserGroupSummary {
                       <span class="text-[11px] text-slate-500">{{ group.role }}</span>
                     }
                   </div>
-                  <div class="text-xs font-mono text-slate-500 mt-0.5">
-                    ✉️ {{ group.userEmail || 'メールアドレス未登録' }}
+                  <div class="text-xs font-mono text-slate-500 mt-0.5 flex items-center gap-1.5">
+                    <app-icon name="mail" />
+                    <span>{{ group.userEmail || 'メールアドレス未登録' }}</span>
                   </div>
                 </div>
                 <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
@@ -554,9 +585,10 @@ interface UserGroupSummary {
                     <button
                       type="button"
                       (click)="openEmailPreviewModal(lic)"
-                      class="shrink-0 px-2.5 py-1.5 rounded-lg bg-[#2A3A4A] hover:bg-slate-800 text-white text-[11px] font-bold transition"
+                      class="shrink-0 px-2.5 py-1.5 rounded-lg bg-[#2A3A4A] hover:bg-slate-800 text-white text-[11px] font-bold transition flex items-center gap-1"
                     >
-                      ✉️ 案内メール
+                      <app-icon name="mail" />
+                      <span>案内メール</span>
                     </button>
                   </div>
                 }
@@ -593,7 +625,7 @@ interface UserGroupSummary {
               (click)="showEmailModal.set(false)"
               class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-sm"
             >
-              ✕
+              <app-icon name="close" />
             </button>
           </div>
 
@@ -678,14 +710,17 @@ interface UserGroupSummary {
                   class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs leading-relaxed"
                 ></textarea>
                 <p class="text-[10px] text-slate-400">
-                  ※ 入力すると右側のHTMLプレビュー内の「📌 管理者からの補足・個別連絡事項」枠にリアルタイム反映されます。
+                  ※ 入力すると右側のHTMLプレビュー内の「管理者からの補足・個別連絡事項」枠にリアルタイム反映されます。
                 </p>
               </div>
 
               <!-- 過去の送信履歴 -->
               @if (targetLic.mail_history && targetLic.mail_history.length > 0) {
                 <div class="rounded-xl bg-blue-50/70 p-3 border border-blue-200 text-xs space-y-1">
-                  <div class="font-bold text-blue-950">📜 過去の案内メール送信履歴</div>
+                  <div class="font-bold text-blue-950 flex items-center gap-1.5">
+                    <app-icon name="clock" />
+                    <span>過去の案内メール送信履歴</span>
+                  </div>
                   @for (h of targetLic.mail_history.slice(0, 3); track h.id) {
                     <div class="text-[11px] text-blue-900">
                       ・{{ h.sent_at }} ➔ {{ h.recipient_name }} ({{ h.recipient_email }}) [担当: {{ h.sent_by }}]
@@ -708,26 +743,29 @@ interface UserGroupSummary {
                   <button
                     type="button"
                     (click)="emailPreviewTab.set('visual')"
-                    class="px-2.5 py-1 rounded-md transition"
+                    class="px-2.5 py-1 rounded-md transition flex items-center gap-1"
                     [class]="emailPreviewTab() === 'visual' ? 'bg-white text-[#2A3A4A] shadow-2xs' : 'text-slate-600'"
                   >
-                    🖼 HTMLメール表示
+                    <app-icon name="eye" />
+                    <span>HTMLメール表示</span>
                   </button>
                   <button
                     type="button"
                     (click)="emailPreviewTab.set('html')"
-                    class="px-2.5 py-1 rounded-md transition"
+                    class="px-2.5 py-1 rounded-md transition flex items-center gap-1"
                     [class]="emailPreviewTab() === 'html' ? 'bg-white text-[#2A3A4A] shadow-2xs' : 'text-slate-600'"
                   >
-                    &lt;/&gt; HTMLソース
+                    <app-icon name="doc" />
+                    <span>HTMLソース</span>
                   </button>
                   <button
                     type="button"
                     (click)="emailPreviewTab.set('text')"
-                    class="px-2.5 py-1 rounded-md transition"
+                    class="px-2.5 py-1 rounded-md transition flex items-center gap-1"
                     [class]="emailPreviewTab() === 'text' ? 'bg-white text-[#2A3A4A] shadow-2xs' : 'text-slate-600'"
                   >
-                    📄 テキスト版
+                    <app-icon name="doc" />
+                    <span>テキスト版</span>
                   </button>
                 </div>
               </div>
@@ -759,31 +797,35 @@ interface UserGroupSummary {
 
           <!-- モーダルフッター (確認後の送信アクション) -->
           <div class="px-5 py-3.5 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
-            <div class="text-[11px] text-slate-500">
-              💡 <strong>おすすめ:</strong> 「HTMLデザインをコピー」を押して Gmail / Outlook の本文に貼り付けると、上のプレビュー通りの装飾で送信できます。
+            <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
+              <app-icon name="check" class="text-emerald-600" />
+              <span><strong>ヒント:</strong> 「HTMLデザインをコピー」を押して Gmail / Outlook の本文に貼り付けると、上のプレビュー通りの装飾で送信できます。</span>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 (click)="downloadHtmlEmail()"
-                class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition"
+                class="px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5"
               >
-                ⬇ HTML保存 (.html)
+                <app-icon name="download" />
+                <span>HTML保存 (.html)</span>
               </button>
               <button
                 type="button"
                 (click)="copyRichHtmlEmail()"
-                class="px-3.5 py-2 rounded-lg border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-bold transition"
+                class="px-3.5 py-2 rounded-lg border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-bold transition flex items-center gap-1.5"
               >
-                📋 HTMLデザインをコピー (Gmail/Outlook貼付用)
+                <app-icon name="copy" />
+                <span>HTMLデザインをコピー (Gmail/Outlook貼付用)</span>
               </button>
               <button
                 type="button"
                 (click)="confirmAndSendEmail()"
                 class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition active:scale-95 flex items-center gap-1.5"
               >
-                <span>✉️ 表示内容を確認して案内メールを送信</span>
+                <app-icon name="mail" />
+                <span>表示内容を確認して案内メールを送信</span>
               </button>
             </div>
           </div>
@@ -799,10 +841,15 @@ interface UserGroupSummary {
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden">
           <div class="px-5 py-4 bg-[#2A3A4A] text-white flex items-center justify-between">
             <div>
-              <h3 class="text-sm font-bold">👤 ライセンスの利用者紐付け設定</h3>
+              <h3 class="text-sm font-bold flex items-center gap-1.5">
+                <app-icon name="user" class="text-[#90CFD6]" />
+                <span>ライセンスの利用者紐付け設定</span>
+              </h3>
               <p class="text-[11px] text-slate-300 mt-0.5">{{ assignLic.management_code }}: {{ assignLic.software_name }}</p>
             </div>
-            <button type="button" (click)="showAssignModal.set(false)" class="text-slate-300 hover:text-white">✕</button>
+            <button type="button" (click)="showAssignModal.set(false)" class="text-slate-300 hover:text-white">
+              <app-icon name="close" />
+            </button>
           </div>
 
           <form (ngSubmit)="saveAssignment()" class="p-5 space-y-3.5 text-xs">
@@ -921,10 +968,13 @@ interface UserGroupSummary {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl border border-slate-200 overflow-hidden my-auto">
           <div class="px-5 py-4 bg-[#2A3A4A] text-white flex items-center justify-between">
-            <h3 class="text-sm font-bold">
-              {{ editingId() ? '✏️ ライセンス・シリアル情報の編集' : '➕ 新規ソフトウェアライセンス・シリアル登録' }}
+            <h3 class="text-sm font-bold flex items-center gap-1.5">
+              <app-icon [name]="editingId() ? 'edit' : 'plus'" class="text-[#90CFD6]" />
+              <span>{{ editingId() ? 'ライセンス・シリアル情報の編集' : '新規ソフトウェアライセンス・シリアル登録' }}</span>
             </h3>
-            <button type="button" (click)="showFormModal.set(false)" class="text-slate-300 hover:text-white">✕</button>
+            <button type="button" (click)="showFormModal.set(false)" class="text-slate-300 hover:text-white">
+              <app-icon name="close" />
+            </button>
           </div>
 
           <form (ngSubmit)="saveForm()" class="p-5 space-y-4 text-xs max-h-[82vh] overflow-y-auto">
@@ -996,7 +1046,10 @@ interface UserGroupSummary {
 
             <!-- アカウント ＆ シリアル入力枠 -->
             <div class="rounded-xl bg-blue-50/60 border border-blue-200 p-3.5 space-y-3">
-              <div class="font-bold text-blue-950">🔑 アカウント ＆ シリアルコード情報</div>
+              <div class="font-bold text-blue-950 flex items-center gap-1.5">
+                <app-icon name="key" />
+                <span>アカウント ＆ シリアルコード情報</span>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label class="block font-bold text-slate-700 mb-1">ログインアカウントID / メール</label>
@@ -1070,7 +1123,10 @@ interface UserGroupSummary {
             <!-- 紐付け情報（任意：登録と同時に割当可能） -->
             <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-800">👤 利用者紐付け（空欄の場合は「空き在庫」として登録）</span>
+                <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                  <app-icon name="user" />
+                  <span>利用者紐付け（空欄の場合は「空き在庫」として登録）</span>
+                </span>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
@@ -1133,9 +1189,10 @@ interface UserGroupSummary {
                 <button
                   type="button"
                   (click)="deleteCurrentLicense()"
-                  class="px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 font-bold"
+                  class="px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-1.5"
                 >
-                  🗑 削除する
+                  <app-icon name="trash" />
+                  <span>削除する</span>
                 </button>
               } @else {
                 <span></span>

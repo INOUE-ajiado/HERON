@@ -113,7 +113,7 @@ interface NavItem {
             routerLinkActive="bg-blue-600 text-white font-bold"
             class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
-            <app-icon name="doc" class="text-sm text-[#90CFD6]" />
+            <app-icon name="key" class="text-sm text-[#90CFD6]" />
             <span>ライセンス仕様書</span>
           </a>
 
@@ -217,7 +217,7 @@ export class ShellComponent {
 
   private readonly nav = signal<NavItem[]>([
     { path: '/equipments', label: '機材台帳・検索', icon: 'box', adminOnly: false, exact: false },
-    { path: '/licenses', label: 'ライセンス管理', icon: 'doc', adminOnly: false, exact: false },
+    { path: '/licenses', label: 'ライセンス管理', icon: 'key', adminOnly: false, exact: false },
     { path: '/approval', label: '稟議申請', icon: 'doc', adminOnly: false, exact: false },
     { path: '/work-request', label: '業務申請', icon: 'clock', adminOnly: false, exact: false },
     { path: '/byod', label: 'BYOD申請', icon: 'box', adminOnly: false, exact: false },

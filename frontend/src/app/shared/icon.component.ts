@@ -16,7 +16,15 @@ export type IconName =
   | 'return'
   | 'check'
   | 'close'
-  | 'doc';
+  | 'doc'
+  | 'key'
+  | 'mail'
+  | 'eye'
+  | 'copy'
+  | 'shield'
+  | 'download'
+  | 'edit'
+  | 'monitor';
 
 /**
  * CSS のみで描画するアイコン。
@@ -407,6 +415,42 @@ export type IconName =
       :host([data-icon='close'])::after {
         transform: translate(-50%, -50%) rotate(-45deg);
       }
+
+      /* ---- key ---- */
+      :host([data-icon='key'])::before { left: 6%; top: 26%; width: 44%; height: 44%; border: var(--sw) solid currentColor; border-radius: 50%; }
+      :host([data-icon='key'])::after { left: 46%; top: 43%; width: 48%; height: var(--sw); background: currentColor; border-radius: 0.04em; }
+      :host([data-icon='key']) i::before { left: 68%; top: 48%; width: var(--sw); height: 22%; background: currentColor; }
+      :host([data-icon='key']) i::after { left: 84%; top: 48%; width: var(--sw); height: 28%; background: currentColor; }
+
+      /* ---- mail ---- */
+      :host([data-icon='mail'])::before { left: 6%; top: 18%; width: 88%; height: 64%; border: var(--sw) solid currentColor; border-radius: 0.1em; }
+      :host([data-icon='mail'])::after { left: 50%; top: 20%; width: 52%; height: 52%; border-right: var(--sw) solid currentColor; border-bottom: var(--sw) solid currentColor; transform: translateX(-50%) rotate(45deg); }
+
+      /* ---- eye ---- */
+      :host([data-icon='eye'])::before { left: 8%; top: 20%; width: 84%; height: 60%; border: var(--sw) solid currentColor; border-radius: 75% 15%; transform: rotate(45deg) scale(0.78); }
+      :host([data-icon='eye'])::after { left: 38%; top: 38%; width: 24%; height: 24%; background: currentColor; border-radius: 50%; }
+
+      /* ---- copy ---- */
+      :host([data-icon='copy'])::before { left: 28%; top: 8%; width: 60%; height: 68%; border: var(--sw) solid currentColor; border-radius: 0.08em; }
+      :host([data-icon='copy'])::after { left: 10%; top: 26%; width: 58%; height: 66%; border: var(--sw) solid currentColor; border-top: 0; border-right: 0; border-radius: 0 0 0 0.08em; }
+
+      /* ---- shield ---- */
+      :host([data-icon='shield'])::before { left: 14%; top: 10%; width: 72%; height: 80%; border: var(--sw) solid currentColor; border-radius: 0.1em 0.1em 50% 50%; }
+      :host([data-icon='shield'])::after { left: 47%; top: 24%; width: 0.08em; height: 50%; background: currentColor; opacity: 0.7; }
+
+      /* ---- download ---- */
+      :host([data-icon='download'])::before { left: 50%; top: 10%; width: var(--sw); height: 46%; background: currentColor; transform: translateX(-50%); }
+      :host([data-icon='download'])::after { left: 50%; top: 44%; width: 0.32em; height: 0.32em; border-right: var(--sw) solid currentColor; border-bottom: var(--sw) solid currentColor; transform: translate(-50%, -50%) rotate(45deg); }
+      :host([data-icon='download']) i::before { left: 12%; top: 66%; width: 76%; height: 24%; border: var(--sw) solid currentColor; border-top: 0; border-radius: 0 0 0.08em 0.08em; }
+
+      /* ---- edit ---- */
+      :host([data-icon='edit'])::before { left: 24%; top: 12%; width: 56%; height: 22%; border: var(--sw) solid currentColor; border-radius: 0.06em; transform: rotate(-45deg); }
+      :host([data-icon='edit'])::after { left: 12%; bottom: 10%; width: 76%; height: var(--sw); background: currentColor; }
+
+      /* ---- monitor ---- */
+      :host([data-icon='monitor'])::before { left: 6%; top: 12%; width: 88%; height: 60%; border: var(--sw) solid currentColor; border-radius: 0.1em; }
+      :host([data-icon='monitor'])::after { left: 28%; top: 84%; width: 44%; height: var(--sw); background: currentColor; border-radius: 0.05em; }
+      :host([data-icon='monitor']) i::before { left: 46%; top: 72%; width: var(--sw); height: 14%; background: currentColor; }
     `,
   ],
 })

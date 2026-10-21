@@ -306,7 +306,7 @@ export class LicenseService {
     const customNoteHtml = opts.customMessage.trim()
       ? `
       <div style="margin-top: 20px; padding: 14px 16px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px;">
-        <div style="font-size: 12px; font-weight: bold; color: #92400e; margin-bottom: 4px;">📌 管理者からの補足・個別連絡事項</div>
+        <div style="font-size: 12px; font-weight: bold; color: #92400e; margin-bottom: 4px;">■ 管理者からの補足・個別連絡事項</div>
         <div style="font-size: 13px; color: #78350f; line-height: 1.6; white-space: pre-wrap;">${esc(opts.customMessage)}</div>
       </div>`
       : '';
@@ -371,8 +371,9 @@ export class LicenseService {
               <!-- 割当ソフトウェア概要カード -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px;">
                 <tr>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid #e2e8f0; background-color: #f1f5f9;">
-                    <span style="font-size: 12px; font-weight: bold; color: #2A3A4A;">📦 割当ソフトウェア情報</span>
+                  <td style="padding: 12px 18px; border-bottom: 1px solid #e2e8f0; background-color: #f1f5f9;">
+                    <span style="display: inline-block; width: 4px; height: 12px; background-color: #2A3A4A; border-radius: 2px; vertical-align: -1px; margin-right: 6px;"></span>
+                    <span style="font-size: 12px; font-weight: bold; color: #2A3A4A;">割当ソフトウェア情報</span>
                   </td>
                 </tr>
                 <tr>
@@ -403,7 +404,8 @@ export class LicenseService {
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; margin-bottom: 20px;">
                 <tr>
                   <td style="padding: 12px 18px; border-bottom: 1px solid #bfdbfe; background-color: #dbeafe;">
-                    <span style="font-size: 12px; font-weight: bold; color: #1e3a8a;">🔑 アカウント ＆ シリアルコード情報（社外秘・取扱注意）</span>
+                    <span style="display: inline-block; width: 4px; height: 12px; background-color: #1e3a8a; border-radius: 2px; vertical-align: -1px; margin-right: 6px;"></span>
+                    <span style="font-size: 12px; font-weight: bold; color: #1e3a8a;">アカウント ＆ シリアルコード情報（社外秘・取扱注意）</span>
                   </td>
                 </tr>
                 <tr>
@@ -443,7 +445,7 @@ export class LicenseService {
               <!-- セットアップ・利用開始手順 -->
               <div style="margin-top: 22px;">
                 <div style="font-size: 13px; font-weight: bold; color: #2A3A4A; border-bottom: 2px solid #2A3A4A; padding-bottom: 6px; margin-bottom: 12px;">
-                  🛠 インストール・ライセンス認証手順
+                  インストール・ライセンス認証手順
                 </div>
                 <table width="100%" cellpadding="0" cellspacing="0">
                   ${stepsHtml}
