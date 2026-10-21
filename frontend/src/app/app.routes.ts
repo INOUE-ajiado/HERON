@@ -116,58 +116,97 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'approval-spec',
-        canActivate: [pageAccessGuard('specs')],
-        loadComponent: () =>
-          import('./pages/approval-spec/approval-spec.component').then(
-            (m) => m.ApprovalSpecComponent,
-          ),
-      },
-      {
-        path: 'work-request-spec',
-        canActivate: [pageAccessGuard('specs')],
-        loadComponent: () =>
-          import('./pages/work-request-spec/work-request-spec.component').then(
-            (m) => m.WorkRequestSpecComponent,
-          ),
-      },
-      {
-        path: 'byod-spec',
-        canActivate: [pageAccessGuard('specs')],
-        loadComponent: () =>
-          import('./pages/byod-spec/byod-spec.component').then(
-            (m) => m.ByodSpecComponent,
-          ),
-      },
-      {
-        path: 'license-spec',
-        canActivate: [pageAccessGuard('specs')],
-        loadComponent: () =>
-          import('./pages/license-spec/license-spec.component').then(
-            (m) => m.LicenseSpecComponent,
-          ),
-      },
-      {
-        path: 'admin-spec',
-        canActivate: [pageAccessGuard('specs')],
-        loadComponent: () =>
-          import('./pages/admin-spec/admin-spec.component').then(
-            (m) => m.AdminSpecComponent,
-          ),
-      },
-      {
         path: 'spec',
         canActivate: [pageAccessGuard('specs')],
         loadComponent: () =>
-          import('./pages/spec/spec.component').then((m) => m.SpecComponent),
+          import('./pages/spec/specs-layout.component').then(
+            (m) => m.SpecsLayoutComponent,
+          ),
+        children: [
+          {
+            path: '',
+            redirectTo: 'basic',
+            pathMatch: 'full',
+          },
+          {
+            path: 'basic',
+            loadComponent: () =>
+              import('./pages/spec/spec.component').then((m) => m.SpecComponent),
+          },
+          {
+            path: 'system',
+            loadComponent: () =>
+              import('./pages/system-spec/system-spec.component').then(
+                (m) => m.SystemSpecComponent,
+              ),
+          },
+          {
+            path: 'approval',
+            loadComponent: () =>
+              import('./pages/approval-spec/approval-spec.component').then(
+                (m) => m.ApprovalSpecComponent,
+              ),
+          },
+          {
+            path: 'work-request',
+            loadComponent: () =>
+              import('./pages/work-request-spec/work-request-spec.component').then(
+                (m) => m.WorkRequestSpecComponent,
+              ),
+          },
+          {
+            path: 'byod',
+            loadComponent: () =>
+              import('./pages/byod-spec/byod-spec.component').then(
+                (m) => m.ByodSpecComponent,
+              ),
+          },
+          {
+            path: 'license',
+            loadComponent: () =>
+              import('./pages/license-spec/license-spec.component').then(
+                (m) => m.LicenseSpecComponent,
+              ),
+          },
+          {
+            path: 'admin',
+            loadComponent: () =>
+              import('./pages/admin-spec/admin-spec.component').then(
+                (m) => m.AdminSpecComponent,
+              ),
+          },
+        ],
       },
+      // 既存の単体URLからのダイレクト遷移も統合ポータル内へリダイレクト
       {
         path: 'system-spec',
-        canActivate: [pageAccessGuard('specs')],
-        loadComponent: () =>
-          import('./pages/system-spec/system-spec.component').then(
-            (m) => m.SystemSpecComponent,
-          ),
+        redirectTo: 'spec/system',
+        pathMatch: 'full',
+      },
+      {
+        path: 'approval-spec',
+        redirectTo: 'spec/approval',
+        pathMatch: 'full',
+      },
+      {
+        path: 'work-request-spec',
+        redirectTo: 'spec/work-request',
+        pathMatch: 'full',
+      },
+      {
+        path: 'byod-spec',
+        redirectTo: 'spec/byod',
+        pathMatch: 'full',
+      },
+      {
+        path: 'license-spec',
+        redirectTo: 'spec/license',
+        pathMatch: 'full',
+      },
+      {
+        path: 'admin-spec',
+        redirectTo: 'spec/admin',
+        pathMatch: 'full',
       },
       {
         path: 'test-members',

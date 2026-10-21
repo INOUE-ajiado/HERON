@@ -40,7 +40,7 @@ import { IconComponent } from '../../shared/icon.component';
 
         <div class="flex flex-wrap items-center gap-2">
           <a
-            routerLink="/admin-spec"
+            routerLink="/spec/admin"
             class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition"
           >
             <app-icon name="doc" />

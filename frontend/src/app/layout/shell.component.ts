@@ -63,74 +63,19 @@ interface NavItem {
         <!-- サイドバー下部 (常時最下部固定: 仕様書リンク ＆ 管理設定 ＆ ログインユーザー表示) -->
         <div class="shrink-0 border-t border-slate-800 p-2.5 space-y-1 bg-heron-navy">
           @if (access.canAccessPage('specs')) {
-            <!-- 基本設計書リンク (PDF) -->
+            <!-- 統合 設計書・仕様書ポータル -->
             <a
               routerLink="/spec"
               routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+              class="flex items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
             >
-              <app-icon name="box" class="text-sm text-[#90CFD6]" />
-              <span>基本設計書</span>
-            </a>
-
-            <!-- システム仕様書 -->
-            <a
-              routerLink="/system-spec"
-              routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-            >
-              <app-icon name="doc" class="text-sm text-[#90CFD6]" />
-              <span>システム仕様書</span>
-            </a>
-
-            <!-- 稟議システム仕様書 -->
-            <a
-              routerLink="/approval-spec"
-              routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-            >
-              <app-icon name="doc" class="text-sm text-[#90CFD6]" />
-              <span>稟議システム仕様書</span>
-            </a>
-
-            <!-- 業務申請仕様書 -->
-            <a
-              routerLink="/work-request-spec"
-              routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-            >
-              <app-icon name="clock" class="text-sm text-[#90CFD6]" />
-              <span>業務申請仕様書</span>
-            </a>
-
-            <!-- BYOD仕様書 -->
-            <a
-              routerLink="/byod-spec"
-              routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-            >
-              <app-icon name="box" class="text-sm text-[#90CFD6]" />
-              <span>BYOD仕様書</span>
-            </a>
-
-            <!-- ライセンス仕様書 -->
-            <a
-              routerLink="/license-spec"
-              routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-            >
-              <app-icon name="key" class="text-sm text-[#90CFD6]" />
-              <span>ライセンス仕様書</span>
-            </a>
-
-            <!-- 権限管理仕様書 -->
-            <a
-              routerLink="/admin-spec"
-              routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-2.5 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
-            >
-              <app-icon name="shield" class="text-sm text-[#90CFD6]" />
-              <span>権限管理仕様書</span>
+              <span class="flex items-center gap-2 truncate">
+                <app-icon name="doc" class="text-sm text-[#90CFD6]" />
+                <span>設計書・仕様書</span>
+              </span>
+              <span class="px-1.5 py-0.2 rounded bg-slate-800 text-[#90CFD6] text-[9px] font-bold">
+                全7編
+              </span>
             </a>
           }
 
@@ -241,16 +186,8 @@ interface NavItem {
             routerLinkActive="text-blue-700 font-bold"
             class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
           >
-            <app-icon name="box" class="text-base" />
-            <span>基本設計書</span>
-          </a>
-          <a
-            routerLink="/system-spec"
-            routerLinkActive="text-blue-700 font-bold"
-            class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
-          >
             <app-icon name="doc" class="text-base" />
-            <span>システム仕様</span>
+            <span>設計・仕様書</span>
           </a>
         }
       </nav>

@@ -51,7 +51,7 @@ interface UserGroupSummary {
 
         <div class="flex flex-wrap items-center gap-2">
           <a
-            routerLink="/license-spec"
+            routerLink="/spec/license"
             class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
           >
             <app-icon name="doc" />
