@@ -28,12 +28,12 @@ import { IconComponent } from '../../shared/icon.component';
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-xs space-y-2">
         <div class="font-bold text-slate-700 uppercase tracking-wider mb-2">目次 (Table of Contents)</div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-indigo-600 font-medium">
-          <a href="#section-1" class="hover:underline flex items-center gap-1.5"><span>1. システム概要・アニメ現場向け背景</span></a>
-          <a href="#section-2" class="hover:underline flex items-center gap-1.5"><span>2. 3段階 承認・勤怠連携ワークフロー</span></a>
-          <a href="#section-3" class="hover:underline flex items-center gap-1.5"><span>3. 申請種別と入力項目仕様</span></a>
-          <a href="#section-4" class="hover:underline flex items-center gap-1.5"><span>4. 上長許諾 ＆ 総務部勤怠連携メカニズム</span></a>
-          <a href="#section-5" class="hover:underline flex items-center gap-1.5"><span>5. デジタル認印・出力仕様 (PDF/印刷)</span></a>
-          <a href="#section-6" class="hover:underline flex items-center gap-1.5"><span>6. データモデル・アーキテクチャ</span></a>
+          <button type="button" (click)="scrollTo('section-1')" class="text-left hover:underline flex items-center gap-1.5"><span>1. システム概要・アニメ現場向け背景</span></button>
+          <button type="button" (click)="scrollTo('section-2')" class="text-left hover:underline flex items-center gap-1.5"><span>2. 3段階 承認・勤怠連携ワークフロー</span></button>
+          <button type="button" (click)="scrollTo('section-3')" class="text-left hover:underline flex items-center gap-1.5"><span>3. 申請種別と入力項目仕様</span></button>
+          <button type="button" (click)="scrollTo('section-4')" class="text-left hover:underline flex items-center gap-1.5"><span>4. 上長許諾 ＆ 総務部勤怠連携メカニズム</span></button>
+          <button type="button" (click)="scrollTo('section-5')" class="text-left hover:underline flex items-center gap-1.5"><span>5. デジタル認印・出力仕様 (PDF/印刷)</span></button>
+          <button type="button" (click)="scrollTo('section-6')" class="text-left hover:underline flex items-center gap-1.5"><span>6. データモデル・アーキテクチャ</span></button>
         </div>
       </div>
 
@@ -272,4 +272,8 @@ import { IconComponent } from '../../shared/icon.component';
     </div>
   `,
 })
-export class WorkRequestSpecComponent {}
+export class WorkRequestSpecComponent {
+  scrollTo(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}

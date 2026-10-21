@@ -25,9 +25,46 @@ service cloud.firestore {
       );
     }
 
-    // テストメンバー (ホワイトリスト) — 認可済みメンバーのみ閲覧・管理可
+    // システム管理者かどうか（オーナーメールアドレス または managed_users の role == 'admin'）
+    function isSystemAdmin() {
+      return isAllowedUser() && (
+        request.auth.token.email.lower() in [
+          'inoue@ajiado.co.jp',
+          'admin@heron.app',
+          'inoue.cq.jwl@gmail.com'
+        ] || (
+          exists(/databases/$(database)/documents/managed_users/$(request.auth.token.email.lower())) &&
+          get(/databases/$(database)/documents/managed_users/$(request.auth.token.email.lower())).data.status == 'active' &&
+          get(/databases/$(database)/documents/managed_users/$(request.auth.token.email.lower())).data.role == 'admin'
+        )
+      );
+    }
+
+    // 機材・アカウント管理者以上かどうか
+    function isAssetManagerOrAdmin() {
+      return isSystemAdmin() || (
+        isAllowedUser() && (
+          request.auth.token.email.lower() in [
+            'nakamura@ajiado.co.jp'
+          ] || (
+            exists(/databases/$(database)/documents/managed_users/$(request.auth.token.email.lower())) &&
+            get(/databases/$(database)/documents/managed_users/$(request.auth.token.email.lower())).data.status == 'active' &&
+            get(/databases/$(database)/documents/managed_users/$(request.auth.token.email.lower())).data.role == 'asset_manager'
+          )
+        )
+      );
+    }
+
+    // テストメンバー (ホワイトリスト) — 閲覧・初期マイグレーションは許可メンバー、変更・削除はシステム管理者のみ
     match /test_members/{email} {
-      allow read, write: if isAllowedUser();
+      allow read, create: if isAllowedUser();
+      allow update, delete: if isSystemAdmin();
+    }
+
+    // アクセス権限管理ユーザー (RBAC) — 変更・削除はシステム管理者のみ（自己権限昇格の防止）
+    match /managed_users/{email} {
+      allow read, create: if isAllowedUser();
+      allow update, delete: if isSystemAdmin();
     }
 
     // 機材
@@ -68,17 +105,19 @@ service cloud.firestore {
       allow read, write: if isAllowedUser();
     }
 
-    // 採番カウンタ・初期化フラグ
+    // 採番カウンタ・システム設定（権限マトリクス等の更新はシステム管理者のみ許可し権限昇格を防止）
     match /counters/{name} {
       allow read, write: if isAllowedUser();
     }
     match /system/{docId} {
-      allow read, write: if isAllowedUser();
+      allow read, create: if isAllowedUser();
+      allow update, delete: if isSystemAdmin();
     }
 
-    // ソフトウェア・ライセンス＆アカウント台帳
+    // ソフトウェア・ライセンス＆アカウント台帳（更新・削除は機材・アカウント管理者以上のみ）
     match /licenses/{licenseId} {
-      allow read, write: if isAllowedUser();
+      allow read, create: if isAllowedUser();
+      allow update, delete: if isAssetManagerOrAdmin();
     }
 
     // 上記以外はすべて遮断

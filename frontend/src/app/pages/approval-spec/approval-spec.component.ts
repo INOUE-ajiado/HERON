@@ -28,12 +28,12 @@ import { IconComponent } from '../../shared/icon.component';
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-xs space-y-2">
         <div class="font-bold text-slate-700 uppercase tracking-wider mb-2">目次 (Table of Contents)</div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-blue-600 font-medium">
-          <a href="#section-1" class="hover:underline flex items-center gap-1.5"><span>1. システム概要・目的</span></a>
-          <a href="#section-2" class="hover:underline flex items-center gap-1.5"><span>2. 承認ワークフロー仕様</span></a>
-          <a href="#section-3" class="hover:underline flex items-center gap-1.5"><span>3. 入力・申請フォーム仕様</span></a>
-          <a href="#section-4" class="hover:underline flex items-center gap-1.5"><span>4. 出力・認印スタンプ仕様</span></a>
-          <a href="#section-5" class="hover:underline flex items-center gap-1.5"><span>5. UI/UXデザイン仕様</span></a>
-          <a href="#section-6" class="hover:underline flex items-center gap-1.5"><span>6. データモデル・構造</span></a>
+          <button type="button" (click)="scrollTo('section-1')" class="text-left hover:underline flex items-center gap-1.5"><span>1. システム概要・目的</span></button>
+          <button type="button" (click)="scrollTo('section-2')" class="text-left hover:underline flex items-center gap-1.5"><span>2. 承認ワークフロー仕様</span></button>
+          <button type="button" (click)="scrollTo('section-3')" class="text-left hover:underline flex items-center gap-1.5"><span>3. 入力・申請フォーム仕様</span></button>
+          <button type="button" (click)="scrollTo('section-4')" class="text-left hover:underline flex items-center gap-1.5"><span>4. 出力・認印スタンプ仕様</span></button>
+          <button type="button" (click)="scrollTo('section-5')" class="text-left hover:underline flex items-center gap-1.5"><span>5. UI/UXデザイン仕様</span></button>
+          <button type="button" (click)="scrollTo('section-6')" class="text-left hover:underline flex items-center gap-1.5"><span>6. データモデル・構造</span></button>
         </div>
       </div>
 
@@ -235,4 +235,8 @@ export interface ApprovalRequest &#123;
     </div>
   `,
 })
-export class ApprovalSpecComponent {}
+export class ApprovalSpecComponent {
+  scrollTo(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}

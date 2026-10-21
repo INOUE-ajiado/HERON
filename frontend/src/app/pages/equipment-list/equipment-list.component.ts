@@ -3,6 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { AccessControlService } from '../../core/access-control.service';
 import { ApiService, getDefaultAccessories } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { MasterService } from '../../core/master.service';
@@ -40,7 +41,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         <p class="text-xs text-slate-500 mt-0.5 hidden sm:block">新規登録・詳細表示・編集・貸出返却・付属品自由追加・棚QRスキャン</p>
       </div>
 
-      @if (auth.isAdmin()) {
+      @if (access.canManageAssets()) {
         <button type="button" (click)="openCreateDrawer()" class="heron-btn-primary text-xs font-bold shadow-xs">
           <app-icon name="plus" />
           <span class="hidden sm:inline">機材新規登録</span>
@@ -352,7 +353,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
-            @if (drawerMode() === 'detail' && auth.isAdmin() && activeEquipment()) {
+            @if (drawerMode() === 'detail' && access.canManageAssets() && activeEquipment()) {
               <button
                 type="button"
                 (click)="drawerMode.set('edit')"
@@ -582,7 +583,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                       <span class="text-[11px] font-bold flex items-center gap-1" [class]="acc.present ? 'text-emerald-700' : 'text-amber-700'">
                         @if (acc.present) { <app-icon name="check" /> 付属 } @else { 欠品中 }
                       </span>
-                      @if (auth.isAdmin()) {
+                      @if (access.canManageAssets()) {
                         <button
                           type="button"
                           (click)="removeAccessoryInDetail(i)"
@@ -598,7 +599,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               </div>
 
               <!-- 付属品の自由追加フォーム -->
-              @if (auth.isAdmin()) {
+              @if (access.canManageAssets()) {
                 <div class="flex items-center gap-2 pt-1">
                   <input
                     type="text"
@@ -648,7 +649,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             }
 
             <!-- 管理者貸出・返却操作 -->
-            @if (auth.isAdmin()) {
+            @if (access.canManageAssets()) {
               <div class="rounded-lg bg-slate-50 p-4 border border-slate-200 space-y-3">
                 <h3 class="text-xs font-bold text-[#2A3A4A] flex items-center gap-1.5">
                   <app-icon name="user" /> 管理者割当・貸出返却操作
@@ -911,6 +912,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 export class EquipmentListComponent {
   private readonly api = inject(ApiService);
   readonly auth = inject(AuthService);
+  readonly access = inject(AccessControlService);
   readonly master = inject(MasterService);
 
   readonly statusLabel = STATUS_LABEL;
@@ -981,9 +983,7 @@ export class EquipmentListComponent {
 
   constructor() {
     this.loadData();
-    if (this.auth.isAdmin()) {
-      this.api.listUsers().subscribe({ next: (r) => this.users.set(r.items ?? []) });
-    }
+    this.api.listUsers().subscribe({ next: (r) => this.users.set(r.items ?? []) });
   }
 
   private loadData(): void {
@@ -1258,7 +1258,7 @@ export class EquipmentListComponent {
     }
 
     this.actionBusy.set(true);
-    this.api.lend(eq.equipment_id, this.targetUserId).subscribe({
+    this.api.lend(eq.equipment_id, this.targetUserId, '', this.targetLocationId).subscribe({
       next: () => {
         this.actionBusy.set(false);
         this.drawerMessage.set('ユーザーと棚IDを紐付けて貸出しました');
@@ -1275,17 +1275,17 @@ export class EquipmentListComponent {
   }
 
   drawerReturn(eq: Equipment): void {
-    if (this.actionBusy()) return;
+    if (this.actionBusy() || !this.targetLocationId) return;
     this.actionBusy.set(true);
-    this.api.return(eq.equipment_id, 1).subscribe({
+    this.api.return(eq.equipment_id, this.targetLocationId).subscribe({
       next: () => {
         this.actionBusy.set(false);
-        this.drawerMessage.set('返却処理が完了しました');
+        this.drawerMessage.set('指定された棚への返却処理が完了しました');
         this.drawerMessageIsError.set(false);
         this.openDetailDrawer(eq);
         this.loadData();
       },
-      error: (err) => {
+      error: () => {
         this.actionBusy.set(false);
         this.drawerMessage.set('返却処理に失敗しました');
         this.drawerMessageIsError.set(true);

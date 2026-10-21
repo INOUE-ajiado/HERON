@@ -271,13 +271,19 @@ export class AccessControlService {
       email === 'admin@heron.app' ||
       email === 'inoue.cq.jwl@gmail.com';
 
+    const policy = this.domainPolicy();
+    const isAjiado = email.endsWith('@ajiado.co.jp');
+    const isAllowedUnlisted =
+      isBuiltInAdmin ||
+      (!policy.requireExplicitRegistration && (isAjiado ? policy.allowAjiadoDomain : true));
+
     return {
       email: email || u.user_id,
       name: u.name || 'ログインユーザー',
       department: '未設定',
       title: isBuiltInAdmin ? 'システム管理者' : 'スタッフ',
-      role: isBuiltInAdmin ? 'admin' : this.domainPolicy().defaultDomainRole,
-      status: 'active',
+      role: isBuiltInAdmin ? 'admin' : policy.defaultDomainRole,
+      status: isAllowedUnlisted ? 'active' : 'suspended',
       custom_permissions: {},
       note: '自動認識ユーザー',
       updated_at: this.nowStr(),
@@ -291,10 +297,16 @@ export class AccessControlService {
     return this.currentManagedUser()?.role ?? 'general';
   });
 
+  /** 機材・アカウント管理者以上の編集操作権限を持つか（プレビューモード連動） */
+  readonly canManageAssets = computed<boolean>(() => {
+    const role = this.effectiveRole();
+    return role === 'admin' || role === 'asset_manager';
+  });
+
   /** 本来の権限がシステム管理者かどうか（プレビュー中も管理ページへ戻れるようにするため） */
   readonly isActualAdmin = computed<boolean>(() => {
     const cur = this.currentManagedUser();
-    if (!cur) return this.auth.isAdmin();
+    if (!cur || cur.status === 'suspended') return false;
     if (cur.custom_permissions['admin'] === 'allow') return true;
     return cur.role === 'admin';
   });
@@ -470,7 +482,7 @@ export class AccessControlService {
         });
       }
 
-      // 2. ユーザー一覧の同期 (system/access_users_list ドキュメントに格納して既存の firestore.rules でも確実に同期)
+      // 2. ユーザー一覧の同期 (system/access_users_list ドキュメントおよび managed_users コレクションへ同期)
       const usersDocRef = doc(db, FIRESTORE_SYSTEM_COL, 'access_users_list');
       const usersDocSnap = await getDoc(usersDocRef);
       if (usersDocSnap.exists()) {
@@ -479,7 +491,12 @@ export class AccessControlService {
           this.saveUsersToStorage(data.users);
         }
       } else {
-        await setDoc(usersDocRef, { users: this.managedUsers() });
+        const initialUsers = this.managedUsers();
+        await setDoc(usersDocRef, { users: initialUsers });
+        for (const u of initialUsers) {
+          const uRef = doc(db, FIRESTORE_USERS_COL, u.email.toLowerCase());
+          await setDoc(uRef, JSON.parse(JSON.stringify(u))).catch(() => undefined);
+        }
       }
     } catch (err) {
       console.warn('[HERON] アクセス権限設定の Firestore 同期をスキップしました (ローカルを使用):', err);
@@ -496,6 +513,10 @@ export class AccessControlService {
         users: JSON.parse(JSON.stringify(users)),
         updated_at: this.nowStr(),
       });
+      for (const u of users) {
+        const uRef = doc(db, FIRESTORE_USERS_COL, u.email.toLowerCase());
+        await setDoc(uRef, JSON.parse(JSON.stringify(u))).catch(() => undefined);
+      }
     } catch (err) {
       console.warn('[HERON] ユーザー権限データの Firestore 保存に失敗:', err);
     }
@@ -554,6 +575,7 @@ export class AccessControlService {
   /**
    * 現在のユーザーがアクセス可能な最初のデフォルト遷移先パスを返す
    * （一般ユーザーが '/' や '/equipments' にアクセスした際、自動的に '/approval' 等へ誘導する）
+   * どのページにもアクセス権限がない（利用停止状態など）場合は '/login' を返し無限リダイレクトを防止する
    */
   getDefaultLandingRoute(): string {
     const priorityOrder: { key: AppPageKey; path: string }[] = [
@@ -562,13 +584,20 @@ export class AccessControlService {
       { key: 'work-request', path: '/work-request' },
       { key: 'byod', path: '/byod' },
       { key: 'licenses', path: '/licenses' },
+      { key: 'inventory', path: '/inventory' },
+      { key: 'locations', path: '/locations' },
+      { key: 'settings', path: '/settings' },
+      { key: 'logs', path: '/logs' },
+      { key: 'specs', path: '/spec' },
+      { key: 'admin', path: '/admin' },
+      { key: 'test-members', path: '/test-members' },
     ];
     for (const item of priorityOrder) {
       if (this.canAccessPage(item.key)) {
         return item.path;
       }
     }
-    return '/approval';
+    return '/login';
   }
 
   // --- ユーザー操作 API ---

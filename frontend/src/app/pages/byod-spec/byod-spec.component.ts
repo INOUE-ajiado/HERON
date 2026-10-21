@@ -28,11 +28,11 @@ import { IconComponent } from '../../shared/icon.component';
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-xs space-y-2">
         <div class="font-bold text-slate-700 uppercase tracking-wider mb-2">目次 (Table of Contents)</div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-blue-700 font-medium">
-          <a href="#section-1" class="hover:underline flex items-center gap-1.5"><span>1. 制定目的 ＆ シャドーIT対策</span></a>
-          <a href="#section-2" class="hover:underline flex items-center gap-1.5"><span>2. 2種類の自動生成書類と構成</span></a>
-          <a href="#section-3" class="hover:underline flex items-center gap-1.5"><span>3. 3段階 審査・決裁フロー</span></a>
-          <a href="#section-4" class="hover:underline flex items-center gap-1.5"><span>4. 必須セキュリティ要件 (BitLocker / FileVault等)</span></a>
-          <a href="#section-5" class="hover:underline flex items-center gap-1.5"><span>5. 管理ステッカー交付 ＆ 有効期限管理</span></a>
+          <button type="button" (click)="scrollTo('section-1')" class="text-left hover:underline flex items-center gap-1.5"><span>1. 制定目的 ＆ シャドーIT対策</span></button>
+          <button type="button" (click)="scrollTo('section-2')" class="text-left hover:underline flex items-center gap-1.5"><span>2. 2種類の自動生成書類と構成</span></button>
+          <button type="button" (click)="scrollTo('section-3')" class="text-left hover:underline flex items-center gap-1.5"><span>3. 3段階 審査・決裁フロー</span></button>
+          <button type="button" (click)="scrollTo('section-4')" class="text-left hover:underline flex items-center gap-1.5"><span>4. 必須セキュリティ要件 (BitLocker / FileVault等)</span></button>
+          <button type="button" (click)="scrollTo('section-5')" class="text-left hover:underline flex items-center gap-1.5"><span>5. 管理ステッカー交付 ＆ 有効期限管理</span></button>
         </div>
       </div>
 
@@ -181,4 +181,8 @@ import { IconComponent } from '../../shared/icon.component';
     </div>
   `,
 })
-export class ByodSpecComponent {}
+export class ByodSpecComponent {
+  scrollTo(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}

@@ -145,27 +145,37 @@ export class ApiService {
 
   // ---- 取引（貸出・返却・棚卸し） ----
 
-  lend(equipmentId: string, targetUserId: string, note = ''): Observable<Equipment> {
+  lend(
+    equipmentId: string,
+    targetUserId: string,
+    note = '',
+    locationOrShelf?: number | string | null,
+  ): Observable<Equipment> {
     return this.route(
       () =>
         this.http.post<Equipment>(`${this.base}/transactions/lend`, {
           equipment_id: equipmentId,
           target_user_id: targetUserId,
+          location_id: locationOrShelf,
           note,
         }),
-      () => this.store.lend(equipmentId, targetUserId, note),
+      () => this.store.lend(equipmentId, targetUserId, note, locationOrShelf),
     );
   }
 
-  return(equipmentId: string, locationId: number, note = ''): Observable<Equipment> {
+  return(
+    equipmentId: string,
+    locationOrShelf: number | string,
+    note = '',
+  ): Observable<Equipment> {
     return this.route(
       () =>
         this.http.post<Equipment>(`${this.base}/transactions/return`, {
           equipment_id: equipmentId,
-          location_id: locationId,
+          location_id: locationOrShelf,
           note,
         }),
-      () => this.store.returnEquipment(equipmentId, locationId, note),
+      () => this.store.returnEquipment(equipmentId, locationOrShelf, note),
     );
   }
 

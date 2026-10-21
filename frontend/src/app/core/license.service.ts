@@ -287,9 +287,17 @@ export class LicenseService {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
 
+    const sanitizeHttpUrl = (raw?: string): string => {
+      const trimmed = (raw || '').trim();
+      if (/^https?:\/\//i.test(trimmed)) {
+        return trimmed;
+      }
+      return 'https://heron-dcd38.web.app';
+    };
+
     const categoryLabel = SOFTWARE_CATEGORY_LABELS[lic.category] || 'ソフトウェア';
     const steps = this.getActivationSteps(lic.category);
-    const portalUrl = lic.portal_url || 'https://heron-dcd38.web.app';
+    const portalUrl = sanitizeHttpUrl(lic.portal_url);
 
     const displayPassword = lic.account_password
       ? opts.includePassword

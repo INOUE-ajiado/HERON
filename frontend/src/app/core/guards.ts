@@ -23,8 +23,13 @@ export const adminGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const access = inject(AccessControlService);
   const router = inject(Router);
-  if (access.isActualAdmin() || auth.isAdmin()) return true;
-  return router.createUrlTree([access.getDefaultLandingRoute()]);
+  if (access.isActualAdmin()) return true;
+  const fallback = access.getDefaultLandingRoute();
+  if (fallback === '/login') {
+    auth.logout();
+    return false;
+  }
+  return router.createUrlTree([fallback]);
 };
 
 /**
@@ -34,12 +39,17 @@ export const adminGuard: CanActivateFn = () => {
  */
 export function pageAccessGuard(pageKey: AppPageKey): CanActivateFn {
   return () => {
+    const auth = inject(AuthService);
     const access = inject(AccessControlService);
     const router = inject(Router);
     if (access.canAccessPage(pageKey)) {
       return true;
     }
     const fallback = access.getDefaultLandingRoute();
+    if (fallback === '/login') {
+      auth.logout();
+      return false;
+    }
     return router.createUrlTree([fallback]);
   };
 }

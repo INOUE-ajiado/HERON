@@ -715,7 +715,12 @@ export class FirestoreDataService {
 
   // ---------------------------------------------------------------- 貸出・返却・棚卸し
 
-  async lend(equipmentId: string, targetUserId: string, note = ''): Promise<Equipment> {
+  async lend(
+    equipmentId: string,
+    targetUserId: string,
+    note = '',
+    locationOrShelf?: number | string | null,
+  ): Promise<Equipment> {
     await this.ready();
     const ref = doc(this.db, COL.equipments, equipmentId);
     const snap = await getDoc(ref);
@@ -730,9 +735,19 @@ export class FirestoreDataService {
       throw { status: 409, error: { error: 'この機材は除却済みのため貸出できません' } };
     }
 
+    const place =
+      locationOrShelf !== undefined
+        ? this.splitLocation(locationOrShelf)
+        : {
+            current_location_id: current.current_location_id ?? null,
+            shelf_code: current.shelf_code ?? null,
+          };
+
     await updateDoc(ref, {
       status: 'in_use',
       current_user_id: targetUserId,
+      current_location_id: place.current_location_id,
+      shelf_code: place.shelf_code,
       updated_at: new Date().toISOString(),
     });
 
@@ -742,14 +757,25 @@ export class FirestoreDataService {
       action_type: 'lend',
       target_user_id: targetUserId,
       target_user_name: users.get(targetUserId)?.name,
+      target_location_id: place.current_location_id,
       equipment_name: current.name,
-      note: note || '貸出登録',
+      note: note || (place.shelf_code ? `貸出登録 (棚: ${place.shelf_code})` : '貸出登録'),
     });
 
-    return { ...current, status: 'in_use', current_user_id: targetUserId };
+    return {
+      ...current,
+      status: 'in_use',
+      current_user_id: targetUserId,
+      current_location_id: place.current_location_id,
+      shelf_code: place.shelf_code,
+    };
   }
 
-  async returnEquipment(equipmentId: string, locationId: number, note = ''): Promise<Equipment> {
+  async returnEquipment(
+    equipmentId: string,
+    locationOrShelf: number | string,
+    note = '',
+  ): Promise<Equipment> {
     await this.ready();
     const ref = doc(this.db, COL.equipments, equipmentId);
     const snap = await getDoc(ref);
@@ -757,29 +783,30 @@ export class FirestoreDataService {
       throw { status: 404, error: { error: `機材ID「${equipmentId}」は登録されていません` } };
     }
     const current = snap.data() as Equipment;
+    const place = this.splitLocation(locationOrShelf);
 
     await updateDoc(ref, {
       status: 'available',
       current_user_id: null,
-      current_location_id: locationId,
-      shelf_code: null,
+      current_location_id: place.current_location_id,
+      shelf_code: place.shelf_code,
       updated_at: new Date().toISOString(),
     });
 
     await this.writeLog({
       equipment_id: equipmentId,
       action_type: 'return',
-      target_location_id: locationId,
+      target_location_id: place.current_location_id,
       equipment_name: current.name,
-      note: note || '返却処理',
+      note: note || (place.shelf_code ? `返却処理 (返却棚: ${place.shelf_code})` : '返却処理'),
     });
 
     return {
       ...current,
       status: 'available',
       current_user_id: null,
-      current_location_id: locationId,
-      shelf_code: null,
+      current_location_id: place.current_location_id,
+      shelf_code: place.shelf_code,
     };
   }
 

@@ -378,7 +378,7 @@ import { IconComponent } from '../../shared/icon.component';
                                       <a
                                         [href]="item.purchase_url"
                                         target="_blank"
-                                        rel="noopener"
+                                        rel="noopener noreferrer"
                                         class="text-blue-600 underline font-medium hover:text-blue-800 truncate max-w-md"
                                       >
                                         {{ item.purchase_url }}
