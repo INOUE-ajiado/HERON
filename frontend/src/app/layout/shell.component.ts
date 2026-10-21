@@ -23,7 +23,7 @@ interface NavItem {
     <div class="flex min-h-screen flex-col md:flex-row bg-white">
       <!-- サイドバー（md 以上） -->
       <aside
-        class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-heron-navy md:flex sticky top-0 h-screen z-20"
+        class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-heron-navy md:flex print:hidden sticky top-0 h-screen z-20"
       >
         <!-- ロゴ ＆ タイトルヘッダー -->
         <div class="px-4 py-4 border-b border-slate-800 flex items-center gap-3 shrink-0">
@@ -56,14 +56,14 @@ interface NavItem {
         </nav>
 
         <!-- サイドバー下部 (常時最下部固定: 基本設計書 ＆ システム仕様書 ＆ テスト設定 ＆ ログインユーザー表示) -->
-        <div class="shrink-0 border-t border-slate-800 p-3 space-y-1.5 bg-heron-navy">
+        <div class="shrink-0 border-t border-slate-800 p-2.5 space-y-1 bg-heron-navy">
           <!-- 基本設計書リンク (PDF) -->
           <a
             routerLink="/spec"
             routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
-            <app-icon name="box" class="text-base text-[#90CFD6]" />
+            <app-icon name="box" class="text-sm text-[#90CFD6]" />
             <span>基本設計書</span>
           </a>
 
@@ -71,9 +71,9 @@ interface NavItem {
           <a
             routerLink="/system-spec"
             routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
-            <app-icon name="doc" class="text-base text-[#90CFD6]" />
+            <app-icon name="doc" class="text-sm text-[#90CFD6]" />
             <span>システム仕様書</span>
           </a>
 
@@ -81,9 +81,9 @@ interface NavItem {
           <a
             routerLink="/approval-spec"
             routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
-            <app-icon name="doc" class="text-base text-[#90CFD6]" />
+            <app-icon name="doc" class="text-sm text-[#90CFD6]" />
             <span>稟議システム仕様書</span>
           </a>
 
@@ -91,9 +91,9 @@ interface NavItem {
           <a
             routerLink="/work-request-spec"
             routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
-            <app-icon name="clock" class="text-base text-[#90CFD6]" />
+            <app-icon name="clock" class="text-sm text-[#90CFD6]" />
             <span>業務申請仕様書</span>
           </a>
 
@@ -101,19 +101,29 @@ interface NavItem {
           <a
             routerLink="/byod-spec"
             routerLinkActive="bg-blue-600 text-white font-bold"
-            class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
           >
-            <app-icon name="box" class="text-base text-[#90CFD6]" />
+            <app-icon name="box" class="text-sm text-[#90CFD6]" />
             <span>BYOD仕様書</span>
+          </a>
+
+          <!-- ライセンス仕様書 -->
+          <a
+            routerLink="/license-spec"
+            routerLinkActive="bg-blue-600 text-white font-bold"
+            class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-slate-200 hover:bg-slate-800 hover:text-white transition"
+          >
+            <app-icon name="doc" class="text-sm text-[#90CFD6]" />
+            <span>ライセンス仕様書</span>
           </a>
 
           @if (auth.isAdmin()) {
             <a
               routerLink="/test-members"
               routerLinkActive="bg-blue-600 text-white font-bold"
-              class="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-[#90CFD6] hover:bg-slate-800 hover:text-white transition border border-slate-700/60 bg-slate-900/40"
+              class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-bold text-[#90CFD6] hover:bg-slate-800 hover:text-white transition border border-slate-700/60 bg-slate-900/40"
             >
-              <app-icon name="user" class="text-base" />
+              <app-icon name="user" class="text-sm" />
               <span>テスト設定</span>
             </a>
           }
@@ -134,7 +144,7 @@ interface NavItem {
 
       <!-- モバイルヘッダー -->
       <header
-        class="flex items-center justify-between bg-heron-navy px-4 py-2.5 md:hidden shrink-0"
+        class="flex items-center justify-between bg-heron-navy px-4 py-2.5 md:hidden print:hidden shrink-0"
       >
         <div class="flex items-center gap-2.5">
           <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white p-0.5 shadow-sm border border-slate-200 overflow-hidden">
@@ -159,23 +169,23 @@ interface NavItem {
       </header>
 
       <!-- 本文 (クリーンフルキャンバス) -->
-      <main class="flex-1 min-w-0 overflow-x-hidden pb-20 md:pb-0 bg-white">
-        <div class="w-full max-w-full px-4 py-4 md:px-6 md:py-5">
+      <main class="flex-1 min-w-0 overflow-x-hidden pb-20 md:pb-0 print:pb-0 bg-white">
+        <div class="w-full max-w-full px-4 py-4 md:px-6 md:py-5 print:p-0">
           <router-outlet />
         </div>
       </main>
 
-      <!-- モバイル下部タブ -->
+      <!-- モバイル下部タブ (横スクロール対応で文字潰れ防止) -->
       <nav
-        class="fixed inset-x-0 bottom-0 z-20 flex border-t border-slate-200 bg-white md:hidden"
+        class="fixed inset-x-0 bottom-0 z-20 flex overflow-x-auto border-t border-slate-200 bg-white md:hidden print:hidden"
       >
         @for (item of visibleNav(); track item.path) {
           <a
             [routerLink]="item.path"
             routerLinkActive="text-blue-700 font-bold"
             [routerLinkActiveOptions]="{ exact: item.exact }"
-            class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px]
-                   font-medium text-slate-500"
+            class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px]
+                   font-medium text-slate-500 whitespace-nowrap"
           >
             <app-icon [name]="item.icon" class="text-base" />
             <span>{{ item.label }}</span>
@@ -184,7 +194,7 @@ interface NavItem {
         <a
           routerLink="/spec"
           routerLinkActive="text-blue-700 font-bold"
-          class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium text-slate-500"
+          class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
         >
           <app-icon name="box" class="text-base" />
           <span>基本設計書</span>
@@ -192,10 +202,10 @@ interface NavItem {
         <a
           routerLink="/system-spec"
           routerLinkActive="text-blue-700 font-bold"
-          class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[9px] font-medium text-slate-500"
+          class="flex min-w-[68px] shrink-0 flex-1 flex-col items-center gap-0.5 px-1.5 py-2 text-[10px] font-medium text-slate-500 whitespace-nowrap"
         >
           <app-icon name="doc" class="text-base" />
-          <span class="whitespace-nowrap">システム仕様</span>
+          <span>システム仕様</span>
         </a>
       </nav>
     </div>
@@ -207,6 +217,7 @@ export class ShellComponent {
 
   private readonly nav = signal<NavItem[]>([
     { path: '/equipments', label: '機材台帳・検索', icon: 'box', adminOnly: false, exact: false },
+    { path: '/licenses', label: 'ライセンス管理', icon: 'doc', adminOnly: false, exact: false },
     { path: '/approval', label: '稟議申請', icon: 'doc', adminOnly: false, exact: false },
     { path: '/work-request', label: '業務申請', icon: 'clock', adminOnly: false, exact: false },
     { path: '/byod', label: 'BYOD申請', icon: 'box', adminOnly: false, exact: false },

@@ -76,6 +76,11 @@ service cloud.firestore {
       allow read, write: if isAllowedUser();
     }
 
+    // ソフトウェア・ライセンス＆アカウント台帳
+    match /licenses/{licenseId} {
+      allow read, write: if isAllowedUser();
+    }
+
     // 上記以外はすべて遮断
     match /{document=**} {
       allow read, write: if false;
