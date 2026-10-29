@@ -9,12 +9,28 @@ import { User } from './models';
 export const TOKEN_KEY = 'heron.token';
 export const USER_KEY = 'heron.user';
 
+function normalizeSessionUser(user: User): User {
+  const email = (user.login_id || '').trim().toLowerCase();
+  const name = (user.name || '').trim();
+  if (
+    email === 'inoue@ajiado.co.jp' ||
+    email === 'admin' ||
+    email === 'admin@heron.app' ||
+    name === '井上 (システムオーナー)' ||
+    name === '井上' ||
+    name.startsWith('井上 健二')
+  ) {
+    return { ...user, name: '井上 賢治' };
+  }
+  return user;
+}
+
 /** 現在ログイン中のユーザー（未ログインなら null）。 */
 export function readStoredUser(): User | null {
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as User;
+    return normalizeSessionUser(JSON.parse(raw) as User);
   } catch {
     localStorage.removeItem(USER_KEY);
     return null;
@@ -22,7 +38,7 @@ export function readStoredUser(): User | null {
 }
 
 export function writeStoredUser(user: User): void {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.setItem(USER_KEY, JSON.stringify(normalizeSessionUser(user)));
 }
 
 export function clearStoredSession(): void {

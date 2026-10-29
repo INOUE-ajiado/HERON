@@ -95,10 +95,14 @@ export class AuthService {
     }
 
     const stored = this._user();
+    const resolvedName =
+      fbEmail === 'inoue@ajiado.co.jp' || fbEmail === 'admin@heron.app'
+        ? '井上 賢治'
+        : (fbUser.displayName ?? fbUser.email ?? 'Google User');
     const actual: User = {
       user_id: fbUser.uid,
       login_id: (fbUser.email ?? stored?.login_id ?? fbUser.uid).toLowerCase(),
-      name: fbUser.displayName ?? fbUser.email ?? 'Google User',
+      name: resolvedName,
       role: stored?.user_id === fbUser.uid ? stored.role : 'admin',
     };
 
@@ -232,13 +236,21 @@ export class AuthService {
       throw new Error(`アクセス権限がありません (ユーザー: ${userEmail})。HERON管理者に「テストメンバー」としての追加を依頼してください。`);
     }
 
+    const normalizedUser: User = {
+      ...user,
+      name:
+        userEmail === 'inoue@ajiado.co.jp' || userEmail === 'admin@heron.app'
+          ? '井上 賢治'
+          : user.name,
+    };
+
     localStorage.setItem(TOKEN_KEY, token);
-    writeStoredUser(user);
+    writeStoredUser(normalizedUser);
     this._token.set(token);
-    this._user.set(user);
+    this._user.set(normalizedUser);
 
     // 貸出先の選択肢などで参照できるよう、ログインしたメンバーを users コレクションへ登録
-    void this.store.upsertUser(user).catch((err) => {
+    void this.store.upsertUser(normalizedUser).catch((err) => {
       console.warn('[HERON] ユーザー情報の Firestore 登録に失敗しました:', err);
     });
   }

@@ -574,7 +574,7 @@ ${steps.map((s, idx) => `${idx + 1}. ${s}`).join('\n')}
           {
             id: 'MAIL-1001',
             sent_at: '2026/04/01 11:20',
-            sent_by: '井上 健二',
+            sent_by: '井上 賢治',
             recipient_name: '桜井 裕介',
             recipient_email: 'sakurai@ajiado.co.jp',
             subject: '【HERON】Microsoft 365 Business Standard ライセンス割当のご案内',
@@ -612,7 +612,7 @@ ${steps.map((s, idx) => `${idx + 1}. ${s}`).join('\n')}
           {
             id: 'MAIL-1002',
             sent_at: '2026/05/10 15:00',
-            sent_by: '井上 健二',
+            sent_by: '井上 賢治',
             recipient_name: '佐々木 葵',
             recipient_email: 'sasaki@ajiado.co.jp',
             subject: '【HERON】CLIP STUDIO PAINT EX シリアルコード・アカウント割当のご案内',

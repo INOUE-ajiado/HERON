@@ -230,8 +230,8 @@ export const APP_PAGE_DEFINITIONS: AppPageDefinition[] = [
   },
 ];
 
-const LEGACY_USERS_STORAGE_KEY = 'heron_managed_users_v1';
-const USERS_STORAGE_KEY = 'heron_managed_users_v2';
+const LEGACY_USERS_STORAGE_KEYS = ['heron_managed_users_v1', 'heron_managed_users_v2'];
+const USERS_STORAGE_KEY = 'heron_managed_users_v3';
 const MATRIX_STORAGE_KEY = 'heron_role_matrix_v1';
 const POLICY_STORAGE_KEY = 'heron_domain_policy_v1';
 
@@ -412,7 +412,9 @@ export class AccessControlService {
 
   private loadFromStorage(): void {
     try {
-      localStorage.removeItem(LEGACY_USERS_STORAGE_KEY);
+      for (const k of LEGACY_USERS_STORAGE_KEYS) {
+        localStorage.removeItem(k);
+      }
       const rawUsers = localStorage.getItem(USERS_STORAGE_KEY);
       if (rawUsers) {
         const parsed = JSON.parse(rawUsers);
@@ -500,13 +502,18 @@ export class AccessControlService {
         const data = usersDocSnap.data() as {
           users?: ManagedUser[];
           cleaned_sample_users_v2?: boolean;
+          owner_name_v3?: boolean;
         };
         if (Array.isArray(data.users) && data.users.length > 0) {
-          if (!data.cleaned_sample_users_v2) {
-            // 旧バージョンのサンプルユーザーデータを一括パージし、システムオーナーのみ残す
-            const cleaned = data.users.filter(
-              (u) => !LEGACY_SAMPLE_USER_EMAILS.has(u.email.toLowerCase())
-            );
+          if (!data.cleaned_sample_users_v2 || !data.owner_name_v3) {
+            // 旧バージョンのサンプルユーザーデータを一括パージし、システムオーナー氏名を『井上 賢治』に統一
+            const cleaned = data.users
+              .filter((u) => !LEGACY_SAMPLE_USER_EMAILS.has(u.email.toLowerCase()))
+              .map((u) =>
+                u.email.toLowerCase() === 'inoue@ajiado.co.jp'
+                  ? { ...u, name: '井上 賢治' }
+                  : u
+              );
             const finalUsers =
               cleaned.length > 0 ? cleaned : this.createInitialUsers();
             this.saveUsersToStorage(finalUsers);
@@ -537,6 +544,7 @@ export class AccessControlService {
       await setDoc(usersDocRef, {
         users: JSON.parse(JSON.stringify(users)),
         cleaned_sample_users_v2: true,
+        owner_name_v3: true,
         updated_at: this.nowStr(),
       });
       for (const u of users) {
@@ -728,14 +736,14 @@ export class AccessControlService {
     return [
       {
         email: 'inoue@ajiado.co.jp',
-        name: '井上 (システムオーナー)',
+        name: '井上 賢治',
         department: 'クリエイティブ開発課 / 情報システム',
-        title: 'システム最高管理者',
+        title: 'システム最高管理者 (システムオーナー)',
         role: 'admin',
         status: 'active',
         custom_permissions: {},
         note: '全システム・機材・アカウント台帳・権限設定の統括管理者',
-        updated_at: '2026/10/29 15:00',
+        updated_at: '2026/10/29 19:05',
       },
     ];
   }

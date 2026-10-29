@@ -122,9 +122,7 @@ const SEED_LOCATIONS: Location[] = [
 ];
 
 const SEED_USERS: User[] = [
-  { user_id: 'u-admin', login_id: 'admin', name: '井上 健二 (管理者)', role: 'admin' },
-  { user_id: 'u-anim1', login_id: 'animator1', name: 'アニメーター1', role: 'general' },
-  { user_id: 'u-anim2', login_id: 'animator2', name: 'アニメーター2', role: 'general' },
+  { user_id: 'u-admin', login_id: 'inoue@ajiado.co.jp', name: '井上 賢治', role: 'admin' },
 ];
 
 const SEED_DEPARTMENTS: DepartmentDoc[] = [
@@ -162,7 +160,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       '社内機材管理システムの初期実装。機材台帳（登録・編集・検索）、貸出／返却、棚卸し、QRコードラベル印刷、ログイン認証、保管場所・部署・カテゴリのマスタ管理を実装。',
     released_at: '2026-08-03T00:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.1.0',
@@ -174,7 +172,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       'HERON Navy (#2A3A4A) テーマ、Outfit フォント、favicon を適用したフラットデザインに刷新。機材の詳細・新規登録・編集を右スライドのドロワー1画面に統合し、ダッシュボードを廃止して統計指標を機材台帳へ集約。',
     released_at: '2026-08-06T00:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.2.0',
@@ -186,7 +184,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       '小物に個別シールを貼らずに管理できる付属品チェックリスト（完備／欠品の判定、付属品の自由な追加・削除）を追加。あわせて機材ID・棚コードの入力欄すべてにカメラでQRを読み取るボタンを設置。',
     released_at: '2026-08-07T01:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.3.0',
@@ -198,7 +196,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       '単体テスト環境へアクセスできる Google アカウントのホワイトリスト管理ページを追加。未登録アカウントからのログインを遮断する仕組みとサイドバー導線を実装。',
     released_at: '2026-08-07T02:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.4.0',
@@ -210,7 +208,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       'スマートフォン向けに、カード表示・ボトムシート型ドロワー・FAB を備えた専用ビューを追加。PC表示は従来のまま100%維持。',
     released_at: '2026-08-07T03:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.5.0',
@@ -222,7 +220,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       'サイドバーから仕様書PDFを閲覧できるページを追加。あわせてログイン画面を Google 認証のみの1タップ方式に整理。',
     released_at: '2026-08-07T04:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.5.1',
@@ -234,7 +232,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       '@ajiado.co.jp のアカウントを無条件で許可するよう修正し、プリセットのテストメンバーを同期。特定メンバーがログインできない問題を解消。',
     released_at: '2026-08-07T05:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.6.0',
@@ -246,7 +244,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       'テストメンバーの保存先を端末ごとの localStorage から Firebase Firestore へ移行。どの端末から追加・削除しても全員に即時反映されるようになった。',
     released_at: '2026-08-07T06:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.7.0',
@@ -258,7 +256,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       '機材、操作ログ、保管場所、利用者、各種マスタの保存先を Firestore に移行し、テストメンバー全員で同じデータを共有できるようにした。機材IDの採番をトランザクション化して重複を防止。旧 localStorage のデータは初回ログイン時に自動移行。あわせて、新規登録時に選んだ保管場所が保存されない不具合、除却してもステータスが変わらない不具合、存在しない機材IDのスキャンでダミー画面が開く不具合を修正。',
     released_at: '2026-08-07T07:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.7.1',
@@ -270,7 +268,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       '操作者を端末に保存された古いログイン情報から取得していたため、すべての操作が別人の名前で記録される問題を修正。実際に Google 認証しているアカウントを操作者として記録し、認証セッションが無い端末は再ログインを求めるようにした。',
     released_at: '2026-08-07T08:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.7.2',
@@ -282,7 +280,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       'index.html が1時間キャッシュされ、更新後も古い画面が表示され続ける問題を修正。HTML は毎回取得し直し、ハッシュ付きの静的ファイルのみ長期キャッシュする設定に変更。',
     released_at: '2026-08-07T08:30:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
   {
     version: 'VER1.8.0',
@@ -294,7 +292,7 @@ const SEED_VERSIONS: VersionEntry[] = [
     description:
       'サイドバーの「テストメンバー」を「テスト設定」に名称変更。アクセス許可済みアカウント一覧の右に Ver情報 欄を新設し、リリースごとの版数と変更内容を Firestore に記録・共有できるようにした。中型アップデート（機能・ページの追加）で中央、小型アップデート（その他の更新）で右端の数字が繰り上がる。',
     released_at: '2026-08-07T09:00:00.000Z',
-    released_by: '井上 健二',
+    released_by: '井上 賢治',
   },
 ];
 
@@ -514,11 +512,42 @@ export class FirestoreDataService {
     });
   }
 
+  /**
+   * システムオーナー（inoue@ajiado.co.jp / admin）および旧表記（井上 健二 / 井上 (システムオーナー)）を
+   * 正式氏名『井上 賢治』に正規化する。
+   */
+  private normalizeUserName(loginId?: string | null, rawName?: string | null): string {
+    const email = (loginId || '').trim().toLowerCase();
+    const name = (rawName || '').trim();
+    if (
+      email === 'inoue@ajiado.co.jp' ||
+      email === 'admin' ||
+      email === 'admin@heron.app' ||
+      name === '井上 (システムオーナー)' ||
+      name === '井上' ||
+      name.startsWith('井上 健二')
+    ) {
+      return '井上 賢治';
+    }
+    return name || email || '不明なユーザー';
+  }
+
+  private normalizeUser(u: User): User {
+    return {
+      ...u,
+      name: this.normalizeUserName(u.login_id, u.name),
+    };
+  }
+
   // ---------------------------------------------------------------- 参照系
 
   private async loadUserMap(): Promise<Map<string, User>> {
     const snap = await getDocs(collection(this.db, COL.users));
-    return new Map(snap.docs.map((d) => [d.id, d.data() as User]));
+    return new Map(
+      snap.docs
+        .filter((d) => d.id !== 'u-anim1' && d.id !== 'u-anim2')
+        .map((d) => [d.id, this.normalizeUser(d.data() as User)]),
+    );
   }
 
   private async loadLocationMap(): Promise<Map<number, Location>> {
@@ -909,15 +938,17 @@ export class FirestoreDataService {
     if (fbUser) {
       // 認証済みアカウントと保存値が一致するときだけ、保存されている表示名を使う
       const sameUser = stored?.user_id === fbUser.uid;
+      const loginId = (fbUser.email ?? stored?.login_id ?? '').toLowerCase();
+      const rawName = fbUser.displayName ?? (sameUser ? stored!.name : (fbUser.email ?? '不明なユーザー'));
       return {
         user_id: fbUser.uid,
-        login_id: (fbUser.email ?? stored?.login_id ?? '').toLowerCase(),
-        name: fbUser.displayName ?? (sameUser ? stored!.name : (fbUser.email ?? '不明なユーザー')),
+        login_id: loginId,
+        name: this.normalizeUserName(loginId, rawName),
         role: sameUser ? stored!.role : 'admin',
       };
     }
 
-    return stored;
+    return stored ? this.normalizeUser(stored) : null;
   }
 
   /** ログを 1 件追記する（表示用に操作者・機材名などを非正規化して保存）。 */
@@ -962,22 +993,25 @@ export class FirestoreDataService {
     users: Map<string, User>,
     locations: Map<number, Location>,
   ): TransactionLog {
-    const actor: User | undefined = data['actor'] ??
+    const rawActor: User = data['actor'] ??
       users.get(data['actor_user_id']) ?? {
         user_id: data['actor_user_id'] ?? 'unknown',
         login_id: data['actor_login_id'] ?? '',
         name: data['actor_name'] ?? data['actor_user_id'] ?? '不明なユーザー',
         role: 'general',
       };
+    const actor = this.normalizeUser(rawActor);
 
     const targetUser = data['target_user_id']
-      ? (users.get(data['target_user_id']) ??
-        ({
-          user_id: data['target_user_id'],
-          login_id: '',
-          name: data['target_user_name'] ?? data['target_user_id'],
-          role: 'general',
-        } as User))
+      ? this.normalizeUser(
+          users.get(data['target_user_id']) ??
+            ({
+              user_id: data['target_user_id'],
+              login_id: '',
+              name: data['target_user_name'] ?? data['target_user_id'],
+              role: 'general',
+            } as User),
+        )
       : undefined;
 
     const targetLocation =
@@ -1068,7 +1102,18 @@ export class FirestoreDataService {
   async listUsers(role?: string): Promise<ListResult<User>> {
     await this.ready();
     const snap = await getDocs(collection(this.db, COL.users));
-    let items = snap.docs.map((d) => d.data() as User);
+    let items = snap.docs
+      .filter((d) => d.id !== 'u-anim1' && d.id !== 'u-anim2')
+      .map((d) => this.normalizeUser(d.data() as User));
+    // 同一メールアドレスや u-admin の重複がある場合は実アカウントを優先し重複排除
+    const byNameOrEmail = new Map<string, User>();
+    for (const u of items) {
+      const key = (u.login_id || u.name).toLowerCase();
+      if (!byNameOrEmail.has(key) || u.user_id !== 'u-admin') {
+        byNameOrEmail.set(key, u);
+      }
+    }
+    items = [...byNameOrEmail.values()];
     if (role) items = items.filter((u) => u.role === role);
     items.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
     return { items, total: items.length };
@@ -1079,7 +1124,7 @@ export class FirestoreDataService {
     const user: User = {
       user_id: `u-${Date.now()}`,
       login_id: body.login_id,
-      name: body.name,
+      name: this.normalizeUserName(body.login_id, body.name),
       role: (body.role as User['role']) ?? 'general',
     };
     await setDoc(doc(this.db, COL.users, user.user_id), user);
@@ -1091,9 +1136,10 @@ export class FirestoreDataService {
    * これにより貸出先の選択肢に実在のテストメンバーが並ぶ。
    */
   async upsertUser(user: User): Promise<void> {
+    const normalized = this.normalizeUser(user);
     await setDoc(
-      doc(this.db, COL.users, user.user_id),
-      clean({ ...user, last_login_at: new Date().toISOString() }),
+      doc(this.db, COL.users, normalized.user_id),
+      clean({ ...normalized, last_login_at: new Date().toISOString() }),
       { merge: true },
     );
   }
