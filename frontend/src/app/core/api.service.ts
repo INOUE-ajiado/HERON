@@ -110,6 +110,7 @@ export class ApiService {
     category: string;
     dept_id?: string;
     model_number?: string;
+    serial_number?: string;
     location_id?: number | string | null;
     user_id?: string | null;
     purchased_at?: string;

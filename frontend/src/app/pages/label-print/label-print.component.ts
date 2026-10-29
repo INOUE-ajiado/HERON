@@ -55,7 +55,10 @@ import { IconComponent } from '../../shared/icon.component';
             <div class="mt-1 text-[11px] text-heron-2">
               {{ eq.category }} / {{ categoryLabel(eq.category) }}
               @if (eq.model_number) {
-                / {{ eq.model_number }}
+                / 型番: {{ eq.model_number }}
+              }
+              @if (eq.serial_number) {
+                / S/N: <span class="font-mono font-bold text-heron-navy">{{ eq.serial_number }}</span>
               }
             </div>
           </div>
@@ -72,7 +75,9 @@ import { IconComponent } from '../../shared/icon.component';
                 <div class="label-name">{{ eq.name }}</div>
                 <div class="label-sub">
                   {{ eq.category }}
-                  @if (eq.model_number) {
+                  @if (eq.serial_number) {
+                    / SN:{{ eq.serial_number }}
+                  } @else if (eq.model_number) {
                     / {{ eq.model_number }}
                   }
                 </div>
@@ -233,7 +238,9 @@ export class LabelPrintComponent {
     const eq = this.equipment();
     const idStr = eq ? eq.equipment_id : this.equipmentId();
     const nameStr = eq ? eq.name : '';
-    const subStr = eq ? `${eq.category} ${eq.model_number || ''}` : '';
+    const subStr = eq
+      ? `${eq.category} ${eq.serial_number ? 'SN:' + eq.serial_number : eq.model_number || ''}`
+      : '';
 
     const qrImg = new Image();
     qrImg.src = await buildQr(idStr);

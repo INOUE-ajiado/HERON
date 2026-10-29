@@ -108,6 +108,7 @@ export interface CreateEquipmentInput {
   category: string;
   dept_id?: string;
   model_number?: string;
+  serial_number?: string;
   location_id?: number | string | null;
   user_id?: string | null;
   purchased_at?: string;
@@ -639,7 +640,14 @@ export class FirestoreDataService {
     if (q.q) {
       const needle = q.q.trim().toLowerCase();
       items = items.filter((e) =>
-        [e.equipment_id, e.name, e.model_number ?? '', e.current_user?.name ?? '']
+        [
+          e.equipment_id,
+          e.name,
+          e.model_number ?? '',
+          e.serial_number ?? '',
+          e.note ?? '',
+          e.current_user?.name ?? '',
+        ]
           .join(' ')
           .toLowerCase()
           .includes(needle),
@@ -658,17 +666,39 @@ export class FirestoreDataService {
 
   async getEquipment(id: string): Promise<EquipmentDetail> {
     await this.ready();
+    let targetData: Equipment | null = null;
+    let resolvedId = id;
+
     const snap = await getDoc(doc(this.db, COL.equipments, id));
-    if (!snap.exists()) {
-      throw { status: 404, error: { error: `機材ID「${id}」は登録されていません` } };
+    if (snap.exists()) {
+      targetData = snap.data() as Equipment;
+    } else {
+      // 機材IDで見つからない場合、シリアル番号 (S/N) での一致も照合
+      const allSnap = await getDocs(collection(this.db, COL.equipments));
+      const needle = id.trim().toUpperCase();
+      for (const d of allSnap.docs) {
+        const eq = d.data() as Equipment;
+        if (
+          eq.equipment_id?.toUpperCase() === needle ||
+          (eq.serial_number && eq.serial_number.trim().toUpperCase() === needle)
+        ) {
+          targetData = eq;
+          resolvedId = eq.equipment_id;
+          break;
+        }
+      }
+    }
+
+    if (!targetData) {
+      throw { status: 404, error: { error: `機材ID または シリアル番号「${id}」は登録されていません` } };
     }
     const [users, locations, shelves] = await Promise.all([
       this.loadUserMap(),
       this.loadLocationMap(),
       this.loadShelfMap(),
     ]);
-    const equipment = this.enrich(snap.data() as Equipment, users, locations, shelves);
-    const recent_logs = await this.logsForEquipment(id, users, locations);
+    const equipment = this.enrich(targetData, users, locations, shelves);
+    const recent_logs = await this.logsForEquipment(resolvedId, users, locations);
     return { equipment, recent_logs };
   }
 
@@ -680,12 +710,14 @@ export class FirestoreDataService {
     const equipmentId = `${dept}-${cat}-${String(seq).padStart(5, '0')}`;
     const place = this.splitLocation(body.location_id);
     const now = new Date().toISOString();
+    const serialNumber = (body.serial_number || '').trim();
 
     const equipment: Equipment = {
       equipment_id: equipmentId,
       name: body.name,
       category: body.category,
       model_number: body.model_number || '',
+      serial_number: serialNumber,
       status: body.user_id ? 'in_use' : 'available',
       current_user_id: body.user_id || null,
       current_location_id: place.current_location_id,
@@ -702,7 +734,7 @@ export class FirestoreDataService {
     await this.writeLog({
       equipment_id: equipmentId,
       action_type: 'create',
-      note: '新規機材登録',
+      note: serialNumber ? `新規機材登録 (S/N: ${serialNumber})` : '新規機材登録',
       equipment_name: equipment.name,
       target_location_id: place.current_location_id,
     });

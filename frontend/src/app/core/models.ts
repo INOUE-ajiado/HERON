@@ -54,6 +54,8 @@ export interface Equipment {
   name: string;
   category: string;
   model_number?: string;
+  /** メーカー個体識別用シリアル番号 (S/N) — 同一型番の複数機材を個体識別するために使用 */
+  serial_number?: string;
   status: EquipmentStatus;
   current_user_id?: string | null;
   current_location_id?: number | null;

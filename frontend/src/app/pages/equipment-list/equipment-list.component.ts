@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { AccessControlService } from '../../core/access-control.service';
 import { ApiService, getDefaultAccessories } from '../../core/api.service';
@@ -101,7 +102,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
             <input
               type="text"
               class="heron-input pl-8 pr-9 text-xs font-mono uppercase bg-white"
-              placeholder="バーコード / 機材IDを照合"
+              placeholder="バーコード / 機材ID / シリアル番号を照合"
               [(ngModel)]="scanInput"
               name="scanInput"
               autofocus
@@ -122,12 +123,12 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
         <!-- フィルタ項目 -->
         <div class="flex flex-wrap items-center gap-2 text-xs">
-          <div class="flex items-center gap-1.5 min-w-[140px] flex-1 sm:flex-none">
+          <div class="flex items-center gap-1.5 min-w-[160px] flex-1 sm:flex-none">
             <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">検索:</span>
             <input
               type="search"
               class="heron-input text-xs bg-white"
-              placeholder="名称, 型番..."
+              placeholder="名称, 型番, シリアル番号..."
               [(ngModel)]="query"
             />
           </div>
@@ -176,12 +177,12 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         </div>
       } @else {
         <div class="overflow-x-auto rounded-md border border-slate-200/80 shadow-2xs">
-          <table class="w-full min-w-[620px] text-left text-xs">
+          <table class="w-full min-w-[680px] text-left text-xs">
             <thead>
               <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px]">
                 <th class="py-2.5 px-3.5">機材ID / 機材名</th>
                 <th class="py-2.5 px-3.5">カテゴリ / 付属品状態</th>
-                <th class="py-2.5 px-3.5">型番</th>
+                <th class="py-2.5 px-3.5">型番 / シリアル番号 (S/N)</th>
                 <th class="py-2.5 px-3.5">ステータス / 所在</th>
               </tr>
             </thead>
@@ -210,8 +211,17 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                       }
                     </div>
                   </td>
-                  <td class="py-2.5 px-3.5 font-mono text-slate-600">
-                    {{ eq.model_number || '—' }}
+                  <td class="py-2.5 px-3.5">
+                    <div class="font-mono text-slate-700 font-semibold">{{ eq.model_number || '—' }}</div>
+                    <div class="mt-0.5">
+                      @if (eq.serial_number) {
+                        <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#2A3A4A] border border-slate-200">
+                          S/N: {{ eq.serial_number }}
+                        </span>
+                      } @else {
+                        <span class="text-[10px] text-slate-400">S/N: 未登録</span>
+                      }
+                    </div>
                   </td>
                   <td class="py-2.5 px-3.5">
                     <div class="flex items-center gap-2">
@@ -257,10 +267,19 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               <app-status-badge [status]="eq.status" />
             </div>
 
-            <!-- 中段: 機材名 + 型番 -->
+            <!-- 中段: 機材名 + 型番 + シリアル番号 -->
             <div>
               <h3 class="font-bold text-sm text-slate-900 leading-snug">{{ eq.name }}</h3>
-              <p class="text-xs text-slate-500 font-mono mt-0.5">型番: {{ eq.model_number || '—' }}</p>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs font-mono">
+                <span class="text-slate-500">型番: {{ eq.model_number || '—' }}</span>
+                @if (eq.serial_number) {
+                  <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-bold text-[#2A3A4A] border border-slate-200">
+                    S/N: {{ eq.serial_number }}
+                  </span>
+                } @else {
+                  <span class="text-[11px] text-slate-400">S/N: 未登録</span>
+                }
+              </div>
             </div>
 
             <!-- 下段: 付属品状態 ＆ 保管場所/借用者 -->
@@ -422,8 +441,61 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               </p>
 
               <div>
-                <label class="heron-label text-xs">型番</label>
-                <input class="heron-input text-xs font-mono" placeholder="例: DTH-2420" [(ngModel)]="formModelNumber" name="formModelNumber" />
+                <label class="heron-label text-xs">型番 (モデル番号)</label>
+                <input class="heron-input text-xs font-mono" placeholder="例: DTH-2420 / MacBookPro18,1" [(ngModel)]="formModelNumber" name="formModelNumber" />
+              </div>
+
+              <!-- 個体識別用 シリアル番号 (S/N) 入力・複数台一括登録切替 -->
+              <div class="rounded-lg bg-blue-50/50 p-3.5 border border-blue-200/80 space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                  <label class="heron-label text-xs font-bold text-[#2A3A4A] mb-0">
+                    シリアル番号 (S/N・製造番号)
+                  </label>
+                  <div class="inline-flex rounded border border-slate-300 bg-white p-0.5 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      (click)="bulkCreateMode = false"
+                      class="px-2 py-0.5 rounded transition"
+                      [class]="!bulkCreateMode ? 'bg-[#2A3A4A] text-white' : 'text-slate-600 hover:bg-slate-100'"
+                    >
+                      1台登録
+                    </button>
+                    <button
+                      type="button"
+                      (click)="bulkCreateMode = true"
+                      class="px-2 py-0.5 rounded transition"
+                      [class]="bulkCreateMode ? 'bg-[#2A3A4A] text-white' : 'text-slate-600 hover:bg-slate-100'"
+                    >
+                      複数台一括 (連続S/N)
+                    </button>
+                  </div>
+                </div>
+
+                @if (!bulkCreateMode) {
+                  <input
+                    class="heron-input text-xs font-mono bg-white"
+                    placeholder="例: 1QA0023849 / C02X1234JG5H (本体記載のS/N)"
+                    [(ngModel)]="formSerialNumber"
+                    name="formSerialNumber"
+                  />
+                  <p class="text-[10px] text-slate-500 leading-relaxed">
+                    同じ型番の機材を複数所有している場合でも、個体ごとのメーカーシリアル番号（S/N）で確実に識別・検索できます。
+                  </p>
+                } @else {
+                  <textarea
+                    rows="4"
+                    class="heron-input text-xs font-mono bg-white"
+                    placeholder="1行に1台分のシリアル番号を入力してください&#10;例:&#10;1QA0023849&#10;1QA0023850&#10;1QA0023851"
+                    [(ngModel)]="formBulkSerialNumbers"
+                    name="formBulkSerialNumbers"
+                  ></textarea>
+                  <div class="flex items-center justify-between text-[10px] text-blue-900 font-bold">
+                    <span>※ 改行区切りで入力されたシリアル番号の数だけ個別に機材IDを自動採番して登録します</span>
+                    <span class="rounded bg-[#2A3A4A] text-white px-2 py-0.5 font-mono">
+                      計 {{ getBulkSerialList().length }} 台
+                    </span>
+                  </div>
+                }
               </div>
 
               <div>
@@ -443,6 +515,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     <option [ngValue]="s.code">[{{ s.code }}] {{ s.room_name }} / {{ s.shelf_name }}</option>
                   }
                 </select>
+              </div>
+
+              <div>
+                <label class="heron-label text-xs">備考・個体メモ</label>
+                <input
+                  class="heron-input text-xs"
+                  placeholder="例: 2026年10月増設分 / 画面保護フィルム貼付済 など"
+                  [(ngModel)]="formNote"
+                  name="formNote"
+                />
               </div>
 
               <!-- 動的 付属品自由追加・削除リスト -->
@@ -499,13 +581,19 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               <div class="flex gap-2 pt-3 border-t border-slate-200">
                 <button type="button" (click)="closeDrawer()" class="heron-btn-secondary flex-1 text-xs">キャンセル</button>
                 <button type="submit" class="heron-btn-primary flex-1 text-xs font-bold py-2" [disabled]="actionBusy()">
-                  {{ actionBusy() ? '登録中...' : '機材を登録する' }}
+                  @if (actionBusy()) {
+                    登録中...
+                  } @else if (bulkCreateMode) {
+                    {{ getBulkSerialList().length || 1 }} 台を一括登録する
+                  } @else {
+                    機材を登録する
+                  }
                 </button>
               </div>
             </form>
           }
 
-          <!-- === MODE 2: スペック・付属品編集フォーム === -->
+          <!-- === MODE 2: スペック・シリアル番号編集フォーム === -->
           @else if (drawerMode() === 'edit' && activeEquipment(); as eq) {
             <form (ngSubmit)="submitEdit()" class="space-y-4">
               <div>
@@ -514,8 +602,21 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
               </div>
 
               <div>
-                <label class="heron-label text-xs">型番</label>
-                <input class="heron-input text-xs font-mono" [(ngModel)]="formModelNumber" name="editModel" />
+                <label class="heron-label text-xs">型番 (モデル番号)</label>
+                <input class="heron-input text-xs font-mono" placeholder="例: DTH-2420" [(ngModel)]="formModelNumber" name="editModel" />
+              </div>
+
+              <div>
+                <label class="heron-label text-xs font-bold text-[#2A3A4A]">シリアル番号 (S/N・製造番号)</label>
+                <input
+                  class="heron-input text-xs font-mono"
+                  placeholder="例: 1QA0023849 / C02X1234JG5H"
+                  [(ngModel)]="formSerialNumber"
+                  name="editSerialNumber"
+                />
+                <p class="mt-1 text-[10px] text-slate-500">
+                  ※ 同一型番の機材を個体ごとに区別するためのメーカーシリアル番号です。
+                </p>
               </div>
 
               <div>
@@ -535,6 +636,16 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                     <option [ngValue]="s.code">[{{ s.code }}] {{ s.room_name }} / {{ s.shelf_name }}</option>
                   }
                 </select>
+              </div>
+
+              <div>
+                <label class="heron-label text-xs">備考・個体メモ</label>
+                <input
+                  class="heron-input text-xs"
+                  placeholder="個体に関するメモ・購入情報など"
+                  [(ngModel)]="formNote"
+                  name="editNote"
+                />
               </div>
 
               <div class="flex gap-2 pt-3 border-t border-slate-200">
@@ -728,7 +839,18 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
 
             <!-- 機材スペック表 -->
             <div class="space-y-2">
-              <h3 class="text-xs font-bold text-[#2A3A4A] pb-1 border-b border-slate-200">機材スペック詳細</h3>
+              <div class="flex items-center justify-between pb-1 border-b border-slate-200">
+                <h3 class="text-xs font-bold text-[#2A3A4A]">機材スペック・個体識別詳細</h3>
+                @if (access.canManageAssets()) {
+                  <button
+                    type="button"
+                    (click)="drawerMode.set('edit')"
+                    class="text-[11px] font-bold text-blue-700 hover:underline"
+                  >
+                    シリアル番号・情報を編集
+                  </button>
+                }
+              </div>
               <dl class="divide-y divide-slate-100 text-xs">
                 <div class="flex justify-between py-1.5">
                   <dt class="font-semibold text-slate-500">機材名</dt>
@@ -739,13 +861,40 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
                   <dd class="text-slate-800">{{ categoryLabel(eq.category) }}</dd>
                 </div>
                 <div class="flex justify-between py-1.5">
-                  <dt class="font-semibold text-slate-500">型番</dt>
+                  <dt class="font-semibold text-slate-500">型番 (モデル番号)</dt>
                   <dd class="font-mono text-slate-800">{{ eq.model_number || '—' }}</dd>
+                </div>
+                <div class="flex justify-between items-center py-1.5">
+                  <dt class="font-semibold text-slate-500">シリアル番号 (S/N)</dt>
+                  <dd>
+                    @if (eq.serial_number) {
+                      <span class="inline-flex items-center gap-1.5 rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-[#2A3A4A] border border-slate-200">
+                        {{ eq.serial_number }}
+                      </span>
+                    } @else {
+                      <span class="text-slate-400">未登録</span>
+                      @if (access.canManageAssets()) {
+                        <button
+                          type="button"
+                          (click)="drawerMode.set('edit')"
+                          class="ml-1.5 text-[11px] font-bold text-blue-700 hover:underline"
+                        >
+                          [+入力する]
+                        </button>
+                      }
+                    }
+                  </dd>
                 </div>
                 <div class="flex justify-between py-1.5">
                   <dt class="font-semibold text-slate-500">保管場所</dt>
                   <dd class="font-bold text-emerald-800">{{ currentShelfText(eq) }}</dd>
                 </div>
+                @if (eq.note) {
+                  <div class="flex justify-between py-1.5 gap-4">
+                    <dt class="font-semibold text-slate-500 shrink-0">備考・メモ</dt>
+                    <dd class="text-slate-700 text-right">{{ eq.note }}</dd>
+                  </div>
+                }
               </dl>
             </div>
 
@@ -948,6 +1097,10 @@ export class EquipmentListComponent {
   formDeptId = 'DEV';
   formCategory = 'TAB';
   formModelNumber = '';
+  formSerialNumber = '';
+  formBulkSerialNumbers = '';
+  bulkCreateMode = false;
+  formNote = '';
   formLocationId: number | string | null = null;
   formAccessories: AccessoryItem[] = getDefaultAccessories('TAB');
   newAccessoryInput = '';
@@ -971,6 +1124,8 @@ export class EquipmentListComponent {
         eq.equipment_id,
         eq.name,
         eq.model_number ?? '',
+        eq.serial_number ?? '',
+        eq.note ?? '',
         eq.current_user?.name ?? '',
         eq.current_location?.room_name ?? '',
         eq.current_location?.shelf_name ?? '',
@@ -998,6 +1153,13 @@ export class EquipmentListComponent {
 
   onCategoryChange(): void {
     this.formAccessories = getDefaultAccessories(this.formCategory);
+  }
+
+  getBulkSerialList(): string[] {
+    return this.formBulkSerialNumbers
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
   }
 
   categoryLabel(c: string): string {
@@ -1125,11 +1287,15 @@ export class EquipmentListComponent {
     this.drawerMode.set('create');
     this.drawerMessage.set('');
     this.formName = '';
-    this.formDeptId = 'DEV';
-    this.formCategory = 'TAB';
+    this.formDeptId = this.master.departments()[0]?.code || 'DEV';
+    this.formCategory = this.master.categories()[0]?.code || 'TAB';
     this.formModelNumber = '';
+    this.formSerialNumber = '';
+    this.formBulkSerialNumbers = '';
+    this.bulkCreateMode = false;
+    this.formNote = '';
     this.formLocationId = null;
-    this.formAccessories = getDefaultAccessories('TAB');
+    this.formAccessories = getDefaultAccessories(this.formCategory);
     this.newAccessoryInput = '';
     this.drawerOpen.set(true);
   }
@@ -1149,11 +1315,18 @@ export class EquipmentListComponent {
     // 編集用初期化
     this.formName = eq.name;
     this.formModelNumber = eq.model_number || '';
+    this.formSerialNumber = eq.serial_number || '';
+    this.formNote = eq.note || '';
     this.formLocationId = eq.shelf_code ?? eq.current_location_id ?? null;
 
     this.api.getEquipment(eq.equipment_id).subscribe({
       next: (res) => {
         this.activeEquipment.set(res.equipment);
+        this.formName = res.equipment.name;
+        this.formModelNumber = res.equipment.model_number || '';
+        this.formSerialNumber = res.equipment.serial_number || '';
+        this.formNote = res.equipment.note || '';
+        this.formLocationId = res.equipment.shelf_code ?? res.equipment.current_location_id ?? null;
         this.drawerAccessories.set(res.equipment.accessories || getDefaultAccessories(res.equipment.category));
         this.drawerLogs.set(res.recent_logs ?? []);
         this.drawerLoading.set(false);
@@ -1162,12 +1335,61 @@ export class EquipmentListComponent {
     });
   }
 
-  submitCreate(): void {
+  async submitCreate(): Promise<void> {
     if (!this.formName.trim()) {
       this.drawerMessage.set('機材名を入力してください');
       this.drawerMessageIsError.set(true);
       return;
     }
+
+    if (this.bulkCreateMode) {
+      const serials = this.getBulkSerialList();
+      if (serials.length === 0) {
+        this.drawerMessage.set('一括登録するシリアル番号を1行に1台ずつ入力してください');
+        this.drawerMessageIsError.set(true);
+        return;
+      }
+
+      this.actionBusy.set(true);
+      const createdList: Equipment[] = [];
+      try {
+        for (const sn of serials) {
+          const eq = await firstValueFrom(
+            this.api.createEquipment({
+              name: this.formName.trim(),
+              category: this.formCategory,
+              dept_id: this.formDeptId,
+              model_number: this.formModelNumber.trim(),
+              serial_number: sn,
+              note: this.formNote.trim(),
+              location_id: this.formLocationId,
+              accessories: this.formAccessories.map((a) => ({ ...a })),
+            }),
+          );
+          createdList.push(eq);
+        }
+        this.actionBusy.set(false);
+        this.loadData();
+        const lastEq = createdList[createdList.length - 1];
+        if (lastEq) {
+          this.openDetailDrawer(lastEq);
+          const idRange =
+            createdList.length > 1
+              ? `${createdList[0].equipment_id} 〜 ${lastEq.equipment_id}`
+              : lastEq.equipment_id;
+          this.drawerMessage.set(
+            `同一機材「${lastEq.name}」を計 ${createdList.length} 台（${idRange}）シリアル番号付きで一括登録しました！`,
+          );
+          this.drawerMessageIsError.set(false);
+        }
+      } catch (err: any) {
+        this.actionBusy.set(false);
+        this.drawerMessage.set(err?.error?.error ?? '一括登録中にエラーが発生しました');
+        this.drawerMessageIsError.set(true);
+      }
+      return;
+    }
+
     this.actionBusy.set(true);
 
     this.api
@@ -1176,6 +1398,8 @@ export class EquipmentListComponent {
         category: this.formCategory,
         dept_id: this.formDeptId,
         model_number: this.formModelNumber.trim(),
+        serial_number: this.formSerialNumber.trim(),
+        note: this.formNote.trim(),
         location_id: this.formLocationId,
         accessories: this.formAccessories,
       })
@@ -1184,7 +1408,9 @@ export class EquipmentListComponent {
           this.actionBusy.set(false);
           this.loadData();
           this.openDetailDrawer(eq);
-          this.drawerMessage.set(`機材「${eq.name} (${eq.equipment_id})」を新規登録しました！`);
+          this.drawerMessage.set(
+            `機材「${eq.name} (${eq.equipment_id}${eq.serial_number ? ' / S/N: ' + eq.serial_number : ''})」を新規登録しました！`,
+          );
           this.drawerMessageIsError.set(false);
         },
         error: (err) => {
@@ -1200,18 +1426,31 @@ export class EquipmentListComponent {
     if (!active || !this.formName.trim()) return;
 
     this.actionBusy.set(true);
+    const updatedName = this.formName.trim();
+    const updatedModel = this.formModelNumber.trim();
+    const updatedSerial = this.formSerialNumber.trim();
+    const updatedNote = this.formNote.trim();
+
     this.api
       .updateEquipment(active.equipment_id, {
-        name: this.formName.trim(),
-        model_number: this.formModelNumber.trim(),
+        name: updatedName,
+        model_number: updatedModel,
+        serial_number: updatedSerial,
+        note: updatedNote,
         current_location_id: this.formLocationId,
       })
       .subscribe({
         next: () => {
           this.actionBusy.set(false);
-          this.drawerMessage.set('機材情報を更新しました');
+          this.drawerMessage.set('機材情報・シリアル番号を更新しました');
           this.drawerMessageIsError.set(false);
-          this.openDetailDrawer({ ...active, name: this.formName, model_number: this.formModelNumber });
+          this.openDetailDrawer({
+            ...active,
+            name: updatedName,
+            model_number: updatedModel,
+            serial_number: updatedSerial,
+            note: updatedNote,
+          });
           this.loadData();
         },
         error: () => {
@@ -1307,7 +1546,7 @@ export class EquipmentListComponent {
       },
       error: () => {
         this.scanning.set(false);
-        this.scanError.set(`機材ID「${targetId}」は見つかりませんでした`);
+        this.scanError.set(`機材ID または シリアル番号「${targetId}」は見つかりませんでした`);
       },
     });
   }
