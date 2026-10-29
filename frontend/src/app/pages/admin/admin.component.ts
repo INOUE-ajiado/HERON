@@ -20,28 +20,33 @@ import { IconComponent } from '../../shared/icon.component';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   template: `
-    <div class="space-y-4">
-      <!-- ページタイトルヘッダー -->
-      <div class="flex flex-col gap-3 pb-3 border-b border-slate-200 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold text-[#2A3A4A] flex items-center gap-2">
-              <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
-              管理ページ（ユーザー ＆ ページアクセス権限管理）
-            </h1>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2A3A4A] text-[#90CFD6]">
-              RBAC ＋ 個別ページ制御
-            </span>
+    <!-- 完全エッジ・トゥ・エッジ フルキャンバスコンテナ (ネガティブマージンでシェルパディングを相殺) -->
+    <div class="-mx-4 -my-4 md:-mx-6 md:-my-5 min-h-[calc(100vh-3.5rem)] md:min-h-screen flex flex-col bg-slate-100/80 text-slate-800 font-sans">
+      <!-- トップ ヘッダーバー (Edge-to-Edge Seamless Header) -->
+      <header class="border-b border-slate-200 bg-white px-4 md:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-30 shrink-0 shadow-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#2A3A4A] text-[#90CFD6] flex items-center justify-center shadow-xs shrink-0">
+            <app-icon name="shield" class="text-lg" />
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">
-            HERONにログインできるユーザーの管理と、「どの権限レベル（または個人）がどのページまで開けるか」を詳細に設定します
-          </p>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-base font-bold text-[#2A3A4A] tracking-tight">
+                管理ページ（ユーザー ＆ ページアクセス権限管理）
+              </h1>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2A3A4A] text-[#90CFD6]">
+                RBAC ＋ 個別ページ制御
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              HERONにログインできるユーザーの管理と、「どの権限レベル（または個人）がどのページまで開けるか」を詳細に設定します
+            </p>
+          </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
           <a
             routerLink="/spec/admin"
-            class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition"
+            class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
           >
             <app-icon name="doc" />
             <span>権限管理仕様書</span>
@@ -49,7 +54,7 @@ import { IconComponent } from '../../shared/icon.component';
           <button
             type="button"
             (click)="syncFirestore()"
-            class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm transition"
+            class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
             [disabled]="access.syncing()"
           >
             <app-icon name="clock" />
@@ -58,17 +63,17 @@ import { IconComponent } from '../../shared/icon.component';
           <button
             type="button"
             (click)="openCreateUserModal()"
-            class="heron-btn-primary text-xs font-bold shadow-sm flex items-center gap-1.5"
+            class="heron-btn-primary text-xs font-bold shadow-xs flex items-center gap-1.5"
           >
             <app-icon name="plus" />
             <span>新規ユーザー追加・権限付与</span>
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- トースト通知 -->
+      <!-- トースト通知 (Edge-to-Edge Banner) -->
       @if (toastMessage()) {
-        <div class="rounded-xl bg-emerald-900 text-white px-4 py-3 text-xs font-bold shadow-lg flex items-center justify-between border border-emerald-700">
+        <div class="bg-emerald-900 text-white px-4 md:px-6 py-2.5 text-xs font-bold flex items-center justify-between border-b border-emerald-700 shrink-0">
           <div class="flex items-center gap-2">
             <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[11px]">
               <app-icon name="check" />
@@ -81,11 +86,11 @@ import { IconComponent } from '../../shared/icon.component';
         </div>
       }
 
-      <!-- 権限シミュレーター（プレビュー切替バー） -->
-      <div class="rounded-xl border border-slate-300 bg-gradient-to-r from-[#2A3A4A] to-slate-800 text-white p-3.5 shadow-sm">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <!-- 権限シミュレーター（Edge-to-Edge フルブリードバー） -->
+      <div class="border-b border-slate-800 bg-gradient-to-r from-[#2A3A4A] to-slate-800 text-white px-4 md:px-6 py-2.5 shrink-0">
+        <div class="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
           <div class="space-y-0.5">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="px-2 py-0.5 rounded bg-[#90CFD6]/20 border border-[#90CFD6]/50 text-[#90CFD6] text-[10px] font-bold">
                 権限動作シミュレーター
               </span>
@@ -105,7 +110,7 @@ import { IconComponent } from '../../shared/icon.component';
               class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border"
               [class]="
                 access.previewRole() === null
-                  ? 'bg-[#90CFD6] text-[#2A3A4A] border-[#90CFD6] shadow-sm'
+                  ? 'bg-[#90CFD6] text-[#2A3A4A] border-[#90CFD6] shadow-xs'
                   : 'bg-slate-800/80 text-slate-300 border-slate-600 hover:bg-slate-700'
               "
             >
@@ -118,7 +123,7 @@ import { IconComponent } from '../../shared/icon.component';
               class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border"
               [class]="
                 access.previewRole() === 'asset_manager'
-                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-sm'
+                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-xs'
                   : 'bg-slate-800/80 text-slate-300 border-slate-600 hover:bg-slate-700'
               "
             >
@@ -131,7 +136,7 @@ import { IconComponent } from '../../shared/icon.component';
               class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border"
               [class]="
                 access.previewRole() === 'approver'
-                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-sm'
+                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-xs'
                   : 'bg-slate-800/80 text-slate-300 border-slate-600 hover:bg-slate-700'
               "
             >
@@ -144,7 +149,7 @@ import { IconComponent } from '../../shared/icon.component';
               class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border"
               [class]="
                 access.previewRole() === 'general'
-                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-sm'
+                  ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-xs'
                   : 'bg-slate-800/80 text-slate-300 border-slate-600 hover:bg-slate-700'
               "
             >
@@ -155,9 +160,9 @@ import { IconComponent } from '../../shared/icon.component';
         </div>
       </div>
 
-      <!-- KPI サマリーカード -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100/80 border border-slate-200/80 shadow-sm">
+      <!-- KPI サマリーストリップ (Edge-to-Edge 分割グリッド) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-slate-200 border-b border-slate-200 bg-white shrink-0">
+        <div class="flex items-center gap-3 px-4 md:px-5 py-3 bg-white">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2A3A4A] text-[#90CFD6] font-bold text-base shrink-0">
             <app-icon name="user" />
           </div>
@@ -169,7 +174,7 @@ import { IconComponent } from '../../shared/icon.component';
           </div>
         </div>
 
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 shadow-sm">
+        <div class="flex items-center gap-3 px-4 md:px-5 py-3 bg-blue-50/30">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-700 text-white font-bold text-base shrink-0">
             <app-icon name="shield" />
           </div>
@@ -181,7 +186,7 @@ import { IconComponent } from '../../shared/icon.component';
           </div>
         </div>
 
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 shadow-sm">
+        <div class="flex items-center gap-3 px-4 md:px-5 py-3 bg-emerald-50/30">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-base shrink-0">
             <app-icon name="doc" />
           </div>
@@ -193,7 +198,7 @@ import { IconComponent } from '../../shared/icon.component';
           </div>
         </div>
 
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50/70 border border-amber-200/70 shadow-sm">
+        <div class="flex items-center gap-3 px-4 md:px-5 py-3 bg-amber-50/30">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-600 text-white font-bold text-base shrink-0">
             <app-icon name="key" />
           </div>
@@ -206,16 +211,16 @@ import { IconComponent } from '../../shared/icon.component';
         </div>
       </div>
 
-      <!-- メインタブ切替バー -->
-      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
-        <div class="inline-flex rounded-xl bg-slate-200/80 p-1">
+      <!-- メインタブ ＆ 統合コントロールバー (Edge-to-Edge Subheader) -->
+      <div class="border-b border-slate-200 bg-slate-50 px-4 md:px-6 py-2.5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5 shrink-0">
+        <div class="inline-flex flex-wrap rounded-xl bg-slate-200/80 p-1 self-start">
           <button
             type="button"
             (click)="activeTab.set('users')"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
             [class]="
               activeTab() === 'users'
-                ? 'bg-[#2A3A4A] text-white shadow-sm'
+                ? 'bg-[#2A3A4A] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             "
           >
@@ -225,10 +230,10 @@ import { IconComponent } from '../../shared/icon.component';
           <button
             type="button"
             (click)="activeTab.set('matrix')"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
             [class]="
               activeTab() === 'matrix'
-                ? 'bg-[#2A3A4A] text-white shadow-sm'
+                ? 'bg-[#2A3A4A] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             "
           >
@@ -238,10 +243,10 @@ import { IconComponent } from '../../shared/icon.component';
           <button
             type="button"
             (click)="activeTab.set('policy')"
-            class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
             [class]="
               activeTab() === 'policy'
-                ? 'bg-[#2A3A4A] text-white shadow-sm'
+                ? 'bg-[#2A3A4A] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             "
           >
@@ -249,254 +254,250 @@ import { IconComponent } from '../../shared/icon.component';
             <span>3. 社内ドメイン・全体ログイン制御ポリシー</span>
           </button>
         </div>
+
+        @if (activeTab() === 'users') {
+          <div class="flex flex-wrap items-center gap-2">
+            <input
+              type="search"
+              [(ngModel)]="searchQuery"
+              placeholder="氏名・メールアドレス・部署・役職で検索..."
+              class="w-full sm:w-64 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]"
+            />
+
+            <select
+              [(ngModel)]="roleFilter"
+              class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700"
+            >
+              <option value="">すべての権限レベル</option>
+              <option value="admin">システム管理者 (Lv.4)</option>
+              <option value="asset_manager">機材・アカウント管理者 (Lv.3)</option>
+              <option value="approver">決裁・承認者 / デスク (Lv.2)</option>
+              <option value="general">一般ユーザー / スタッフ (Lv.1)</option>
+            </select>
+
+            <select
+              [(ngModel)]="statusFilter"
+              class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700"
+            >
+              <option value="">すべての状態</option>
+              <option value="active">ログイン許可 (有効)</option>
+              <option value="suspended">一時停止・アクセス遮断</option>
+            </select>
+
+            <div class="text-[11px] text-slate-500 font-semibold bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+              表示中: <strong class="text-[#2A3A4A] font-mono">{{ filteredUsers().length }}</strong> / {{ users().length }} 名
+            </div>
+          </div>
+        }
+
+        @if (activeTab() === 'matrix') {
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              (click)="resetMatrix()"
+              class="px-3.5 py-1.5 rounded-lg border border-blue-300 bg-white hover:bg-blue-50 text-blue-900 text-xs font-bold shadow-2xs transition flex items-center gap-1.5"
+            >
+              <app-icon name="shield" />
+              <span>推奨セキュリティ設定に戻す</span>
+            </button>
+          </div>
+        }
       </div>
 
       <!-- =========================================================================
-           タブ1: ユーザー一覧 ＆ 個別アクセス権限管理
+           タブ1: ユーザー一覧 ＆ 個別アクセス権限管理 (Edge-to-Edge フルワイドリスト)
            ========================================================================= -->
       @if (activeTab() === 'users') {
-        <div class="space-y-3">
-          <!-- 検索・フィルタバー -->
-          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-wrap items-center gap-2 flex-1">
-              <input
-                type="search"
-                [(ngModel)]="searchQuery"
-                placeholder="氏名・メールアドレス・部署・役職で検索..."
-                class="w-full sm:w-72 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#2A3A4A]"
-              />
-
-              <select
-                [(ngModel)]="roleFilter"
-                class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700"
-              >
-                <option value="">すべての権限レベル</option>
-                <option value="admin">システム管理者 (Lv.4)</option>
-                <option value="asset_manager">機材・アカウント管理者 (Lv.3)</option>
-                <option value="approver">決裁・承認者 / デスク (Lv.2)</option>
-                <option value="general">一般ユーザー / スタッフ (Lv.1)</option>
-              </select>
-
-              <select
-                [(ngModel)]="statusFilter"
-                class="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700"
-              >
-                <option value="">すべての状態</option>
-                <option value="active">ログイン許可 (有効)</option>
-                <option value="suspended">一時停止・アクセス遮断</option>
-              </select>
-            </div>
-
-            <div class="text-[11px] text-slate-500 font-semibold">
-              表示中: <strong class="text-[#2A3A4A]">{{ filteredUsers().length }}</strong> / {{ users().length }} 名
-            </div>
-          </div>
-
-          <!-- ユーザーカード一覧 -->
-          <div class="grid grid-cols-1 gap-3">
-            @for (u of filteredUsers(); track u.email) {
-              <div
-                class="rounded-xl border bg-white p-4 shadow-sm transition hover:border-slate-300"
-                [class]="
-                  u.status === 'suspended'
-                    ? 'border-rose-200 bg-rose-50/20 opacity-80'
-                    : 'border-slate-200'
-                "
-              >
-                <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                  <!-- 左: ユーザー基本情報 ＆ アクセス可能ページ一覧バッジ -->
-                  <div class="space-y-2.5 flex-1 min-w-0">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <span class="text-sm sm:text-base font-extrabold text-[#2A3A4A]">
-                        {{ u.name }}
+        <div class="flex-1 bg-white divide-y divide-slate-200 border-b border-slate-200">
+          @for (u of filteredUsers(); track u.email) {
+            <div
+              class="px-4 md:px-6 py-4 transition hover:bg-slate-50/70"
+              [class]="u.status === 'suspended' ? 'bg-rose-50/30 opacity-85' : 'bg-white'"
+            >
+              <div class="flex flex-col gap-3.5 lg:flex-row lg:items-start lg:justify-between">
+                <!-- 左: ユーザー基本情報 ＆ アクセス可能ページ一覧バッジ -->
+                <div class="space-y-2.5 flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm sm:text-base font-extrabold text-[#2A3A4A]">
+                      {{ u.name }}
+                    </span>
+                    <span class="font-mono text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      {{ u.email }}
+                    </span>
+                    @if (u.department) {
+                      <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                        {{ u.department }}
                       </span>
-                      <span class="font-mono text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                        {{ u.email }}
+                    }
+                    @if (u.title) {
+                      <span class="text-[11px] text-slate-500">{{ u.title }}</span>
+                    }
+                    @if (u.status === 'active') {
+                      <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <app-icon name="check" />
+                        <span>アクセス許可中</span>
                       </span>
-                      @if (u.department) {
-                        <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                          {{ u.department }}
-                        </span>
-                      }
-                      @if (u.title) {
-                        <span class="text-[11px] text-slate-500">{{ u.title }}</span>
-                      }
-                      @if (u.status === 'active') {
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                          <app-icon name="check" />
-                          <span>アクセス許可中</span>
-                        </span>
-                      } @else {
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-                          <app-icon name="close" />
-                          <span>アクセス停止・遮断中</span>
-                        </span>
-                      }
-                    </div>
-
-                    <!-- このユーザーが開けるページ / 開けないページの視覚化 -->
-                    <div class="rounded-lg bg-slate-50 p-3 border border-slate-200/80 space-y-2">
-                      <div class="flex flex-wrap items-center justify-between gap-1">
-                        <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
-                          <app-icon name="shield" class="text-[#2A3A4A]" />
-                          <span>このユーザーがアクセスできるページ一覧:</span>
-                        </span>
-                        @if (hasCustomOverrides(u)) {
-                          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
-                            個別ページ特例設定あり
-                          </span>
-                        }
-                      </div>
-
-                      <div class="flex flex-wrap gap-1.5">
-                        @for (page of allPages; track page.key) {
-                          @if (access.canUserAccessPage(u, page.key)) {
-                            <span
-                              class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold border"
-                              [class]="
-                                u.custom_permissions[page.key] === 'allow'
-                                  ? 'bg-amber-50 text-amber-900 border-amber-400'
-                                  : page.group === 'workflow'
-                                    ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
-                                    : 'bg-blue-50 text-blue-900 border-blue-200'
-                              "
-                            >
-                              <app-icon name="check" />
-                              <span>{{ page.label }}</span>
-                              @if (u.custom_permissions[page.key] === 'allow') {
-                                <span class="text-[9px] px-1 rounded bg-amber-200 text-amber-950">特例許可</span>
-                              }
-                            </span>
-                          } @else {
-                            <span
-                              class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-slate-100/80 text-slate-400 border-slate-200 line-through"
-                              title="このユーザーからは非表示・アクセス不可"
-                            >
-                              <span>{{ page.label }}</span>
-                              @if (u.custom_permissions[page.key] === 'deny') {
-                                <span class="no-underline text-[9px] px-1 rounded bg-rose-100 text-rose-800 font-bold">個別拒否</span>
-                              }
-                            </span>
-                          }
-                        }
-                      </div>
-                    </div>
-
-                    @if (u.note) {
-                      <p class="text-[11px] text-slate-500 flex items-center gap-1.5">
-                        <app-icon name="doc" class="text-slate-400 shrink-0" />
-                        <span>{{ u.note }}</span>
-                      </p>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                        <app-icon name="close" />
+                        <span>アクセス停止・遮断中</span>
+                      </span>
                     }
                   </div>
 
-                  <!-- 右: 権限レベル変更プルダウン ＆ 個別ページ設定ボタン -->
-                  <div class="lg:w-80 shrink-0 flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-                    <div>
-                      <label class="block text-[10px] font-bold text-slate-500 mb-1">
-                        基本権限レベル（ロール）の即時切替
-                      </label>
-                      <select
-                        [ngModel]="u.role"
-                        (ngModelChange)="changeUserRole(u, $event)"
-                        [disabled]="u.email === 'inoue@ajiado.co.jp'"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#2A3A4A] focus:outline-none focus:ring-2 focus:ring-[#2A3A4A] disabled:bg-slate-100"
-                      >
-                        <option value="admin">システム管理者 (Lv.4: 全ページ管理)</option>
-                        <option value="asset_manager">機材・アカウント管理者 (Lv.3: 機材・シリアル)</option>
-                        <option value="approver">決裁・承認者 / デスク (Lv.2: 申請・承認)</option>
-                        <option value="general">一般ユーザー (Lv.1: 稟議・申請系のみ)</option>
-                      </select>
-                      <div class="mt-1 text-[10px] text-slate-500 leading-snug">
-                        {{ getRoleDescription(u.role) }}
-                      </div>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5">
-                      <button
-                        type="button"
-                        (click)="openEditUserModal(u)"
-                        class="w-full py-2 px-3 rounded-lg bg-[#2A3A4A] hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition"
-                      >
-                        <app-icon name="edit" />
-                        <span>詳細・ページ別の個別許可/制限を設定</span>
-                      </button>
-
-                      @if (u.email !== 'inoue@ajiado.co.jp') {
-                        <button
-                          type="button"
-                          (click)="toggleStatus(u)"
-                          class="flex-1 py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition"
-                          [class]="
-                            u.status === 'active'
-                              ? 'border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900'
-                              : 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900'
-                          "
-                        >
-                          {{ u.status === 'active' ? '一時停止にする' : 'アクセス許可に戻す' }}
-                        </button>
-                        <button
-                          type="button"
-                          (click)="deleteUser(u)"
-                          class="py-1.5 px-2.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold transition"
-                        >
-                          削除
-                        </button>
-                      } @else {
-                        <span class="w-full text-center text-[10px] font-bold text-slate-400 py-1">
-                          ※ システムオーナーは常時フルアクセス保護されています
+                  <!-- このユーザーが開けるページ / 開けないページの視覚化 -->
+                  <div class="rounded-lg bg-slate-50/90 p-3 border border-slate-200/80 space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-1">
+                      <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+                        <app-icon name="shield" class="text-[#2A3A4A]" />
+                        <span>このユーザーがアクセスできるページ一覧:</span>
+                      </span>
+                      @if (hasCustomOverrides(u)) {
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                          個別ページ特例設定あり
                         </span>
                       }
                     </div>
+
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (page of allPages; track page.key) {
+                        @if (access.canUserAccessPage(u, page.key)) {
+                          <span
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold border"
+                            [class]="
+                              u.custom_permissions[page.key] === 'allow'
+                                ? 'bg-amber-50 text-amber-900 border-amber-400'
+                                : page.group === 'workflow'
+                                  ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                                  : 'bg-blue-50 text-blue-900 border-blue-200'
+                            "
+                          >
+                            <app-icon name="check" />
+                            <span>{{ page.label }}</span>
+                            @if (u.custom_permissions[page.key] === 'allow') {
+                              <span class="text-[9px] px-1 rounded bg-amber-200 text-amber-950">特例許可</span>
+                            }
+                          </span>
+                        } @else {
+                          <span
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border bg-slate-100/80 text-slate-400 border-slate-200 line-through"
+                            title="このユーザーからは非表示・アクセス不可"
+                          >
+                            <span>{{ page.label }}</span>
+                            @if (u.custom_permissions[page.key] === 'deny') {
+                              <span class="no-underline text-[9px] px-1 rounded bg-rose-100 text-rose-800 font-bold">個別拒否</span>
+                            }
+                          </span>
+                        }
+                      }
+                    </div>
+                  </div>
+
+                  @if (u.note) {
+                    <p class="text-[11px] text-slate-500 flex items-center gap-1.5">
+                      <app-icon name="doc" class="text-slate-400 shrink-0" />
+                      <span>{{ u.note }}</span>
+                    </p>
+                  }
+                </div>
+
+                <!-- 右: 権限レベル変更プルダウン ＆ 個別ページ設定ボタン -->
+                <div class="lg:w-80 shrink-0 flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1">
+                      基本権限レベル（ロール）の即時切替
+                    </label>
+                    <select
+                      [ngModel]="u.role"
+                      (ngModelChange)="changeUserRole(u, $event)"
+                      [disabled]="u.email === 'inoue@ajiado.co.jp'"
+                      class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-[#2A3A4A] focus:outline-none focus:ring-2 focus:ring-[#2A3A4A] disabled:bg-slate-100"
+                    >
+                      <option value="admin">システム管理者 (Lv.4: 全ページ管理)</option>
+                      <option value="asset_manager">機材・アカウント管理者 (Lv.3: 機材・シリアル)</option>
+                      <option value="approver">決裁・承認者 / デスク (Lv.2: 申請・承認)</option>
+                      <option value="general">一般ユーザー (Lv.1: 稟議・申請系のみ)</option>
+                    </select>
+                    <div class="mt-1 text-[10px] text-slate-500 leading-snug">
+                      {{ getRoleDescription(u.role) }}
+                    </div>
+                  </div>
+
+                  <div class="pt-2 border-t border-slate-200 flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      (click)="openEditUserModal(u)"
+                      class="w-full py-2 px-3 rounded-lg bg-[#2A3A4A] hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition"
+                    >
+                      <app-icon name="edit" />
+                      <span>詳細・ページ別の個別許可/制限を設定</span>
+                    </button>
+
+                    @if (u.email !== 'inoue@ajiado.co.jp') {
+                      <button
+                        type="button"
+                        (click)="toggleStatus(u)"
+                        class="flex-1 py-1.5 px-2.5 rounded-lg border text-[11px] font-bold transition"
+                        [class]="
+                          u.status === 'active'
+                            ? 'border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900'
+                            : 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900'
+                        "
+                      >
+                        {{ u.status === 'active' ? '一時停止にする' : 'アクセス許可に戻す' }}
+                      </button>
+                      <button
+                        type="button"
+                        (click)="deleteUser(u)"
+                        class="py-1.5 px-2.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold transition"
+                      >
+                        削除
+                      </button>
+                    } @else {
+                      <span class="w-full text-center text-[10px] font-bold text-slate-400 py-1">
+                        ※ システムオーナーは常時フルアクセス保護されています
+                      </span>
+                    }
                   </div>
                 </div>
               </div>
-            } @empty {
-              <div class="rounded-xl border border-slate-200 bg-white p-10 text-center space-y-2">
-                <div class="text-sm font-bold text-slate-700">条件に一致するユーザーが見つかりません</div>
-                <p class="text-xs text-slate-500">検索条件を変更するか、「新規ユーザー追加・権限付与」から登録してください。</p>
-              </div>
-            }
-          </div>
+            </div>
+          } @empty {
+            <div class="p-12 text-center space-y-2">
+              <div class="text-sm font-bold text-slate-700">条件に一致するユーザーが見つかりません</div>
+              <p class="text-xs text-slate-500">検索条件を変更するか、「新規ユーザー追加・権限付与」から登録してください。</p>
+            </div>
+          }
         </div>
       }
 
       <!-- =========================================================================
-           タブ2: 権限レベル（ロール）別 ページアクセス制御マトリクス
+           タブ2: 権限レベル（ロール）別 ページアクセス制御マトリクス (Edge-to-Edge テーブル)
            ========================================================================= -->
       @if (activeTab() === 'matrix') {
-        <div class="space-y-4">
-          <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex-1 flex flex-col bg-white">
+          <div class="border-b border-blue-200 bg-blue-50/70 px-4 md:px-6 py-3">
             <div class="space-y-1 text-xs text-blue-950">
               <div class="font-bold flex items-center gap-1.5">
                 <app-icon name="shield" />
                 <span>権限レベル（ロール）ごとの標準アクセス可能ページ設定</span>
               </div>
               <p class="text-[11px] text-blue-900 leading-relaxed">
-                ・<strong>申請・ワークフロー系（稟議申請・業務申請・BYOD申請）</strong>は、原則として全ユーザー（一般ユーザー含む）に開放します。<br />
-                ・<strong>機材台帳・ライセンス管理・棚卸し等の管理系ページ</strong>は、原則として管理者（システム管理者／機材・アカウント管理者）のみが開けるように制御します。<br />
-                ・下のチェックボックスをクリックすると、各ロールがアクセスできるページをリアルタイムに切り替えられます。
+                ・<strong>申請・ワークフロー系（稟議申請・業務申請・BYOD申請）</strong>は、原則として全ユーザー（一般ユーザー含む）に開放します。
+                ・<strong>機材台帳・ライセンス管理・棚卸し等の管理系ページ</strong>は、原則として管理者（システム管理者／機材・アカウント管理者）のみが開けるように制御します。
               </p>
             </div>
-
-            <button
-              type="button"
-              (click)="resetMatrix()"
-              class="shrink-0 px-3.5 py-2 rounded-lg border border-blue-300 bg-white hover:bg-blue-100 text-blue-900 text-xs font-bold shadow-sm transition"
-            >
-              推奨セキュリティ設定に戻す
-            </button>
           </div>
 
-          <!-- マトリクステーブル -->
-          <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <!-- フルワイド マトリクステーブル -->
+          <div class="overflow-x-auto border-b border-slate-200 bg-white flex-1">
             <table class="w-full min-w-[760px] text-left text-xs border-collapse">
               <thead>
                 <tr class="bg-[#2A3A4A] text-white">
-                  <th class="py-3 px-4 w-72 font-bold">対象ページ ／ 機能区分</th>
+                  <th class="py-3 px-4 md:px-6 w-72 font-bold">対象ページ ／ 機能区分</th>
                   <th class="py-3 px-3 font-bold">ページ概要</th>
                   @for (r of roleColumns; track r) {
-                    <th class="py-3 px-3 text-center w-32 font-bold">
+                    <th class="py-3 px-3 text-center w-36 font-bold">
                       <div>{{ roleMeta[r].shortLabel }}</div>
                       <div class="text-[10px] font-normal text-[#90CFD6]">Lv.{{ roleMeta[r].level }}</div>
                     </th>
@@ -507,7 +508,7 @@ import { IconComponent } from '../../shared/icon.component';
                 @for (group of pageGroups; track group.group) {
                   <!-- グループ見出し行 -->
                   <tr class="bg-slate-100/90">
-                    <td colspan="6" class="py-2 px-4 font-extrabold text-[#2A3A4A] text-xs">
+                    <td colspan="6" class="py-2 px-4 md:px-6 font-extrabold text-[#2A3A4A] text-xs">
                       <span class="inline-block w-2 h-2 rounded-full mr-1.5" [class]="group.dotClass"></span>
                       {{ group.title }}
                     </td>
@@ -515,7 +516,7 @@ import { IconComponent } from '../../shared/icon.component';
 
                   @for (page of group.pages; track page.key) {
                     <tr class="hover:bg-slate-50 transition">
-                      <td class="py-3 px-4">
+                      <td class="py-3 px-4 md:px-6">
                         <div class="font-bold text-[#2A3A4A] flex items-center gap-1.5">
                           <span>{{ page.label }}</span>
                           <code class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{{ page.path }}</code>
@@ -533,7 +534,7 @@ import { IconComponent } from '../../shared/icon.component';
                             class="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition w-24"
                             [class]="
                               access.roleMatrix()[r][page.key]
-                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm hover:bg-emerald-700'
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs hover:bg-emerald-700'
                                 : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'
                             "
                           >
@@ -557,11 +558,11 @@ import { IconComponent } from '../../shared/icon.component';
       }
 
       <!-- =========================================================================
-           タブ3: 社内ドメイン・全体ログイン制御ポリシー
+           タブ3: 社内ドメイン・全体ログイン制御ポリシー (Edge-to-Edge 2カラム分割)
            ========================================================================= -->
       @if (activeTab() === 'policy') {
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 bg-white border-b border-slate-200">
+          <div class="p-5 md:p-6 space-y-4">
             <div class="border-b border-slate-100 pb-3">
               <h2 class="text-sm font-extrabold text-[#2A3A4A] flex items-center gap-2">
                 <app-icon name="shield" />
@@ -610,8 +611,8 @@ import { IconComponent } from '../../shared/icon.component';
             </div>
           </div>
 
-          <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <div class="border-b border-slate-100 pb-3">
+          <div class="p-5 md:p-6 bg-slate-50/40 space-y-4">
+            <div class="border-b border-slate-200/80 pb-3">
               <h2 class="text-sm font-extrabold text-[#2A3A4A] flex items-center gap-2">
                 <app-icon name="key" />
                 <span>権限設計ガイドライン（HERON アクセス制御方式）</span>
@@ -622,21 +623,21 @@ import { IconComponent } from '../../shared/icon.component';
             </div>
 
             <div class="space-y-3 text-xs text-slate-700 leading-relaxed">
-              <div class="p-3 rounded-lg bg-emerald-50/70 border border-emerald-200">
+              <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200">
                 <div class="font-bold text-emerald-950">1. 全ユーザー開放ページ（申請・ワークフロー系）</div>
                 <p class="text-[11px] text-emerald-900 mt-0.5">
                   「稟議申請 (<code>/approval</code>)」「業務申請 (<code>/work-request</code>)」「BYOD申請 (<code>/byod</code>)」は日常業務で全スタッフが起案・提出するため、Lv.1（一般ユーザー）から標準で利用可能です。
                 </p>
               </div>
 
-              <div class="p-3 rounded-lg bg-blue-50/70 border border-blue-200">
+              <div class="p-3.5 rounded-xl bg-blue-50/80 border border-blue-200">
                 <div class="font-bold text-blue-950">2. 管理者限定ページ（機材・アカウント・シリアル管理系）</div>
                 <p class="text-[11px] text-blue-900 mt-0.5">
                   「機材台帳 (<code>/equipments</code>)」「ライセンス管理 (<code>/licenses</code>)」「棚卸し (<code>/inventory</code>)」「保管場所 (<code>/locations</code>)」「マスタ設定 (<code>/settings</code>)」「操作履歴 (<code>/logs</code>)」は社外秘のシリアルコードや資産情報を含むため、原則として Lv.3 以上の管理者のみアクセス可能です。
                 </p>
               </div>
 
-              <div class="p-3 rounded-lg bg-amber-50/70 border border-amber-200">
+              <div class="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200">
                 <div class="font-bold text-amber-950">3. 個人別の特例ページ許可 / 制限（オーバーライド）</div>
                 <p class="text-[11px] text-amber-900 mt-0.5">
                   「普段は一般ユーザーだが、制作デスク業務のため『機材台帳』だけ見られるようにしたい」といった場合、ユーザー一覧の「詳細・ページ別の個別許可/制限を設定」から1ページ単位で特例許可を付与できます。
