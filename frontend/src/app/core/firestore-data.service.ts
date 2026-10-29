@@ -362,6 +362,39 @@ export class FirestoreDataService {
     if (!this.firebase.getAuth().currentUser) throw new NotAuthenticatedError();
     await this.seedDefaults();
     await this.migrateLegacyLocalData();
+    await this.purgeSampleEquipments();
+  }
+
+  /**
+   * 既存のサンプル機材データを Firestore および localStorage から一括削除し、
+   * 機材ID採番カウンタをリセットする（初回のみ実行、以降の新規登録機材は保持）。
+   */
+  private async purgeSampleEquipments(): Promise<void> {
+    try {
+      localStorage.removeItem(LEGACY_EQUIPMENTS_KEY);
+    } catch {
+      // ignore
+    }
+
+    const purgeFlagRef = doc(this.db, COL.system, 'purged_sample_equipments_v1');
+    const purgeFlagSnap = await getDoc(purgeFlagRef);
+    if (purgeFlagSnap.exists()) return;
+
+    const eqSnap = await getDocs(collection(this.db, COL.equipments));
+    await Promise.all(eqSnap.docs.map((d) => deleteDoc(d.ref).catch(() => undefined)));
+
+    // 機材ID採番カウンタ（DEPT_CAT）も 0 にリセットして次回登録が 00001 から始まるようにする
+    const counterSnap = await getDocs(collection(this.db, COL.counters));
+    await Promise.all(
+      counterSnap.docs
+        .filter((d) => d.id !== 'locations')
+        .map((d) => deleteDoc(d.ref).catch(() => undefined)),
+    );
+
+    await setDoc(purgeFlagRef, {
+      purged_at: new Date().toISOString(),
+      deleted_count: eqSnap.size,
+    });
   }
 
   /** マスタ・保管場所・ユーザーの初期データを投入（ドキュメント ID 固定なので冪等）。 */
@@ -389,13 +422,17 @@ export class FirestoreDataService {
   }
 
   /**
-   * 旧バージョン（localStorage 保存）で登録した機材・ログ・マスタを Firestore へ移行する。
-   * 端末ごとに 1 回だけ実行し、同じ ID の機材が既にある場合は上書きしない。
+   * 旧バージョン（localStorage 保存）で登録したログ・マスタを Firestore へ移行する。
+   * （サンプル機材の再混入を防ぐため、localStorage からの機材自動移行は無効化）
    */
   private async migrateLegacyLocalData(): Promise<void> {
+    try {
+      localStorage.removeItem(LEGACY_EQUIPMENTS_KEY);
+    } catch {
+      // ignore
+    }
     if (localStorage.getItem(MIGRATION_FLAG)) return;
 
-    const equipments = readLegacy<Equipment>(LEGACY_EQUIPMENTS_KEY);
     const logs = readLegacy<TransactionLog>(LEGACY_LOGS_KEY);
     const departments = readLegacy<DepartmentDoc>(LEGACY_DEPT_KEY);
     const categories = readLegacy<CategoryDoc>(LEGACY_CAT_KEY);
@@ -409,18 +446,6 @@ export class FirestoreDataService {
         console.warn(`[HERON] ${label} の移行に失敗しました:`, err);
       }
     };
-
-    for (const eq of equipments) {
-      if (!eq?.equipment_id) continue;
-      await attempt(`機材 ${eq.equipment_id}`, async () => {
-        const ref = doc(this.db, COL.equipments, eq.equipment_id);
-        if ((await getDoc(ref)).exists()) return;
-        await setDoc(ref, clean({ ...eq, migrated_from: 'localStorage' }));
-        // 採番カウンタを移行済み ID に追随させる
-        const m = /^([A-Z0-9]+)-([A-Z0-9]+)-(\d+)$/.exec(eq.equipment_id);
-        if (m) await this.raiseCounter(`${m[1]}_${m[2]}`, parseInt(m[3], 10));
-      });
-    }
 
     const actor = this.currentActor();
     for (const log of logs) {
