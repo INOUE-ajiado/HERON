@@ -230,13 +230,23 @@ export const APP_PAGE_DEFINITIONS: AppPageDefinition[] = [
   },
 ];
 
-const USERS_STORAGE_KEY = 'heron_managed_users_v1';
+const LEGACY_USERS_STORAGE_KEY = 'heron_managed_users_v1';
+const USERS_STORAGE_KEY = 'heron_managed_users_v2';
 const MATRIX_STORAGE_KEY = 'heron_role_matrix_v1';
 const POLICY_STORAGE_KEY = 'heron_domain_policy_v1';
 
 const FIRESTORE_USERS_COL = 'managed_users';
 const FIRESTORE_SYSTEM_COL = 'system';
 const FIRESTORE_POLICY_DOC = 'access_control_config';
+
+const LEGACY_SAMPLE_USER_EMAILS = new Set([
+  'inoue.cq.jwl@gmail.com',
+  'nakamura@ajiado.co.jp',
+  'matsuyama@ajiado.co.jp',
+  'a_yamada@ajiado.co.jp',
+  'shimako@ajiado.co.jp',
+  'sakurai@ajiado.co.jp',
+]);
 
 @Injectable({
   providedIn: 'root',
@@ -402,20 +412,21 @@ export class AccessControlService {
 
   private loadFromStorage(): void {
     try {
+      localStorage.removeItem(LEGACY_USERS_STORAGE_KEY);
       const rawUsers = localStorage.getItem(USERS_STORAGE_KEY);
       if (rawUsers) {
         const parsed = JSON.parse(rawUsers);
         if (Array.isArray(parsed) && parsed.length > 0) {
           this.managedUsers.set(parsed);
         } else {
-          const samples = this.createInitialUsers();
-          this.managedUsers.set(samples);
-          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(samples));
+          const initial = this.createInitialUsers();
+          this.managedUsers.set(initial);
+          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initial));
         }
       } else {
-        const samples = this.createInitialUsers();
-        this.managedUsers.set(samples);
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(samples));
+        const initial = this.createInitialUsers();
+        this.managedUsers.set(initial);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initial));
       }
 
       const rawMatrix = localStorage.getItem(MATRIX_STORAGE_KEY);
@@ -486,17 +497,31 @@ export class AccessControlService {
       const usersDocRef = doc(db, FIRESTORE_SYSTEM_COL, 'access_users_list');
       const usersDocSnap = await getDoc(usersDocRef);
       if (usersDocSnap.exists()) {
-        const data = usersDocSnap.data() as { users?: ManagedUser[] };
+        const data = usersDocSnap.data() as {
+          users?: ManagedUser[];
+          cleaned_sample_users_v2?: boolean;
+        };
         if (Array.isArray(data.users) && data.users.length > 0) {
-          this.saveUsersToStorage(data.users);
+          if (!data.cleaned_sample_users_v2) {
+            // 旧バージョンのサンプルユーザーデータを一括パージし、システムオーナーのみ残す
+            const cleaned = data.users.filter(
+              (u) => !LEGACY_SAMPLE_USER_EMAILS.has(u.email.toLowerCase())
+            );
+            const finalUsers =
+              cleaned.length > 0 ? cleaned : this.createInitialUsers();
+            this.saveUsersToStorage(finalUsers);
+            await this.persistUsersToFirestore(finalUsers);
+            for (const sampleEmail of LEGACY_SAMPLE_USER_EMAILS) {
+              const sRef = doc(db, FIRESTORE_USERS_COL, sampleEmail);
+              await deleteDoc(sRef).catch(() => undefined);
+            }
+          } else {
+            this.saveUsersToStorage(data.users);
+          }
         }
       } else {
         const initialUsers = this.managedUsers();
-        await setDoc(usersDocRef, { users: initialUsers });
-        for (const u of initialUsers) {
-          const uRef = doc(db, FIRESTORE_USERS_COL, u.email.toLowerCase());
-          await setDoc(uRef, JSON.parse(JSON.stringify(u))).catch(() => undefined);
-        }
+        await this.persistUsersToFirestore(initialUsers);
       }
     } catch (err) {
       console.warn('[HERON] アクセス権限設定の Firestore 同期をスキップしました (ローカルを使用):', err);
@@ -511,6 +536,7 @@ export class AccessControlService {
       const usersDocRef = doc(db, FIRESTORE_SYSTEM_COL, 'access_users_list');
       await setDoc(usersDocRef, {
         users: JSON.parse(JSON.stringify(users)),
+        cleaned_sample_users_v2: true,
         updated_at: this.nowStr(),
       });
       for (const u of users) {
@@ -661,6 +687,12 @@ export class AccessControlService {
     );
     this.saveUsersToStorage(list);
     await this.persistUsersToFirestore(list);
+    try {
+      const db = this.firebase.getDb();
+      await deleteDoc(doc(db, FIRESTORE_USERS_COL, cleanEmail));
+    } catch {
+      // ignore
+    }
     void this.auth.removeTestMember(cleanEmail).catch(() => undefined);
   }
 
@@ -703,75 +735,7 @@ export class AccessControlService {
         status: 'active',
         custom_permissions: {},
         note: '全システム・機材・アカウント台帳・権限設定の統括管理者',
-        updated_at: '2026/10/21 10:00',
-      },
-      {
-        email: 'inoue.cq.jwl@gmail.com',
-        name: '井上 (検証・管理アカウント)',
-        department: '情報システム',
-        title: 'システム管理者',
-        role: 'admin',
-        status: 'active',
-        custom_permissions: {},
-        note: '外部ネットワーク・検証用管理者アカウント',
-        updated_at: '2026/10/21 10:00',
-      },
-      {
-        email: 'nakamura@ajiado.co.jp',
-        name: '中村 健一',
-        department: '総務部 / 機材管理',
-        title: '機材・ライセンス管理担当',
-        role: 'asset_manager',
-        status: 'active',
-        custom_permissions: {},
-        note: '機材台帳・Microsoft 365 / クリスタ等のライセンス割当・棚卸しを担当',
-        updated_at: '2026/10/21 10:00',
-      },
-      {
-        email: 'matsuyama@ajiado.co.jp',
-        name: '松山 浩司',
-        department: '制作部',
-        title: '制作デスク / 承認者',
-        role: 'approver',
-        status: 'active',
-        custom_permissions: {
-          equipments: 'allow',
-        },
-        note: '稟議・業務申請の決裁承認者。制作進行用の機材状況確認のため「機材台帳」のみ特例許可',
-        updated_at: '2026/10/21 10:00',
-      },
-      {
-        email: 'a_yamada@ajiado.co.jp',
-        name: '山田 彩花',
-        department: '作画部',
-        title: 'デジタル原画スタッフ',
-        role: 'general',
-        status: 'active',
-        custom_permissions: {},
-        note: '一般スタッフ権限（稟議申請・業務申請・BYOD申請のみアクセス可、機材・ライセンス管理は非表示）',
-        updated_at: '2026/10/21 10:00',
-      },
-      {
-        email: 'shimako@ajiado.co.jp',
-        name: '島子 裕太',
-        department: 'CG・撮影部',
-        title: '3DCGアニメーター',
-        role: 'general',
-        status: 'active',
-        custom_permissions: {},
-        note: '一般スタッフ権限（稟議申請・業務申請・BYOD申請のみ利用可）',
-        updated_at: '2026/10/21 10:00',
-      },
-      {
-        email: 'sakurai@ajiado.co.jp',
-        name: '桜井 裕介',
-        department: '制作部',
-        title: '制作進行',
-        role: 'general',
-        status: 'active',
-        custom_permissions: {},
-        note: '一般スタッフ権限（稟議申請・業務申請・BYOD申請のみ利用可）',
-        updated_at: '2026/10/21 10:00',
+        updated_at: '2026/10/29 15:00',
       },
     ];
   }
