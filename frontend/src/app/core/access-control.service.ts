@@ -173,21 +173,12 @@ export const APP_PAGE_DEFINITIONS: AppPageDefinition[] = [
     recommendedAdminOnly: true,
   },
   {
-    key: 'locations',
-    label: '保管場所マスタ',
-    path: '/locations',
-    group: 'asset_admin',
-    groupLabel: '機材・アカウント管理系（原則：管理者限定）',
-    description: '社内フロア・保管部屋・棚コードの登録と棚ラベル印刷',
-    recommendedAdminOnly: true,
-  },
-  {
     key: 'settings',
-    label: 'マスタ設定',
+    label: '保管場所・マスタ設定',
     path: '/settings',
     group: 'asset_admin',
     groupLabel: '機材・アカウント管理系（原則：管理者限定）',
-    description: '部署マスタ・機材カテゴリ・プレフィックス等の基本定義管理',
+    description: '保管場所（棚コード）・部署コード・機材カテゴリの登録・編集および棚QRラベル印刷',
     recommendedAdminOnly: true,
   },
   {

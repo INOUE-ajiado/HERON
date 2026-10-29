@@ -21,7 +21,7 @@ export const routes: Routes = [
   },
   {
     path: 'print/shelf-label/:code',
-    canActivate: [authGuard, pageAccessGuard('locations')],
+    canActivate: [authGuard, pageAccessGuard('settings')],
     loadComponent: () =>
       import('./pages/shelf-label-print/shelf-label-print.component').then(
         (m) => m.ShelfLabelPrintComponent,
@@ -71,11 +71,8 @@ export const routes: Routes = [
       },
       {
         path: 'locations',
-        canActivate: [pageAccessGuard('locations')],
-        loadComponent: () =>
-          import('./pages/locations/locations.component').then(
-            (m) => m.LocationsComponent,
-          ),
+        redirectTo: 'settings',
+        pathMatch: 'full',
       },
       {
         path: 'approval',

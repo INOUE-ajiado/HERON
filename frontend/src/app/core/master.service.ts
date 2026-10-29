@@ -104,6 +104,29 @@ export class MasterService {
     void this.persist(() => this.store.saveDepartment(entry), '部署の保存');
   }
 
+  updateDepartment(originalCode: string, updated: DepartmentMaster): void {
+    const oldCode = originalCode.toUpperCase().trim();
+    const newCode = updated.code.toUpperCase().trim();
+    const newName = updated.name.trim();
+    if (!newCode || !newName) {
+      throw new Error('部署コードと部署名を入力してください');
+    }
+    if (newCode !== oldCode && this.departments().some((d) => d.code === newCode)) {
+      throw new Error(`部署コード「${newCode}」は既に存在します`);
+    }
+    const entry: DepartmentMaster = { code: newCode, name: newName };
+    this.departments.set(
+      this.departments().map((d) => (d.code === oldCode ? entry : d)),
+    );
+    this.saveCache();
+    void this.persist(async () => {
+      await this.store.saveDepartment(entry);
+      if (newCode !== oldCode) {
+        await this.store.deleteDepartment(oldCode);
+      }
+    }, '部署の更新');
+  }
+
   removeDepartment(code: string): void {
     this.departments.set(this.departments().filter((d) => d.code !== code));
     this.saveCache();
@@ -119,6 +142,29 @@ export class MasterService {
     this.categories.set([...this.categories(), entry]);
     this.saveCache();
     void this.persist(() => this.store.saveCategory(entry), 'カテゴリの保存');
+  }
+
+  updateCategory(originalCode: string, updated: CategoryMaster): void {
+    const oldCode = originalCode.toUpperCase().trim();
+    const newCode = updated.code.toUpperCase().trim();
+    const newName = updated.name.trim();
+    if (!newCode || !newName) {
+      throw new Error('カテゴリコードとカテゴリ名を入力してください');
+    }
+    if (newCode !== oldCode && this.categories().some((c) => c.code === newCode)) {
+      throw new Error(`カテゴリコード「${newCode}」は既に存在します`);
+    }
+    const entry: CategoryMaster = { code: newCode, name: newName };
+    this.categories.set(
+      this.categories().map((c) => (c.code === oldCode ? entry : c)),
+    );
+    this.saveCache();
+    void this.persist(async () => {
+      await this.store.saveCategory(entry);
+      if (newCode !== oldCode) {
+        await this.store.deleteCategory(oldCode);
+      }
+    }, 'カテゴリの更新');
   }
 
   removeCategory(code: string): void {
@@ -140,6 +186,34 @@ export class MasterService {
     this.shelves.set([...this.shelves(), entry]);
     this.saveCache();
     void this.persist(() => this.store.saveShelf(entry), '保管場所の保存');
+  }
+
+  updateShelf(originalCode: string, updated: ShelfMaster): void {
+    const oldCode = originalCode.toUpperCase().trim();
+    const newCode = updated.code.toUpperCase().trim();
+    const newRoom = updated.room_name.trim();
+    const newShelf = updated.shelf_name.trim();
+    if (!newCode || !newRoom || !newShelf) {
+      throw new Error('棚コード・部屋名・棚名のすべてを入力してください');
+    }
+    if (newCode !== oldCode && this.shelves().some((s) => s.code === newCode)) {
+      throw new Error(`棚コード「${newCode}」は既に存在します`);
+    }
+    const entry: ShelfMaster = {
+      code: newCode,
+      room_name: newRoom,
+      shelf_name: newShelf,
+    };
+    this.shelves.set(
+      this.shelves().map((s) => (s.code === oldCode ? entry : s)),
+    );
+    this.saveCache();
+    void this.persist(async () => {
+      await this.store.saveShelf(entry);
+      if (newCode !== oldCode) {
+        await this.store.deleteShelf(oldCode);
+      }
+    }, '保管場所の更新');
   }
 
   removeShelf(code: string): void {

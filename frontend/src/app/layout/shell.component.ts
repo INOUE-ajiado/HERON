@@ -206,8 +206,7 @@ export class ShellComponent {
     { path: '/work-request', label: '業務申請', icon: 'clock', pageKey: 'work-request', exact: false },
     { path: '/byod', label: 'BYOD申請', icon: 'box', pageKey: 'byod', exact: false },
     { path: '/inventory', label: '棚卸し', icon: 'shelf', pageKey: 'inventory', exact: false },
-    { path: '/locations', label: '保管場所', icon: 'pin', pageKey: 'locations', exact: false },
-    { path: '/settings', label: 'マスタ設定', icon: 'pin', pageKey: 'settings', exact: false },
+    { path: '/settings', label: '保管場所・マスタ設定', icon: 'pin', pageKey: 'settings', exact: false },
     { path: '/logs', label: '履歴', icon: 'clock', pageKey: 'logs', exact: false },
     { path: '/admin', label: '管理ページ (権限)', icon: 'shield', pageKey: 'admin', exact: false },
   ]);
