@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import QRCode from 'qrcode';
 
@@ -15,12 +15,15 @@ import { IconComponent } from '../../shared/icon.component';
   imports: [IconComponent, RouterLink],
   template: `
     <div class="no-print min-h-screen bg-heron-silver p-5">
-      <div class="mx-auto max-w-md">
+      <div class="mx-auto max-w-lg">
         <!-- ナビゲーションヘッダー -->
         <div class="mb-3 flex items-center justify-between">
-          <a routerLink="/settings" class="inline-flex items-center gap-1.5 text-xs font-semibold text-heron-1 hover:text-heron-navy">
+          <a
+            routerLink="/settings"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold text-heron-1 hover:text-heron-navy"
+          >
             <app-icon name="shelf" />
-            マスタ設定に戻る
+            保管場所・マスタ設定に戻る
           </a>
           <a routerLink="/inventory" class="text-xs text-heron-2 hover:underline">
             棚卸し画面へ
@@ -30,7 +33,7 @@ import { IconComponent } from '../../shared/icon.component';
         <div class="flex items-center justify-between">
           <h1 class="text-lg font-bold text-heron-navy">棚コード ラベル印刷</h1>
           <span class="rounded bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
-            棚用バーコードシール
+            棚用QRシール (30mm × 15mm)
           </span>
         </div>
 
@@ -48,17 +51,39 @@ import { IconComponent } from '../../shared/icon.component';
             </div>
           </div>
 
-          <!-- 実寸プレビュー（30mm × 15mm） -->
-          <p class="mt-5 text-[11px] font-semibold text-heron-2">
-            棚ラベル 印刷プレビュー（実寸 30mm × 15mm）
-          </p>
-          <div class="mt-2 inline-block border border-dashed border-heron-3 bg-white p-2">
-            <div class="label-sheet">
-              <img class="label-qr" [src]="qrDataUrl()" alt="バーコード/QR" />
-              <div class="label-text">
-                <div class="label-tag">棚コード</div>
-                <div class="label-code">{{ shelf()?.code }}</div>
-                <div class="label-name">{{ shelf()?.room_name }} {{ shelf()?.shelf_name }}</div>
+          <!-- 実寸プレビュー（30mm × 15mm）＆ 拡大確認プレビュー -->
+          <div class="mt-4 rounded-lg border border-slate-200 bg-white p-4 shadow-2xs space-y-4">
+            <div class="flex flex-wrap items-start gap-6">
+              <div>
+                <p class="text-[11px] font-bold text-heron-navy mb-1.5">
+                  実寸プレビュー（30mm × 15mm）
+                </p>
+                <div class="inline-block border border-dashed border-slate-400 bg-slate-50 p-1.5 rounded">
+                  @if (previewDataUrl()) {
+                    <img
+                      [src]="previewDataUrl()"
+                      alt="棚ラベル実寸プレビュー"
+                      class="block bg-white shadow-2xs"
+                      style="width: 30mm; height: 15mm; object-fit: contain;"
+                    />
+                  }
+                </div>
+              </div>
+
+              <div class="flex-1 min-w-[230px]">
+                <p class="text-[11px] font-bold text-slate-600 mb-1.5">
+                  拡大プレビュー（印字内容確認用・200%拡大）
+                </p>
+                <div class="inline-block border border-slate-300 bg-slate-50 p-2 rounded shadow-inner">
+                  @if (previewDataUrl()) {
+                    <img
+                      [src]="previewDataUrl()"
+                      alt="棚ラベル拡大プレビュー"
+                      class="block bg-white border border-slate-200"
+                      style="width: 60mm; height: 30mm; object-fit: contain;"
+                    />
+                  }
+                </div>
               </div>
             </div>
           </div>
@@ -71,7 +96,10 @@ import { IconComponent } from '../../shared/icon.component';
           }
 
           <div class="mt-6 flex flex-col gap-2.5">
-            <button class="heron-btn-primary w-full py-3.5 text-sm font-bold shadow-md bg-emerald-700 hover:bg-emerald-800" (click)="copyLabelImage()">
+            <button
+              class="heron-btn-primary w-full py-3.5 text-sm font-bold shadow-md bg-emerald-700 hover:bg-emerald-800"
+              (click)="copyLabelImage()"
+            >
               <app-icon name="printer" />
               棚ラベル画像をコピー (NIIMBOT アプリに貼り付け)
             </button>
@@ -80,8 +108,11 @@ import { IconComponent } from '../../shared/icon.component';
               棚ラベル画像をダウンロード (PNG)
             </button>
 
-            <a routerLink="/settings" class="heron-btn-secondary w-full text-xs text-center border-slate-300 bg-white hover:bg-slate-50">
-              マスタ設定に戻る
+            <a
+              routerLink="/settings"
+              class="heron-btn-secondary w-full text-xs text-center border-slate-300 bg-white hover:bg-slate-50"
+            >
+              保管場所・マスタ設定に戻る
             </a>
           </div>
 
@@ -97,71 +128,13 @@ import { IconComponent } from '../../shared/icon.component';
       </div>
     </div>
   `,
-  styles: [
-    `
-      .label-sheet {
-        width: 30mm;
-        height: 15mm;
-        display: flex;
-        align-items: center;
-        gap: 0.8mm;
-        padding: 0.8mm;
-        box-sizing: border-box;
-        background: #fff;
-        overflow: hidden;
-      }
-
-      .label-qr {
-        width: 13.4mm;
-        height: 13.4mm;
-        flex-shrink: 0;
-        image-rendering: pixelated;
-      }
-
-      .label-text {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        color: #000;
-        font-family: 'Consolas', 'SFMono-Regular', monospace;
-        line-height: 1.1;
-      }
-
-      .label-tag {
-        font-size: 1.6mm;
-        font-weight: 700;
-        color: #047857;
-        letter-spacing: -0.02em;
-        white-space: nowrap;
-      }
-
-      .label-code {
-        font-size: 2.8mm;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        white-space: nowrap;
-      }
-
-      .label-name {
-        font-size: 1.8mm;
-        font-weight: 500;
-        color: #333;
-        margin-top: 0.2mm;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    `,
-  ],
 })
 export class ShelfLabelPrintComponent {
   private readonly master = inject(MasterService);
   private readonly route = inject(ActivatedRoute);
 
   readonly shelfCode = signal('');
-  readonly qrDataUrl = signal('');
+  readonly previewDataUrl = signal('');
   readonly directStatusMessage = signal('');
 
   readonly shelf = computed<ShelfMaster | undefined>(() => {
@@ -172,47 +145,95 @@ export class ShelfLabelPrintComponent {
   constructor() {
     const code = this.route.snapshot.paramMap.get('code') ?? '';
     this.shelfCode.set(code);
-    if (code) {
-      buildQr(code).then((url) => this.qrDataUrl.set(url));
+    effect(() => {
+      const s = this.shelf();
+      if (s || code) {
+        void this.refreshPreview();
+      }
+    });
+  }
+
+  private async refreshPreview(): Promise<void> {
+    try {
+      const canvas = await this.createLabelCanvas();
+      this.previewDataUrl.set(canvas.toDataURL('image/png'));
+    } catch {
+      // ignore
     }
   }
 
   private async createLabelCanvas(): Promise<HTMLCanvasElement> {
+    const W = 720;
+    const H = 360;
     const canvas = document.createElement('canvas');
-    canvas.width = 360;
-    canvas.height = 180;
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas Context Error');
 
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, 360, 180);
+    ctx.fillRect(0, 0, W, H);
 
     const s = this.shelf();
     const code = s ? s.code : this.shelfCode();
     const room = s ? s.room_name : '';
     const shelfName = s ? s.shelf_name : '';
 
-    // QR描画
+    const padX = 14;
+    const padY = 14;
+    const qrPx = 224;
+
     const qrImg = new Image();
     qrImg.src = await buildQr(code);
     await new Promise((res) => {
       qrImg.onload = res;
       qrImg.onerror = res;
     });
-    ctx.drawImage(qrImg, 12, 12, 156, 156);
+    const qrY = Math.floor((H - qrPx) / 2);
+    ctx.drawImage(qrImg, padX, qrY, qrPx, qrPx);
 
-    // テキスト描画
+    const textX = padX + qrPx + 18;
+    const textMaxW = W - textX - padX;
+
+    // 1. 棚コードタグ
     ctx.fillStyle = '#047857';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText('棚コード', 176, 42);
+    ctx.font = 'bold 26px sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText('保管棚コード', textX, padY + 4, textMaxW);
 
+    // 2. 棚コード本体 (自動縮小フィット)
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 36px Consolas, monospace';
-    ctx.fillText(code, 176, 92);
+    drawSingleLineFitted(
+      ctx,
+      code,
+      textX,
+      padY + 72,
+      textMaxW,
+      58,
+      20,
+      'bold',
+      'Consolas, "SFMono-Regular", monospace',
+    );
 
-    ctx.fillStyle = '#333333';
-    ctx.font = 'bold 22px sans-serif';
-    ctx.fillText(`${room} ${shelfName}`, 176, 142);
+    // 区切り線
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(textX, 128);
+    ctx.lineTo(W - padX, 128);
+    ctx.stroke();
+
+    // 3. 部屋名・棚名 (複数行折り返し＋自動縮小フィット)
+    ctx.fillStyle = '#1E293B';
+    const fullPlace = [room, shelfName].filter(Boolean).join(' / ');
+    drawMultilineFitted(ctx, fullPlace, textX, 140, textMaxW, H - 140 - padY, {
+      maxFont: 38,
+      minFont: 16,
+      maxLines: 3,
+      fontWeight: 'bold',
+      fontFamily: '"Hiragino Sans", "Noto Sans JP", sans-serif',
+      lineHeightRatio: 1.2,
+    });
 
     return canvas;
   }
@@ -223,10 +244,10 @@ export class ShelfLabelPrintComponent {
       canvas.toBlob(async (blob) => {
         if (!blob) return;
         try {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob }),
-          ]);
-          this.directStatusMessage.set('棚ラベル画像をクリップボードにコピーしました！ NIIMBOT アプリで Cmd + V 貼り付けしてください。');
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          this.directStatusMessage.set(
+            '棚ラベル画像をクリップボードにコピーしました！ NIIMBOT アプリで Cmd + V 貼り付けしてください。',
+          );
         } catch {
           this.downloadLabelImage();
         }
@@ -253,8 +274,101 @@ export class ShelfLabelPrintComponent {
 function buildQr(code: string): Promise<string> {
   return QRCode.toDataURL(code, {
     errorCorrectionLevel: 'M',
-    margin: 1,
-    scale: 8,
+    margin: 0,
+    scale: 10,
     color: { dark: '#000000', light: '#FFFFFF' },
   });
+}
+
+function drawSingleLineFitted(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  centerY: number,
+  maxWidth: number,
+  maxFont: number,
+  minFont: number,
+  fontWeight: string,
+  fontFamily: string,
+): void {
+  if (!text) return;
+  let fontSize = maxFont;
+  while (fontSize > minFont) {
+    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    if (ctx.measureText(text).width <= maxWidth) break;
+    fontSize -= 1;
+  }
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, centerY, maxWidth);
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawMultilineFitted(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  topY: number,
+  maxWidth: number,
+  maxHeight: number,
+  opts: {
+    maxFont: number;
+    minFont: number;
+    maxLines: number;
+    fontWeight: string;
+    fontFamily: string;
+    lineHeightRatio: number;
+  },
+): void {
+  if (!text) return;
+  let chosenFont = opts.minFont;
+  let chosenLines: string[] = [text];
+
+  for (let font = opts.maxFont; font >= opts.minFont; font -= 1) {
+    ctx.font = `${opts.fontWeight} ${font}px ${opts.fontFamily}`;
+    const lines = wrapTextByChar(ctx, text, maxWidth);
+    const totalH = lines.length * font * opts.lineHeightRatio;
+    if (lines.length <= opts.maxLines && totalH <= maxHeight) {
+      chosenFont = font;
+      chosenLines = lines;
+      break;
+    }
+    if (font === opts.minFont) {
+      chosenFont = font;
+      chosenLines = wrapTextByChar(ctx, text, maxWidth);
+    }
+  }
+
+  ctx.font = `${opts.fontWeight} ${chosenFont}px ${opts.fontFamily}`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const lineH = chosenFont * opts.lineHeightRatio;
+  const totalTextH = chosenLines.length * lineH;
+  const startY = topY + Math.max(0, (maxHeight - totalTextH) / 2);
+
+  for (let i = 0; i < chosenLines.length; i++) {
+    ctx.fillText(chosenLines[i], x, startY + i * lineH, maxWidth);
+  }
+  ctx.textBaseline = 'alphabetic';
+}
+
+function wrapTextByChar(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string[] {
+  const lines: string[] = [];
+  let current = '';
+  for (const ch of Array.from(text)) {
+    const test = current + ch;
+    if (ctx.measureText(test).width > maxWidth && current.length > 0) {
+      lines.push(current);
+      current = ch;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
 }
