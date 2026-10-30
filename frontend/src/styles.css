@@ -4,7 +4,7 @@
 
 /* 
  * HERON プレミアムエンタープライズ UI システム (テーマカラー: #2A3A4A)
- * モニターサイズ自動最適化 & テキスト変形・不自然改行防御レスポンシブシステム
+ * モニターサイズ自動最適化 & ボタン・UIテキスト不自然改行（縦長化）完全防御システム
  */
 @layer base {
   body {
@@ -12,6 +12,34 @@
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+  }
+
+  /* 
+   * 全ページ共通: 画面の横幅が狭くなった際、ボタン・タブ・バッジ・見出しセル内の
+   * テキストが勝手に改行されて縦長の不格好なボタンになる現象をグローバルで防止
+   */
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    white-space: nowrap;
+    flex-shrink: 0;
+    word-break: keep-all;
+  }
+
+  button > span,
+  [role="button"] > span,
+  a[class*="px-"][class*="py-"],
+  a[class*="px-"][class*="py-"] > span,
+  a[class*="heron-btn"],
+  a[class*="heron-btn"] > span,
+  span[class*="rounded"][class*="px-"],
+  app-status-badge,
+  th {
+    white-space: nowrap;
+    flex-shrink: 0;
+    word-break: keep-all;
   }
 }
 
