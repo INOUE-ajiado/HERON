@@ -32,282 +32,336 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
   standalone: true,
   imports: [FormsModule, RouterLink, DatePipe, StatusBadgeComponent, IconComponent],
   template: `
-    <!-- ページタイトルバー -->
-    <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-      <div>
-        <h1 class="text-lg font-bold text-[#2A3A4A] flex items-center gap-2">
-          <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
-          機材台帳・検索
-        </h1>
-        <p class="text-xs text-slate-500 mt-0.5 hidden sm:block">新規登録・詳細表示・編集・貸出返却・付属品自由追加・棚QRスキャン</p>
-      </div>
-
-      @if (access.canManageAssets()) {
-        <button type="button" (click)="openCreateDrawer()" class="heron-btn-primary text-xs font-bold shadow-xs">
-          <app-icon name="plus" />
-          <span class="hidden sm:inline">機材新規登録</span>
-          <span class="inline sm:hidden">新規登録</span>
-        </button>
-      }
-    </div>
-
-    <!-- 集約されたリアルタイム統計インジケーターパネル -->
-    <div class="grid grid-cols-3 gap-2 sm:gap-3 py-2.5 sm:py-3 border-b border-slate-200">
-      <div class="flex items-center gap-2 sm:gap-2.5 p-2 rounded-md bg-slate-100/70 border border-slate-200/60 shadow-2xs">
-        <div class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded bg-[#2A3A4A] text-white shadow-xs shrink-0">
-          <app-icon name="box" />
-        </div>
-        <div class="min-w-0">
-          <div class="text-[9px] sm:text-[10px] font-bold text-slate-600 truncate-nowrap">総機材数</div>
-          <div class="font-mono text-sm sm:text-base font-bold text-[#2A3A4A] leading-none mt-0.5 whitespace-nowrap">
-            {{ items().length }} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500">件</span>
+    <!-- 完全エッジ・トゥ・エッジ フルキャンバスコンテナ -->
+    <div class="-mx-4 -my-4 md:-mx-6 md:-my-5 min-h-[calc(100vh-3.5rem)] md:min-h-screen flex flex-col bg-slate-100/80 text-slate-800 font-sans">
+      <!-- トップ ヘッダーバー (Edge-to-Edge Seamless Sticky Header) -->
+      <header class="border-b border-slate-200 bg-white px-4 md:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shrink-0 shadow-xs">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-[#2A3A4A] text-[#90CFD6] flex items-center justify-center shadow-xs shrink-0">
+            <app-icon name="box" class="text-lg" />
+          </div>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-base font-bold text-[#2A3A4A] tracking-tight">
+                機材台帳・検索
+              </h1>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2A3A4A] text-[#90CFD6]">
+                リアルタイム台帳
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5 hidden sm:block truncate">
+              新規登録（単体・複数台S/N一括）・詳細表示・シリアル番号編集・貸出返却・付属品自由追加・棚QRスキャン
+            </p>
           </div>
         </div>
-      </div>
 
-      <div class="flex items-center gap-2 sm:gap-2.5 p-2 rounded-md bg-blue-50/60 border border-blue-200/60 shadow-2xs">
-        <div class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded bg-blue-600 text-white shadow-xs shrink-0">
-          <app-icon name="user" />
-        </div>
-        <div class="min-w-0">
-          <div class="text-[9px] sm:text-[10px] font-bold text-blue-900 truncate-nowrap">貸出中</div>
-          <div class="font-mono text-sm sm:text-base font-bold text-blue-950 leading-none mt-0.5 whitespace-nowrap">
-            {{ countInUse() }} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500">件</span>
-          </div>
-        </div>
-      </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            (click)="reloadList()"
+            class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 hidden sm:flex items-center gap-1.5 shadow-2xs transition"
+            [disabled]="loading()"
+          >
+            <app-icon name="clock" />
+            <span>{{ loading() ? '読込中...' : '最新同期' }}</span>
+          </button>
 
-      <div class="flex items-center gap-2 sm:gap-2.5 p-2 rounded-md bg-emerald-50/60 border border-emerald-200/60 shadow-2xs">
-        <div class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded bg-emerald-600 text-white shadow-xs shrink-0">
-          <app-icon name="check" />
-        </div>
-        <div class="min-w-0">
-          <div class="text-[9px] sm:text-[10px] font-bold text-emerald-900 truncate-nowrap">保管中</div>
-          <div class="font-mono text-sm sm:text-base font-bold text-emerald-950 leading-none mt-0.5 whitespace-nowrap">
-            {{ countAvailable() }} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500">件</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- フラットコントロールバー (検索・バーコードスキャン一体型) -->
-    <div class="py-3 border-b border-slate-200 bg-slate-100/60 -mx-4 px-4 md:-mx-6 md:px-6">
-      <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <!-- バーコード/QR照合入力 -->
-        <form (ngSubmit)="scanMatch()" class="flex items-center gap-2 flex-1 w-full lg:max-w-md">
-          <div class="relative w-full">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
-              <app-icon name="box" />
-            </span>
-            <input
-              type="text"
-              class="heron-input pl-8 pr-9 text-xs font-mono uppercase bg-white"
-              placeholder="バーコード / 機材ID / シリアル番号を照合"
-              [(ngModel)]="scanInput"
-              name="scanInput"
-              autofocus
-            />
+          @if (access.canManageAssets()) {
             <button
               type="button"
-              (click)="triggerShelfScan('create')"
-              title="カメラでQRコードを読み取る"
-              class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-blue-700 hover:text-blue-900 font-bold"
+              (click)="openCreateDrawer()"
+              class="heron-btn-primary text-xs font-bold shadow-xs px-3.5 py-2"
             >
-              <app-icon name="camera" />
+              <app-icon name="plus" />
+              <span class="hidden sm:inline">機材新規登録</span>
+              <span class="inline sm:hidden">新規登録</span>
             </button>
-          </div>
-          <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold whitespace-nowrap" [disabled]="scanning()">
-            {{ scanning() ? '照合中...' : '照合' }}
-          </button>
-        </form>
+          }
+        </div>
+      </header>
 
-        <!-- フィルタ項目 -->
-        <div class="flex flex-wrap items-center gap-2 text-xs">
-          <div class="flex items-center gap-1.5 min-w-[160px] flex-1 sm:flex-none">
-            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">検索:</span>
-            <input
-              type="search"
-              class="heron-input text-xs bg-white"
-              placeholder="名称, 型番, シリアル番号..."
-              [(ngModel)]="query"
-            />
+      <!-- 集約されたリアルタイム統計インジケーターストリップ (Edge-to-Edge 3分割グリッド) -->
+      <div class="grid grid-cols-3 divide-x divide-slate-200 border-b border-slate-200 bg-white shrink-0">
+        <div
+          (click)="statusFilter = ''"
+          class="flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 hover:bg-slate-50 cursor-pointer transition"
+          [class.bg-slate-100/70]="statusFilter === ''"
+        >
+          <div class="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-[#2A3A4A] text-[#90CFD6] shadow-2xs shrink-0">
+            <app-icon name="box" />
           </div>
-
-          <div class="flex items-center gap-1.5">
-            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">カテゴリ:</span>
-            <select class="heron-input text-xs bg-white w-24 sm:w-28" [(ngModel)]="categoryFilter">
-              <option value="">すべて</option>
-              @for (c of master.categories(); track c.code) {
-                <option [value]="c.code">{{ c.name }}</option>
-              }
-            </select>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold text-slate-500 truncate-nowrap">総機材数 (全表示)</div>
+            <div class="font-mono text-base sm:text-lg font-extrabold text-[#2A3A4A] leading-tight whitespace-nowrap">
+              {{ items().length }} <span class="text-[10px] font-normal text-slate-500">件</span>
+            </div>
           </div>
+        </div>
 
-          <div class="flex items-center gap-1.5">
-            <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">状態:</span>
-            <select class="heron-input text-xs bg-white w-24 sm:w-28" [(ngModel)]="statusFilter">
-              <option value="">すべて</option>
-              <option value="available">{{ statusLabel.available }}</option>
-              <option value="in_use">{{ statusLabel.in_use }}</option>
-              <option value="maintenance">{{ statusLabel.maintenance }}</option>
-              <option value="discarded">{{ statusLabel.discarded }}</option>
-            </select>
+        <div
+          (click)="statusFilter = statusFilter === 'in_use' ? '' : 'in_use'"
+          class="flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 bg-blue-50/25 hover:bg-blue-50/60 cursor-pointer transition"
+          [class.ring-2]="statusFilter === 'in_use'"
+          [class.ring-inset]="statusFilter === 'in_use'"
+          [class.ring-blue-600]="statusFilter === 'in_use'"
+        >
+          <div class="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-2xs shrink-0">
+            <app-icon name="user" />
           </div>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold text-blue-900 truncate-nowrap">貸出中</div>
+            <div class="font-mono text-base sm:text-lg font-extrabold text-blue-950 leading-tight whitespace-nowrap">
+              {{ countInUse() }} <span class="text-[10px] font-normal text-slate-500">件</span>
+            </div>
+          </div>
+        </div>
 
-          <div class="text-[11px] text-slate-500 font-bold ml-auto bg-white px-2 py-1 rounded border border-slate-200 shadow-2xs whitespace-nowrap">
-            該当: <span class="text-[#2A3A4A] font-mono text-sm font-extrabold">{{ filtered().length }}</span> 件
+        <div
+          (click)="statusFilter = statusFilter === 'available' ? '' : 'available'"
+          class="flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 bg-emerald-50/25 hover:bg-emerald-50/60 cursor-pointer transition"
+          [class.ring-2]="statusFilter === 'available'"
+          [class.ring-inset]="statusFilter === 'available'"
+          [class.ring-emerald-600]="statusFilter === 'available'"
+        >
+          <div class="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-2xs shrink-0">
+            <app-icon name="check" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-[10px] font-bold text-emerald-900 truncate-nowrap">保管中</div>
+            <div class="font-mono text-base sm:text-lg font-extrabold text-emerald-950 leading-tight whitespace-nowrap">
+              {{ countAvailable() }} <span class="text-[10px] font-normal text-slate-500">件</span>
+            </div>
           </div>
         </div>
       </div>
 
-      @if (scanError()) {
-        <p class="mt-2 text-xs text-red-600 font-semibold">{{ scanError() }}</p>
-      }
-    </div>
+      <!-- フラットコントロールバー (Edge-to-Edge 検索・バーコードスキャン一体型サブヘッダー) -->
+      <div class="py-2.5 px-4 md:px-6 border-b border-slate-200 bg-slate-50 shrink-0">
+        <div class="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+          <!-- バーコード/QR照合入力 -->
+          <form (ngSubmit)="scanMatch()" class="flex items-center gap-2 flex-1 w-full lg:max-w-md">
+            <div class="relative w-full">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                <app-icon name="box" />
+              </span>
+              <input
+                type="text"
+                class="heron-input pl-8 pr-9 text-xs font-mono uppercase bg-white"
+                placeholder="バーコード / 機材ID / シリアル番号を照合"
+                [(ngModel)]="scanInput"
+                name="scanInput"
+                autofocus
+              />
+              <button
+                type="button"
+                (click)="triggerShelfScan('create')"
+                title="カメラでQRコードを読み取る"
+                class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-blue-700 hover:text-blue-900 font-bold"
+              >
+                <app-icon name="camera" />
+              </button>
+            </div>
+            <button type="submit" class="heron-btn-primary shrink-0 text-xs font-bold whitespace-nowrap" [disabled]="scanning()">
+              {{ scanning() ? '照合中...' : '照合' }}
+            </button>
+          </form>
 
-    <!-- ========================================================= -->
-    <!-- VIEW A: PC画面専用プレミアムテーブル (hidden md:block で無傷保護) -->
-    <!-- ========================================================= -->
-    <div class="mt-3 hidden md:block">
-      @if (loading()) {
-        <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
-      } @else if (filtered().length === 0) {
-        <div class="py-12 text-center text-xs text-slate-400">
-          該当する機材が見つかりません。
-        </div>
-      } @else {
-        <div class="overflow-x-auto rounded-md border border-slate-200/80 shadow-2xs">
-          <table class="w-full min-w-[680px] text-left text-xs">
-            <thead>
-              <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px]">
-                <th class="py-2.5 px-3.5">機材ID / 機材名</th>
-                <th class="py-2.5 px-3.5">カテゴリ / 付属品状態</th>
-                <th class="py-2.5 px-3.5">型番 / シリアル番号 (S/N)</th>
-                <th class="py-2.5 px-3.5">ステータス / 所在</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 bg-white">
-              @for (eq of filtered(); track eq.equipment_id) {
-                <tr
-                  (click)="openDetailDrawer(eq)"
-                  class="cursor-pointer hover:bg-blue-50/60 transition-colors duration-150"
-                  [class.bg-blue-50/90]="activeEquipment()?.equipment_id === eq.equipment_id && drawerOpen()"
-                >
-                  <td class="py-2.5 px-3.5">
-                    <div class="heron-mono font-bold text-[#2A3A4A] text-xs">{{ eq.equipment_id }}</div>
-                    <div class="font-bold text-slate-900 text-xs">{{ eq.name }}</div>
-                  </td>
-                  <td class="py-2.5 px-3.5 text-slate-600 font-medium">
-                    <div>{{ categoryLabel(eq.category) }}</div>
-                    <div class="mt-0.5">
-                      @if (isComplete(eq)) {
-                        <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
-                          <app-icon name="check" /> 完品
-                        </span>
-                      } @else {
-                        <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
-                          欠品あり ({{ missingSummary(eq) }})
-                        </span>
-                      }
-                    </div>
-                  </td>
-                  <td class="py-2.5 px-3.5">
-                    <div class="font-mono text-slate-700 font-semibold">{{ eq.model_number || '—' }}</div>
-                    <div class="mt-0.5">
-                      @if (eq.serial_number) {
-                        <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#2A3A4A] border border-slate-200">
-                          S/N: {{ eq.serial_number }}
-                        </span>
-                      } @else {
-                        <span class="text-[10px] text-slate-400">S/N: 未登録</span>
-                      }
-                    </div>
-                  </td>
-                  <td class="py-2.5 px-3.5">
-                    <div class="flex items-center gap-2">
-                      <app-status-badge [status]="eq.status" />
-                      <span class="text-[11px] text-slate-600 font-medium">
-                        @if (eq.status === 'in_use') {
-                          {{ eq.current_user?.name ?? '利用者' }}
-                        } @else if (eq.current_location) {
-                          {{ eq.current_location.room_name }} / {{ eq.current_location.shelf_name }}
-                        }
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </div>
-
-    <!-- ========================================================= -->
-    <!-- VIEW B: スマホ専用最適化カード型機材リスト (block md:hidden) -->
-    <!-- ========================================================= -->
-    <div class="mt-3 space-y-2.5 block md:hidden">
-      @if (loading()) {
-        <p class="py-8 text-center text-xs text-slate-400">読み込み中...</p>
-      } @else if (filtered().length === 0) {
-        <div class="py-12 text-center text-xs text-slate-400">
-          該当する機材が見つかりません。
-        </div>
-      } @else {
-        @for (eq of filtered(); track eq.equipment_id) {
-          <div
-            (click)="openDetailDrawer(eq)"
-            class="p-3.5 rounded-lg border border-slate-200 bg-white shadow-2xs active:bg-blue-50/80 transition-colors cursor-pointer space-y-2"
-          >
-            <!-- 上段: ID + ステータスバッジ -->
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-              <div class="font-mono font-bold text-xs text-[#2A3A4A] bg-slate-100 px-2 py-0.5 rounded">
-                {{ eq.equipment_id }}
-              </div>
-              <app-status-badge [status]="eq.status" />
+          <!-- フィルタ項目 -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <div class="flex items-center gap-1.5 min-w-[160px] flex-1 sm:flex-none">
+              <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">検索:</span>
+              <input
+                type="search"
+                class="heron-input text-xs bg-white"
+                placeholder="名称, 型番, シリアル番号..."
+                [(ngModel)]="query"
+              />
             </div>
 
-            <!-- 中段: 機材名 + 型番 + シリアル番号 -->
-            <div>
-              <h3 class="font-bold text-sm text-slate-900 leading-snug">{{ eq.name }}</h3>
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs font-mono">
-                <span class="text-slate-500">型番: {{ eq.model_number || '—' }}</span>
-                @if (eq.serial_number) {
-                  <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-bold text-[#2A3A4A] border border-slate-200">
-                    S/N: {{ eq.serial_number }}
-                  </span>
-                } @else {
-                  <span class="text-[11px] text-slate-400">S/N: 未登録</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">カテゴリ:</span>
+              <select class="heron-input text-xs bg-white w-24 sm:w-28" [(ngModel)]="categoryFilter">
+                <option value="">すべて</option>
+                @for (c of master.categories(); track c.code) {
+                  <option [value]="c.code">{{ c.name }}</option>
                 }
-              </div>
+              </select>
             </div>
 
-            <!-- 下段: 付属品状態 ＆ 保管場所/借用者 -->
-            <div class="flex items-center justify-between pt-1 text-xs">
-              <div>
-                @if (isComplete(eq)) {
-                  <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
-                    <app-icon name="check" /> 完品
-                  </span>
-                } @else {
-                  <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
-                    欠品あり
-                  </span>
-                }
-              </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-slate-600 font-bold text-[11px] whitespace-nowrap">状態:</span>
+              <select class="heron-input text-xs bg-white w-24 sm:w-28" [(ngModel)]="statusFilter">
+                <option value="">すべて</option>
+                <option value="available">{{ statusLabel.available }}</option>
+                <option value="in_use">{{ statusLabel.in_use }}</option>
+                <option value="maintenance">{{ statusLabel.maintenance }}</option>
+                <option value="discarded">{{ statusLabel.discarded }}</option>
+              </select>
+            </div>
 
-              <div class="text-[11px] font-bold text-slate-700">
-                @if (eq.status === 'in_use') {
-                  {{ eq.current_user?.name }}
-                } @else {
-                  {{ currentShelfText(eq) }}
-                }
-              </div>
+            <div class="text-[11px] text-slate-500 font-bold ml-auto bg-white px-2.5 py-1 rounded border border-slate-200 shadow-2xs whitespace-nowrap">
+              該当: <span class="text-[#2A3A4A] font-mono text-sm font-extrabold">{{ filtered().length }}</span> 件
             </div>
           </div>
+        </div>
+
+        @if (scanError()) {
+          <p class="mt-2 text-xs text-red-600 font-semibold">{{ scanError() }}</p>
         }
-      }
-    </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- VIEW A: PC画面専用 エッジ・トゥ・エッジ プレミアムテーブル -->
+      <!-- ========================================================= -->
+      <div class="hidden md:flex md:flex-col flex-1 bg-white">
+        @if (loading()) {
+          <div class="py-16 text-center text-xs text-slate-400">読み込み中...</div>
+        } @else if (filtered().length === 0) {
+          <div class="py-16 text-center text-xs text-slate-400 space-y-2">
+            <p>該当する機材が見つかりません。</p>
+            @if (access.canManageAssets() && items().length === 0) {
+              <button
+                type="button"
+                (click)="openCreateDrawer()"
+                class="heron-btn-primary text-xs font-bold mt-2"
+              >
+                <app-icon name="plus" /> 最初の機材を新規登録する
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="overflow-x-auto flex-1">
+            <table class="w-full min-w-[720px] text-left text-xs border-b border-slate-200">
+              <thead>
+                <tr class="bg-[#2A3A4A] text-white font-bold tracking-wider text-[11px] border-b border-slate-700">
+                  <th class="py-2.5 pl-4 md:pl-6 pr-3.5">機材ID / 機材名</th>
+                  <th class="py-2.5 px-3.5">カテゴリ / 付属品状態</th>
+                  <th class="py-2.5 px-3.5">型番 / シリアル番号 (S/N)</th>
+                  <th class="py-2.5 pl-3.5 pr-4 md:pr-6">ステータス / 所在</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 bg-white">
+                @for (eq of filtered(); track eq.equipment_id) {
+                  <tr
+                    (click)="openDetailDrawer(eq)"
+                    class="cursor-pointer hover:bg-blue-50/60 transition-colors duration-150"
+                    [class.bg-blue-50/90]="activeEquipment()?.equipment_id === eq.equipment_id && drawerOpen()"
+                  >
+                    <td class="py-3 pl-4 md:pl-6 pr-3.5">
+                      <div class="heron-mono font-bold text-[#2A3A4A] text-xs">{{ eq.equipment_id }}</div>
+                      <div class="font-bold text-slate-900 text-xs mt-0.5">{{ eq.name }}</div>
+                    </td>
+                    <td class="py-3 px-3.5 text-slate-600 font-medium">
+                      <div>{{ categoryLabel(eq.category) }}</div>
+                      <div class="mt-0.5">
+                        @if (isComplete(eq)) {
+                          <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                            <app-icon name="check" /> 完品
+                          </span>
+                        } @else {
+                          <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
+                            欠品あり ({{ missingSummary(eq) }})
+                          </span>
+                        }
+                      </div>
+                    </td>
+                    <td class="py-3 px-3.5">
+                      <div class="font-mono text-slate-700 font-semibold">{{ eq.model_number || '—' }}</div>
+                      <div class="mt-0.5">
+                        @if (eq.serial_number) {
+                          <span class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#2A3A4A] border border-slate-200">
+                            S/N: {{ eq.serial_number }}
+                          </span>
+                        } @else {
+                          <span class="text-[10px] text-slate-400">S/N: 未登録</span>
+                        }
+                      </div>
+                    </td>
+                    <td class="py-3 pl-3.5 pr-4 md:pr-6">
+                      <div class="flex items-center gap-2">
+                        <app-status-badge [status]="eq.status" />
+                        <span class="text-[11px] text-slate-600 font-medium">
+                          @if (eq.status === 'in_use') {
+                            {{ eq.current_user?.name ?? '利用者' }}
+                          } @else if (eq.current_location) {
+                            {{ eq.current_location.room_name }} / {{ eq.current_location.shelf_name }}
+                          }
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- VIEW B: スマホ専用 エッジ・トゥ・エッジ リスト (block md:hidden) -->
+      <!-- ========================================================= -->
+      <div class="block md:hidden flex-1 bg-white divide-y divide-slate-200 border-b border-slate-200">
+        @if (loading()) {
+          <p class="py-12 text-center text-xs text-slate-400">読み込み中...</p>
+        } @else if (filtered().length === 0) {
+          <div class="py-12 text-center text-xs text-slate-400">
+            該当する機材が見つかりません。
+          </div>
+        } @else {
+          @for (eq of filtered(); track eq.equipment_id) {
+            <div
+              (click)="openDetailDrawer(eq)"
+              class="px-4 py-3.5 bg-white active:bg-blue-50/80 transition-colors cursor-pointer space-y-2"
+            >
+              <!-- 上段: ID + ステータスバッジ -->
+              <div class="flex items-center justify-between">
+                <div class="font-mono font-bold text-xs text-[#2A3A4A] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {{ eq.equipment_id }}
+                </div>
+                <app-status-badge [status]="eq.status" />
+              </div>
+
+              <!-- 中段: 機材名 + 型番 + シリアル番号 -->
+              <div>
+                <h3 class="font-bold text-sm text-slate-900 leading-snug">{{ eq.name }}</h3>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs font-mono">
+                  <span class="text-slate-500">型番: {{ eq.model_number || '—' }}</span>
+                  @if (eq.serial_number) {
+                    <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-bold text-[#2A3A4A] border border-slate-200">
+                      S/N: {{ eq.serial_number }}
+                    </span>
+                  } @else {
+                    <span class="text-[11px] text-slate-400">S/N: 未登録</span>
+                  }
+                </div>
+              </div>
+
+              <!-- 下段: 付属品状態 ＆ 保管場所/借用者 -->
+              <div class="flex items-center justify-between pt-0.5 text-xs">
+                <div>
+                  @if (isComplete(eq)) {
+                    <span class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                      <app-icon name="check" /> 完品
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-300">
+                      欠品あり
+                    </span>
+                  }
+                </div>
+
+                <div class="text-[11px] font-bold text-slate-700">
+                  @if (eq.status === 'in_use') {
+                    {{ eq.current_user?.name }}
+                  } @else {
+                    {{ currentShelfText(eq) }}
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </div>
 
     <!-- スマホ専用固定ワンタップフローティングアクションバー (FAB) -->
     <div class="fixed bottom-20 right-4 z-30 flex flex-col gap-2 md:hidden">
@@ -978,6 +1032,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
         </div>
       </div>
     }
+    </div>
   `,
   styles: [
     `
@@ -1139,6 +1194,11 @@ export class EquipmentListComponent {
   constructor() {
     this.loadData();
     this.api.listUsers().subscribe({ next: (r) => this.users.set(r.items ?? []) });
+  }
+
+  reloadList(): void {
+    this.loading.set(true);
+    this.loadData();
   }
 
   private loadData(): void {
