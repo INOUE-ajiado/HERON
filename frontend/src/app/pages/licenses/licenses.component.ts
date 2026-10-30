@@ -31,25 +31,30 @@ interface UserGroupSummary {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   template: `
-    <div class="space-y-4">
-      <!-- ページタイトルヘッダー -->
-      <div class="flex flex-col gap-3 pb-3 border-b border-slate-200 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg font-bold text-[#2A3A4A] flex items-center gap-2">
-              <span class="inline-block w-1.5 h-4 bg-[#2A3A4A] rounded-full"></span>
-              ライセンス・アカウント台帳
-            </h1>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2A3A4A] text-[#90CFD6]">
-              シリアル ＆ 利用者紐付け管理
-            </span>
+    <!-- 完全エッジ・トゥ・エッジ フルキャンバスコンテナ -->
+    <div class="-mx-4 -my-4 md:-mx-6 md:-my-5 min-h-[calc(100vh-3.5rem)] md:min-h-screen flex flex-col bg-slate-100/80 text-slate-800 font-sans">
+      <!-- トップ ヘッダーバー (Edge-to-Edge Seamless Sticky Header) -->
+      <header class="border-b border-slate-200 bg-white px-4 md:px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-30 shrink-0 shadow-xs">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-[#2A3A4A] text-[#90CFD6] flex items-center justify-center shadow-xs shrink-0">
+            <app-icon name="key" class="text-lg" />
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">
-            Microsoft Office・CLIP STUDIO PAINT・Adobe Photoshop等のアカウント／シリアルコード管理と、利用者へのHTML案内メールプレビュー・送信
-          </p>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-base font-bold text-[#2A3A4A] tracking-tight">
+                ライセンス・アカウント台帳
+              </h1>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2A3A4A] text-[#90CFD6]">
+                シリアル ＆ 利用者紐付け管理
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5 truncate">
+              Microsoft Office・CLIP STUDIO PAINT・Adobe Photoshop等のアカウント／シリアルコード管理と、利用者へのHTML案内メールプレビュー・送信
+            </p>
+          </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
           <a
             routerLink="/spec/license"
             class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs transition"
@@ -60,17 +65,17 @@ interface UserGroupSummary {
           <button
             type="button"
             (click)="openCreateModal()"
-            class="heron-btn-primary text-xs font-bold shadow-xs flex items-center gap-1.5"
+            class="heron-btn-primary text-xs font-bold shadow-xs flex items-center gap-1.5 px-3.5 py-2"
           >
             <app-icon name="plus" />
             <span>新規ライセンス・シリアル登録</span>
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- トースト通知 -->
+      <!-- トースト通知 (Edge-to-Edge Banner) -->
       @if (toastMessage()) {
-        <div class="rounded-xl bg-emerald-900 text-white px-4 py-3 text-xs font-bold shadow-lg flex items-center justify-between border border-emerald-700">
+        <div class="bg-emerald-900 text-white px-4 md:px-6 py-2.5 text-xs font-bold flex items-center justify-between border-b border-emerald-700 shrink-0">
           <div class="flex items-center gap-2">
             <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[11px]">
               <app-icon name="check" />
@@ -83,9 +88,12 @@ interface UserGroupSummary {
         </div>
       }
 
-      <!-- KPI 統計カード -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100/80 border border-slate-200/80 shadow-2xs">
+      <!-- KPI 統計ストリップ (Edge-to-Edge 4分割グリッド) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-slate-200 border-b border-slate-200 bg-white shrink-0">
+        <div
+          (click)="statusFilter = ''; viewMode.set('list')"
+          class="flex items-center gap-3 px-4 md:px-5 py-3 bg-white hover:bg-slate-50 cursor-pointer transition"
+        >
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2A3A4A] text-[#90CFD6] font-bold text-base shrink-0">
             <app-icon name="key" />
           </div>
@@ -97,7 +105,13 @@ interface UserGroupSummary {
           </div>
         </div>
 
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 shadow-2xs">
+        <div
+          (click)="statusFilter = statusFilter === 'assigned' ? '' : 'assigned'; viewMode.set('list')"
+          class="flex items-center gap-3 px-4 md:px-5 py-3 bg-blue-50/25 hover:bg-blue-50/60 cursor-pointer transition"
+          [class.ring-2]="statusFilter === 'assigned'"
+          [class.ring-inset]="statusFilter === 'assigned'"
+          [class.ring-blue-600]="statusFilter === 'assigned'"
+        >
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-base shrink-0">
             <app-icon name="user" />
           </div>
@@ -109,7 +123,13 @@ interface UserGroupSummary {
           </div>
         </div>
 
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 shadow-2xs">
+        <div
+          (click)="statusFilter = statusFilter === 'available' ? '' : 'available'; viewMode.set('list')"
+          class="flex items-center gap-3 px-4 md:px-5 py-3 bg-emerald-50/25 hover:bg-emerald-50/60 cursor-pointer transition"
+          [class.ring-2]="statusFilter === 'available'"
+          [class.ring-inset]="statusFilter === 'available'"
+          [class.ring-emerald-600]="statusFilter === 'available'"
+        >
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-base shrink-0">
             <app-icon name="box" />
           </div>
@@ -121,7 +141,10 @@ interface UserGroupSummary {
           </div>
         </div>
 
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50/70 border border-amber-200/70 shadow-2xs">
+        <div
+          (click)="viewMode.set('users')"
+          class="flex items-center gap-3 px-4 md:px-5 py-3 bg-amber-50/25 hover:bg-amber-50/60 cursor-pointer transition"
+        >
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-600 text-white font-bold text-base shrink-0">
             <app-icon name="mail" />
           </div>
@@ -134,15 +157,15 @@ interface UserGroupSummary {
         </div>
       </div>
 
-      <!-- ビュー切替タブ ＆ 検索・フィルタバー -->
-      <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-3 space-y-3">
+      <!-- ビュー切替タブ ＆ 検索・フィルタバー (Edge-to-Edge Subheader) -->
+      <div class="border-b border-slate-200 bg-slate-50 px-4 md:px-6 py-2.5 space-y-2.5 shrink-0">
         <div class="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
           <!-- 表示モード切替 -->
-          <div class="inline-flex rounded-lg bg-slate-200/80 p-1 self-start">
+          <div class="inline-flex rounded-xl bg-slate-200/80 p-1 self-start">
             <button
               type="button"
               (click)="viewMode.set('list')"
-              class="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
               [class]="
                 viewMode() === 'list'
                   ? 'bg-[#2A3A4A] text-white shadow-xs'
@@ -155,7 +178,7 @@ interface UserGroupSummary {
             <button
               type="button"
               (click)="viewMode.set('users')"
-              class="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center gap-1.5"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5"
               [class]="
                 viewMode() === 'users'
                   ? 'bg-[#2A3A4A] text-white shadow-xs'
@@ -288,20 +311,16 @@ interface UserGroupSummary {
       </div>
 
       <!-- =========================================================================
-           ビュー1: ライセンス・シリアル台帳一覧
+           ビュー1: ライセンス・シリアル台帳一覧 (Edge-to-Edge Full-Width Rows)
            ========================================================================= -->
       @if (viewMode() === 'list') {
-        <div class="grid grid-cols-1 gap-3">
+        <div class="flex-1 bg-white divide-y divide-slate-200 border-b border-slate-200">
           @for (lic of filteredLicenses(); track lic.id) {
             <div
-              class="rounded-xl border bg-white p-4 shadow-2xs transition hover:border-slate-300"
-              [class]="
-                lic.status === 'available'
-                  ? 'border-emerald-200 bg-emerald-50/10'
-                  : 'border-slate-200'
-              "
+              class="px-4 md:px-6 py-4 transition hover:bg-slate-50/70"
+              [class]="lic.status === 'available' ? 'bg-emerald-50/10' : 'bg-white'"
             >
-              <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div class="flex flex-col gap-3.5 lg:flex-row lg:items-start lg:justify-between">
                 <!-- 左: ソフト概要 ＆ シリアル・アカウント情報 -->
                 <div class="space-y-2.5 flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
@@ -428,7 +447,7 @@ interface UserGroupSummary {
                 </div>
 
                 <!-- 右: 紐付けスタッフ情報 ＆ アクションボタン -->
-                <div class="lg:w-80 shrink-0 flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                <div class="lg:w-80 shrink-0 flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
                   @if (lic.status === 'assigned' && lic.assigned_user_name) {
                     <div class="space-y-1">
                       <div class="flex items-center justify-between">
@@ -536,7 +555,7 @@ interface UserGroupSummary {
               </div>
             </div>
           } @empty {
-            <div class="rounded-xl border border-slate-200 bg-white p-10 text-center space-y-2">
+            <div class="p-16 text-center space-y-2 bg-white">
               <div class="text-sm font-bold text-slate-700">条件に一致するライセンス・アカウントが見つかりません</div>
               <p class="text-xs text-slate-500">検索条件を変更するか、「新規ライセンス・シリアル登録」から追加してください。</p>
             </div>
@@ -545,12 +564,12 @@ interface UserGroupSummary {
       }
 
       <!-- =========================================================================
-           ビュー2: スタッフ（利用者）別 紐付け一覧
+           ビュー2: スタッフ（利用者）別 紐付け一覧 (Edge-to-Edge Grid)
            ========================================================================= -->
       @if (viewMode() === 'users') {
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex-1 bg-white grid grid-cols-1 md:grid-cols-2 divide-y md:divide-x divide-slate-200 border-b border-slate-200">
           @for (group of userGroups(); track group.userName + group.userEmail) {
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+            <div class="p-4 md:p-6 bg-white space-y-3 hover:bg-slate-50/40 transition">
               <div class="flex items-start justify-between border-b border-slate-100 pb-3">
                 <div>
                   <div class="flex items-center gap-2">
