@@ -35,7 +35,7 @@ export type DrawerMode = 'detail' | 'create' | 'edit';
     <!-- 完全エッジ・トゥ・エッジ フルキャンバスコンテナ -->
     <div class="-mx-4 -my-4 md:-mx-6 md:-my-5 min-h-[calc(100vh-3.5rem)] md:min-h-screen flex flex-col bg-slate-100/80 text-slate-800 font-sans">
       <!-- トップ ヘッダーバー (Edge-to-Edge Seamless Sticky Header) -->
-      <header class="border-b border-slate-200 bg-white px-4 md:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-30 shrink-0 shadow-xs">
+      <header class="border-b border-slate-200 bg-white px-4 md:px-6 py-3 flex items-center justify-between gap-3 sticky top-14 md:top-0 z-30 shrink-0 shadow-xs">
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-9 h-9 rounded-xl bg-[#2A3A4A] text-[#90CFD6] flex items-center justify-center shadow-xs shrink-0">
             <app-icon name="box" class="text-lg" />
