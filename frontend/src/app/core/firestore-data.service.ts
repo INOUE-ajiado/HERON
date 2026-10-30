@@ -896,10 +896,24 @@ export class FirestoreDataService {
     };
   }
 
-  async inventory(locationId: number, equipmentIds: string[]): Promise<InventoryResult> {
+  async inventory(
+    locationOrShelf: number | string,
+    equipmentIds: string[],
+  ): Promise<InventoryResult> {
     await this.ready();
     const all = await getDocs(collection(this.db, COL.equipments));
     const byId = new Map(all.docs.map((d) => [d.id, d.data() as Equipment]));
+    const place = this.splitLocation(locationOrShelf);
+
+    const isSamePlace = (eq: Equipment): boolean => {
+      if (place.shelf_code) {
+        return (eq.shelf_code ?? '').toUpperCase() === place.shelf_code.toUpperCase();
+      }
+      if (place.current_location_id != null) {
+        return Number(eq.current_location_id) === Number(place.current_location_id);
+      }
+      return false;
+    };
 
     const updated: string[] = [];
     const movedIn: string[] = [];
@@ -916,18 +930,22 @@ export class FirestoreDataService {
         skipped.push(id);
         continue;
       }
-      const wasHere = Number(eq.current_location_id) === Number(locationId);
+      const wasHere = isSamePlace(eq);
       await updateDoc(doc(this.db, COL.equipments, id), {
-        current_location_id: locationId,
-        shelf_code: null,
+        current_location_id: place.current_location_id,
+        shelf_code: place.shelf_code,
+        status: 'available',
+        current_user_id: null,
         updated_at: new Date().toISOString(),
       });
       await this.writeLog({
         equipment_id: id,
         action_type: 'inventory',
-        target_location_id: locationId,
+        target_location_id: place.current_location_id,
         equipment_name: eq.name,
-        note: wasHere ? '棚卸し照合' : '棚卸しにより所在更新',
+        note: wasHere
+          ? `棚卸し照合${place.shelf_code ? ` (棚: ${place.shelf_code})` : ''}`
+          : `棚卸しにより所在更新${place.shelf_code ? ` (棚: ${place.shelf_code})` : ''}`,
       });
       updated.push(id);
       if (!wasHere) movedIn.push(id);
@@ -936,16 +954,11 @@ export class FirestoreDataService {
     // この棚にあるはずなのに読み取られなかった機材
     const scanned = new Set(equipmentIds);
     const missing = [...byId.values()]
-      .filter(
-        (e) =>
-          Number(e.current_location_id) === Number(locationId) &&
-          e.status !== 'discarded' &&
-          !scanned.has(e.equipment_id),
-      )
+      .filter((e) => isSamePlace(e) && e.status !== 'discarded' && !scanned.has(e.equipment_id))
       .map((e) => e.equipment_id);
 
     return {
-      location_id: locationId,
+      location_id: locationOrShelf,
       updated,
       moved_in: movedIn,
       missing,

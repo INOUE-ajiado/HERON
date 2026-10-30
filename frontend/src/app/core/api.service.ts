@@ -180,7 +180,7 @@ export class ApiService {
     );
   }
 
-  inventory(locationId: number, equipmentIds: string[]): Observable<InventoryResult> {
+  inventory(locationId: number | string, equipmentIds: string[]): Observable<InventoryResult> {
     return this.route(
       () =>
         this.http.post<InventoryResult>(`${this.base}/transactions/inventory`, {

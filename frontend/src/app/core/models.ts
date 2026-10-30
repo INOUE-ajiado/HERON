@@ -99,7 +99,7 @@ export interface EquipmentDetail {
 
 /** 棚卸し実行結果 (`POST /api/transactions/inventory`) */
 export interface InventoryResult {
-  location_id: number;
+  location_id: number | string;
   updated: string[];
   moved_in: string[];
   missing: string[];
